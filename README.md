@@ -1,10 +1,10 @@
-# moaon.kr 사이트
+# moaonfarm.kr 사이트
 
 빌드 도구 없는 손 HTML. 글자의 정본은 `80_브랜드마케팅/홈페이지/홈페이지_문안.md`, 구성·디자인은 `홈페이지_기획.md`.
 
 - 페이지: `/` `/moaon/` `/doodoo/` `/contact/` `/notice/`
-- 공고 주소는 `https://moaon.kr/notice/` 하나로 고정한다. 임시 주소를 공고 주소로 쓰지 않는다.
-- `CNAME` 은 지금 없다. moaon.kr 연결을 승인받을 때 저장소 맨 위에 `moaon.kr` 한 줄로 되살린다.
+- 공고 주소는 `https://moaonfarm.kr/notice/` 하나로 고정한다. 임시 주소를 공고 주소로 쓰지 않는다.
+- `CNAME` 은 지금 없다. moaonfarm.kr 연결을 승인받을 때 저장소 맨 위에 `moaonfarm.kr` 한 줄로 되살린다.
 - `.nojekyll` 을 넣지 않는다. 넣으면 `notice/_양식.html` 이 공개된다.
 - `_capture/` 는 확인용 캡처를 두는 곳으로 올리지 않는다.
 

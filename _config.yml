@@ -2,3 +2,4 @@
 # .nojekyll 을 넣지 말 것 — 넣으면 notice/_양식.html 이 공개된다.
 exclude:
   - README.md
+  - _capture

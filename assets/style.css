@@ -44,6 +44,8 @@ nav.menu a:hover,nav.menu a[aria-current]{color:var(--green);background:var(--cr
 .hero{min-height:calc(100vh - 65px);min-height:calc(100svh - 65px)}
 .hero h1{font-size:clamp(34px,6vw,60px);margin-bottom:18px}
 .hero p{font-size:clamp(18px,2.2vw,22px);line-height:1.7}
+.hero .hero-notice{margin-top:22px;font-size:18px;font-weight:700}
+.hero-notice a{color:#fff;display:inline-block;padding:6px 0}
 .hero img{object-position:center 70%}
 @media(max-width:700px){.hero picture img{height:113%;object-position:center bottom;bottom:auto}}
 .sub-head{min-height:62vh}
@@ -106,16 +108,14 @@ figure img{width:100%;border-radius:14px;object-fit:cover}
 
 /* 두두 배지 */
 .badge-stage{max-width:760px;margin:0 auto}
-.badge-labels{position:relative;height:74px}
-.badge-labels span{position:absolute;top:0;transform:translateX(-50%);padding-top:38px;font-weight:700;font-size:17px;color:var(--green);white-space:nowrap}
-.badge-labels span::before{content:'';position:absolute;top:0;left:50%;height:34px;border-left:1.5px solid var(--gold)}
-.badge-labels span::after{content:'';position:absolute;top:-3px;left:50%;width:7px;height:7px;margin-left:-3px;border-radius:50%;background:var(--gold)}
-.badge-note{text-align:center;margin-top:10px}
-.lead-b{font-weight:700;font-size:19px}
-.ready{list-style:none;margin:20px 0 0;padding:0}
-.ready li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--soil);font-weight:500}
-.ready em{font-style:normal;font-size:14px;font-weight:500;color:var(--green);background:var(--soil);border-radius:99px;padding:2px 12px;white-space:nowrap}
+.grains{margin:20px 0 24px}
+.grains div{padding:12px 0;border-bottom:1px solid var(--soil)}
+.grains dt{font-weight:700;color:var(--green)}
+.grains dd{margin:0;color:var(--sub)}
+.service{background:var(--cream);border-top:4px solid var(--gold);border-radius:10px;padding:26px}
+.service h3{margin:0 0 12px;font-family:var(--display);font-weight:var(--display-w);font-size:22px;line-height:1.5;color:var(--green)}
 .names{margin:0}
+.join-note{margin-top:24px}
 .names div{background:var(--paper);border-radius:14px;padding:26px}
 .names dt{font-family:var(--display);font-weight:var(--display-w);font-size:26px;color:var(--green);line-height:1.4}
 .names dd{margin:4px 0 0;color:var(--sub)}
@@ -137,15 +137,33 @@ footer{background:var(--green);color:#E9EDE6;padding:44px 0 48px;font-size:15px;
 footer strong{color:#fff}
 footer a{color:#fff}
 .foot-last{margin-top:10px;font-size:14px}
+.foot-opt::before{content:' · '}
+.foot-opt:empty{display:none}
+
+/* 알림 신청 */
+.order{max-width:620px}
+.field{margin-bottom:22px}
+.field label,.field legend{display:block;font-weight:700;color:var(--green);margin-bottom:6px;padding:0}
+fieldset.field{border:0;margin:0 0 22px;padding:0}
+.field input[type=text],.field input[type=tel]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--sub);border-radius:8px;background:var(--paper);color:var(--ink)}
+.field .check{display:flex;align-items:center;gap:10px;font-weight:400;color:var(--ink);margin:0;padding:6px 0}
+.field .check.agree{font-weight:700;align-items:flex-start}
+.check input{width:22px;height:22px;flex:none;margin:3px 0 0;accent-color:var(--green)}
+.agree-text{margin:4px 0 0 32px;color:var(--sub)}
+button.btn{font:inherit;font-weight:700;border:0;cursor:pointer}
+.order-done{margin-top:24px;padding:18px 20px;background:var(--paper);border-left:6px solid var(--gold);border-radius:8px}
+.order-done .call{margin-top:14px}
 
 /* 공고 */
 .page-head{padding:56px 0 8px}
-.notice-list{list-style:none;padding:0;margin:24px 0 0;border-top:2px solid var(--green)}
-.notice-list li{border-bottom:1px solid var(--line)}
-.notice-list a{display:flex;gap:16px;padding:16px 4px;text-decoration:none}
-.notice-list time{color:var(--sub);flex:0 0 auto;font-variant-numeric:tabular-nums}
-.notice-list .empty{padding:28px 4px;color:var(--sub)}
-@media(max-width:480px){.notice-list a{flex-direction:column;gap:2px}}
+.notice-items{margin-top:24px;border-top:2px solid var(--green)}
+.notice-items .empty{margin:0;padding:28px 4px;color:var(--sub);border-bottom:1px solid var(--line)}
+.notice-item{padding:20px 4px;border-bottom:1px solid var(--line)}
+.notice-item h2{font-size:21px;margin-bottom:10px}
+.notice-item dl{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:0;font-size:16px}
+.notice-item dt{color:var(--green);font-weight:700}
+.notice-item dd{margin:0}
+.past-title{font-size:22px;margin-top:40px}
 .notice-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;background:var(--cream);border-radius:10px;padding:16px 18px;margin:20px 0 28px;font-size:16px}
 .notice-meta dt{color:var(--green);font-weight:700}
 .notice-meta dd{margin:0}

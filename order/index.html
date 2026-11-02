@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>알림 신청 · 두두농장 · 농업회사법인 모아온</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/style.css">
+<script>document.documentElement.classList.add('js')</script>
+<script src="../assets/site.js" defer></script>
+<script src="../assets/order.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="../"><img src="../assets/logo-dudu.svg" alt="두두농장" width="79" height="36"></a>
+  <button class="menu-btn" type="button" aria-label="메뉴" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <nav class="menu"><a href="../">홈</a><a href="../moaon/">모아온</a><a href="../doodoo/">두두</a><a href="../contact/">연락하기</a><a href="../notice/">공고</a></nav>
+</div></header>
+
+<main>
+<section class="band cream"><div class="wrap order">
+  <h1 class="bar">두두 곡식 알림 신청</h1>
+  <p>예약을 시작하면 가장 먼저 문자로 알려드리겠습니다.</p>
+  <form id="order-form" style="margin-top:28px">
+    <div class="field"><label for="f-name">이름</label><input id="f-name" name="name" type="text" autocomplete="name" required></div>
+    <div class="field"><label for="f-tel">연락처</label><input id="f-tel" name="tel" type="tel" inputmode="tel" autocomplete="tel" required></div>
+    <fieldset class="field">
+      <legend>관심 곡식 (선택)</legend>
+      <label class="check"><input type="checkbox" name="grain" value="신동진 쌀">신동진 쌀</label>
+      <label class="check"><input type="checkbox" name="grain" value="동진찰 찹쌀">동진찰 찹쌀</label>
+      <label class="check"><input type="checkbox" name="grain" value="선풍 콩">선풍 콩</label>
+    </fieldset>
+    <div class="field">
+      <label class="check agree"><input type="checkbox" name="agree" required>[필수] 개인정보 수집·이용 동의</label>
+      <p class="agree-text">예약 시작을 알려드리기 위해 이름과 연락처를 받습니다.</p>
+    </div>
+    <button class="btn" type="submit">알림 신청하기</button>
+  </form>
+  <div class="order-done" id="order-done" hidden role="status">
+    <p>신청을 보냈습니다. 예약을 시작하면 문자로 알려드리겠습니다.</p>
+    <div class="call"><button class="btn line" type="button" id="order-copy">복사</button><a class="btn line" id="order-mail" href="mailto:haree7777@gmail.com">이메일</a></div>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span class="foot-logo"><img src="../assets/logo-dudu.svg" alt="두두농장" width="66" height="30"></span><br>
+  <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
+  전북특별자치도 정읍시 태인면 매계리 25<br>
+  전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
+  대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
+  <p class="foot-last"><a href="../notice/">공고</a> · Copyright © MOAON. All rights reserved.</p>
+</div></footer>
+</body>
+</html>

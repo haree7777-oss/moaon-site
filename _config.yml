@@ -1,0 +1,4 @@
+# GitHub Pages 설정. README는 공개 사이트에 내보내지 않는다.
+# .nojekyll 을 넣지 말 것 — 넣으면 notice/_양식.html 이 공개된다.
+exclude:
+  - README.md

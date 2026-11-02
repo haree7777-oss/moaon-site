@@ -1,7 +1,7 @@
 :root{--green:#1F3D2B;--gold:#B08D57;--ink:#22302A;--sub:#55625A;--paper:#FFFFFF;--soft:#F4F3EE;--line:#D9DCD4}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:17px;line-height:1.75;word-break:keep-all}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:17px;line-height:1.75;word-break:keep-all;overflow-wrap:break-word}
 a{color:var(--green)}
 img{max-width:100%;height:auto;display:block}
 .wrap{max-width:960px;margin:0 auto;padding:0 20px}
@@ -11,11 +11,20 @@ header.top .brand img{height:34px;width:auto}
 nav.menu{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 nav.menu a{text-decoration:none;color:var(--ink);font-weight:500;font-size:15px;padding:6px 8px;border-radius:6px}
 nav.menu a:hover,nav.menu a[aria-current]{color:var(--green);background:var(--soft)}
-.hero{padding:72px 0 64px;text-align:center;background:var(--soft)}
+@media(max-width:480px){
+  header.top .wrap{gap:6px;padding:0 12px}
+  header.top .brand img{height:26px}
+  nav.menu{gap:0;flex-wrap:nowrap}
+  nav.menu a{font-size:14px;padding:8px 4px;white-space:nowrap}
+  header.top .brand{flex:none}
+}
+@media(max-width:350px){nav.menu a{font-size:13px;padding:8px 2px}}
+/* 로고 SVG에 흰 바탕이 있어 로고 놓는 자리는 흰 바탕으로 둔다 */
+.hero{padding:72px 0 64px;text-align:center;background:var(--paper);border-bottom:1px solid var(--line)}
 .hero img{width:min(360px,80%);margin:0 auto 20px}
 .hero p{margin:0;font-size:20px;color:var(--sub);letter-spacing:.04em}
 section.block{padding:64px 0;border-bottom:1px solid var(--line)}
-section.block:nth-of-type(even){background:var(--soft)}
+section.block:nth-of-type(odd){background:var(--soft)}
 h2{margin:0 0 24px;font-size:26px;line-height:1.4;color:var(--green);padding-left:14px;border-left:6px solid var(--green)}
 h3{margin:32px 0 10px;font-size:19px;color:var(--ink)}
 .lead{font-size:19px;font-weight:500;margin:0 0 8px}
@@ -29,7 +38,7 @@ ul.plain li::before{content:'';position:absolute;left:4px;top:19px;width:8px;hei
 .card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 14px}
 .card b{display:block;color:var(--green);font-size:18px;margin-bottom:4px}
 .card span{font-size:15px;color:var(--sub);line-height:1.6}
-.card i{font-style:normal;color:var(--gold);font-size:13px;font-weight:700;letter-spacing:.06em}
+.card i{font-style:normal;color:var(--sub);font-size:13px;font-weight:700;letter-spacing:.06em}
 .btn{display:inline-block;margin-top:12px;background:var(--green);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:8px}
 dl.contact{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;margin:0}
 dl.contact dt{color:var(--green);font-weight:700}
@@ -43,11 +52,14 @@ footer strong{color:var(--ink)}
 .notice-list a{display:flex;gap:16px;padding:16px 4px;text-decoration:none;color:var(--ink)}
 .notice-list time{color:var(--sub);flex:0 0 auto;font-variant-numeric:tabular-nums}
 .notice-list .empty{padding:28px 4px;color:var(--sub)}
+#notice .notice-list{margin-top:16px}
+@media(max-width:480px){.notice-list a{flex-direction:column;gap:2px}}
 .notice-meta{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;background:var(--soft);border-radius:10px;padding:16px 18px;margin:20px 0 28px;font-size:15px}
 .notice-meta dt{color:var(--green);font-weight:700}
 .notice-meta dd{margin:0}
 article.notice{padding-bottom:56px}
-article.notice table{border-collapse:collapse;width:100%;font-size:15px}
+article.notice table{display:block;overflow-x:auto;border-collapse:collapse;font-size:15px}
+@media(min-width:720px){article.notice table{display:table;width:100%}}
 article.notice th,article.notice td{border:1px solid var(--line);padding:6px 10px;text-align:right}
 article.notice th:first-child,article.notice td:first-child{text-align:left}
 .back{display:inline-block;margin:8px 0 40px}

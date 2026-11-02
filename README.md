@@ -4,7 +4,7 @@
 
 - 페이지: `/` `/moaon/` `/doodoo/` `/contact/` `/notice/`
 - 공고 주소는 `https://moaonfarm.kr/notice/` 하나로 고정한다. 임시 주소를 공고 주소로 쓰지 않는다.
-- `CNAME` 은 지금 없다. moaonfarm.kr 연결을 승인받을 때 저장소 맨 위에 `moaonfarm.kr` 한 줄로 되살린다.
+- `CNAME` 은 `moaonfarm.kr` 한 줄이다. 지우면 주소가 끊긴다.
 - `.nojekyll` 을 넣지 않는다. 넣으면 `notice/_양식.html` 이 공개된다.
 - `_capture/` 는 확인용 캡처를 두는 곳으로 올리지 않는다.
 

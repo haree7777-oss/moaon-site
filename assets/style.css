@@ -140,20 +140,6 @@ footer a{color:#fff}
 .foot-opt::before{content:' · '}
 .foot-opt:empty{display:none}
 
-/* 알림 신청 */
-.order{max-width:620px}
-.field{margin-bottom:22px}
-.field label,.field legend{display:block;font-weight:700;color:var(--green);margin-bottom:6px;padding:0}
-fieldset.field{border:0;margin:0 0 22px;padding:0}
-.field input[type=text],.field input[type=tel]{width:100%;font:inherit;padding:12px 14px;border:1.5px solid var(--sub);border-radius:8px;background:var(--paper);color:var(--ink)}
-.field .check{display:flex;align-items:center;gap:10px;font-weight:400;color:var(--ink);margin:0;padding:6px 0}
-.field .check.agree{font-weight:700;align-items:flex-start}
-.check input{width:22px;height:22px;flex:none;margin:3px 0 0;accent-color:var(--green)}
-.agree-text{margin:4px 0 0 32px;color:var(--sub)}
-button.btn{font:inherit;font-weight:700;border:0;cursor:pointer}
-.order-done{margin-top:24px;padding:18px 20px;background:var(--paper);border-left:6px solid var(--gold);border-radius:8px}
-.order-done .call{margin-top:14px}
-
 /* 공고 */
 .page-head{padding:56px 0 8px}
 .notice-items{margin-top:24px;border-top:2px solid var(--green)}

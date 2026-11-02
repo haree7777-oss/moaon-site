@@ -1,5 +1,5 @@
 :root{--green:#1F3D2B;--gold:#B08D57;--soil:#E7DCC8;--cream:#F7F4EC;--paper:#FFFFFF;--ink:#22302A;--sub:#55625A;--line:#D9DCD4;--spring:#C9D8A6;
-  --display:'Noto Sans KR','Malgun Gothic',sans-serif;--display-w:700}
+  --display:'Noto Serif KR',serif;--display-w:600}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:17px;line-height:1.8;word-break:keep-all;overflow-wrap:break-word}
 a{color:inherit}

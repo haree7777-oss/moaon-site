@@ -107,17 +107,31 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 .season p{color:var(--sub);font-size:16px}
 .closing{margin-top:56px;text-align:center;font-family:var(--display);font-weight:var(--display-w);font-size:clamp(21px,2.6vw,27px);color:var(--green)}
 
-/* 두두: 확정 배지 */
-.badge-stage{max-width:760px;margin:36px auto 0}
+/* 두두: 로고 + 한 문장, 두 제품, 세 단계 */
+.dd-hero{padding:clamp(56px,8vw,96px) 0 clamp(64px,8vw,96px);text-align:center;background:var(--paper)}
+.dd-logo{width:min(560px,100%);height:auto;margin:0 auto 44px;object-fit:contain}
+.dd-hero h1{font-size:clamp(30px,4.6vw,48px);line-height:1.35;margin-bottom:20px}
+.dd-hero p{max-width:620px;margin:0 auto;color:var(--sub);font-size:clamp(16px,1.7vw,18px)}
+.products{display:grid;gap:64px}
+@media(min-width:900px){.products{grid-template-columns:1fr 1fr;gap:56px}}
+.product img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin-bottom:28px}
+.product .name{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:.08em;color:var(--gold)}
+.product h2{font-size:clamp(24px,2.8vw,31px);margin-bottom:10px}
+.product .flow{margin-top:18px;font-weight:500;color:var(--green)}
+.product .flow span{color:var(--gold);margin:0 4px}
+.product details{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.product summary{cursor:pointer;color:var(--sub);font-size:15px}
+.picks{margin:12px 0 0;display:grid;gap:6px}
+.picks div{display:flex;gap:16px;font-size:16px}
+.picks dt{min-width:96px;font-weight:700;color:var(--green)}
+.picks dd{margin:0}
+.steps{list-style:none;margin:48px 0 0;padding:0;display:grid;gap:28px}
+@media(min-width:760px){.steps{grid-template-columns:repeat(3,1fr);gap:40px}}
+.steps b{display:block;font-size:14px;letter-spacing:.16em;color:var(--gold);margin-bottom:10px}
+.steps h3{font-size:24px;margin-bottom:8px}
+.steps p{color:var(--sub)}
+.btn.gold{margin-top:28px;background:var(--gold);color:var(--green)!important;padding:13px 32px;font-size:17px}
 
-/* 두두: 곡식, 세 이름, 연락하기 협력 */
-.grain-list{display:grid;gap:0;margin:40px 0 0;border-top:1px solid var(--line)}
-@media(min-width:640px){.grain-list{grid-template-columns:1fr 1fr}}
-@media(min-width:1000px){.grain-list{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:640px){.grain-list.in-split{grid-template-columns:1fr 1fr}}
-.grain-list div{padding:28px 24px 30px 0;border-bottom:1px solid var(--line)}
-.grain-list dt{font-size:13px;letter-spacing:.2em;color:var(--gold);font-weight:700;margin-bottom:8px}
-.grain-list dd{margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:24px;color:var(--green)}
 .names{display:grid;gap:18px;margin:40px 0 0}
 @media(min-width:760px){.names{grid-template-columns:repeat(3,1fr);gap:24px}}
 .names div{background:var(--paper);border-top:3px solid var(--gold);padding:28px 26px}

@@ -56,15 +56,16 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 
 /* 홈 첫 화면 */
 .hero{position:relative;display:flex;align-items:flex-end;min-height:calc(100vh - 69px);min-height:calc(100svh - 69px);overflow:hidden;background:var(--green);color:#fff}
-.hero picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 70%}
-.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(16,28,21,.82) 0%,rgba(16,28,21,.5) 38%,rgba(16,28,21,.08) 70%,rgba(16,28,21,0) 100%)}
+.hero picture img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 60%}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(16,28,21,.7) 0%,rgba(16,28,21,.38) 42%,rgba(16,28,21,0) 75%),linear-gradient(to right,rgba(16,28,21,.35) 0%,rgba(16,28,21,0) 60%)}
+.hero .wrap{text-shadow:0 1px 14px rgba(0,0,0,.35)}
 .hero .wrap{position:relative;z-index:1;width:100%;padding-top:72px;padding-bottom:clamp(56px,9vw,104px)}
 .hero .label{color:#E6D3A8;font-size:14px}
 .hero h1{color:#fff;font-size:clamp(38px,6.4vw,72px);line-height:1.3;margin-bottom:22px}
 .hero p{max-width:640px;font-size:clamp(17px,2vw,21px);line-height:1.75;color:#F1F0EA}
 .hero .more{color:#fff;border-bottom-color:rgba(255,255,255,.6)}
 .hero .more:hover{border-bottom-color:#fff}
-@media(max-width:700px){.hero picture img{height:113%;object-position:center bottom;bottom:auto}}
+@media(max-width:700px){.hero picture img{object-position:38% center}}
 
 /* 홈: 네 가지 가치 */
 .values{display:grid;gap:0;margin-top:44px;border-top:1px solid var(--line)}
@@ -106,19 +107,14 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 .season p{color:var(--sub);font-size:16px}
 .closing{margin-top:56px;text-align:center;font-family:var(--display);font-weight:var(--display-w);font-size:clamp(21px,2.6vw,27px);color:var(--green)}
 
-/* 두두: 로고 구상 */
-.wordmark{text-align:center;padding:24px 0 8px}
-.wordmark .word{font-family:'Noto Sans KR',sans-serif;font-weight:700;font-size:clamp(64px,13vw,150px);line-height:1;letter-spacing:.02em;color:var(--green)}
-.wordmark .dots{display:flex;justify-content:center;gap:clamp(18px,4vw,44px);margin:34px 0 0;padding:0;list-style:none}
-.wordmark .dots li{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:15px;color:var(--sub)}
-.wordmark .dots i{display:block;width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
-.dot-rice{background:#F4EFE2}.dot-barley{background:#D9B76E}.dot-bean{background:#E2C99A}.dot-black{background:#2E2B28}
-.wordmark .note{margin-top:28px;font-size:15px;color:var(--sub)}
+/* 두두: 확정 배지 */
+.badge-stage{max-width:760px;margin:36px auto 0}
 
 /* 두두: 곡식, 세 이름, 연락하기 협력 */
 .grain-list{display:grid;gap:0;margin:40px 0 0;border-top:1px solid var(--line)}
 @media(min-width:640px){.grain-list{grid-template-columns:1fr 1fr}}
 @media(min-width:1000px){.grain-list{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:640px){.grain-list.in-split{grid-template-columns:1fr 1fr}}
 .grain-list div{padding:28px 24px 30px 0;border-bottom:1px solid var(--line)}
 .grain-list dt{font-size:13px;letter-spacing:.2em;color:var(--gold);font-weight:700;margin-bottom:8px}
 .grain-list dd{margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:24px;color:var(--green)}
@@ -145,7 +141,9 @@ footer{background:var(--green);color:#D9DED7;padding:56px 0 44px;font-size:15px;
 .foot-motto{margin:6px 0 0;font-family:var(--display);color:#E6D3A8}
 footer strong{color:#fff;font-weight:500}
 footer a{color:#fff}
-.foot-last{grid-column:1/-1;margin:8px 0 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);font-size:14px}
+.foot-last{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:8px;padding-top:22px;border-top:1px solid rgba(255,255,255,.14);font-size:14px}
+.foot-last p{margin:0}
+.foot-badge{width:120px;height:auto;border-radius:6px}
 .foot-last a{text-decoration:none;letter-spacing:.12em;font-weight:500}
 .foot-last a:hover{text-decoration:underline}
 .foot-opt::before{content:' · '}

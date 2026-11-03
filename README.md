@@ -2,7 +2,9 @@
 
 빌드 도구 없는 손 HTML. 글자의 정본은 `80_브랜드마케팅/홈페이지/홈페이지_문안.md`, 구성·디자인은 `홈페이지_기획.md`.
 
-- 페이지: `/` `/moaon/` `/doodoo/` `/contact/` `/notice/`
+- 페이지: `/` `/moaon/` `/doodoo/` `/contact/` `/notice/`. 위 메뉴는 HOME · ABOUT · DOODOO · CONTACT 넷, 공고는 바닥글 「NOTICE 공고」로 들어간다.
+- 리디자인 기준: `MOAON_홈페이지_리디자인_실행지시서` (2026-11-03). 되돌릴 지점은 태그 `backup-before-redesign-20261103`.
+- 사진 자리는 HTML 주석 `사진 자리: 파일명` 으로 표시했다. 실제 사진을 받으면 그 자리의 이미지를 바꾼다. 생성 이미지를 실제 농장 사진처럼 쓰지 않고, 얼굴이 보이는 사람 사진은 쓰지 않는다.
 - 공고 주소는 `https://moaonfarm.kr/notice/` 하나로 고정한다. 임시 주소를 공고 주소로 쓰지 않는다.
 - `CNAME` 은 `moaonfarm.kr` 한 줄이다. 지우면 주소가 끊긴다.
 - `.nojekyll` 을 넣지 않는다. 넣으면 `notice/_양식.html` 이 공개된다.

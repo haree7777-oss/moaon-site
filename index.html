@@ -3,8 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>두두농장 · 농업회사법인 모아온</title>
-<meta name="description" content="전북 정읍 태인면에서 벼와 콩, 보리와 밀을 기릅니다.">
+<title>모아온 MOAON | 정읍의 농업회사</title>
+<meta name="description" content="전북 정읍 태인면에서 벼와 콩, 밀과 보리 등을 재배하는 농업회사 모아온입니다. 가치를 모아, 따뜻함을 나눕니다.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:url" content="https://moaonfarm.kr/">
+<meta property="og:title" content="모아온 MOAON | 정읍의 농업회사">
+<meta property="og:description" content="전북 정읍 태인면에서 벼와 콩, 밀과 보리 등을 재배하는 농업회사 모아온입니다. 가치를 모아, 따뜻함을 나눕니다.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
@@ -13,62 +18,77 @@
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="./"><img src="assets/logo-dudu.svg" alt="두두농장" width="79" height="36"></a>
+  <a class="brand" href="./" aria-label="모아온 MOAON 처음으로"><b>MOAON</b><span>모아온</span></a>
   <button class="menu-btn" type="button" aria-label="메뉴" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  <nav class="menu"><a href="./" aria-current="page">홈</a><a href="moaon/">모아온</a><a href="doodoo/">두두</a><a href="contact/">연락하기</a><a href="notice/">공고</a></nav>
+  <nav class="menu"><a href="./" aria-current="page">HOME</a><a href="moaon/">ABOUT</a><a href="doodoo/">DOODOO</a><a href="contact/">CONTACT</a></nav>
 </div></header>
 
 <main>
-<section class="photo-head hero stripes">
+<!-- 사진 자리: hero-field.jpg (16:9). 지금은 실제 촬영 사진을 쓴다 -->
+<section class="hero">
   <picture>
     <source media="(max-width:700px)" srcset="assets/photos/home-hero-sunset-mobile.webp">
-    <img src="assets/photos/home-hero-autumn.webp" alt="벼가 누렇게 익어 가는 들녘과 논둑길" fetchpriority="high">
+    <img src="assets/photos/home-hero-autumn.webp" alt="벼가 누렇게 익어 가는 정읍 들녘과 논둑길" fetchpriority="high">
   </picture>
   <div class="wrap">
-    <p class="hero-name">모아온 <span>MOAON</span></p>
-    <h1>가치를 모아,<br>따뜻함을 나눕니다.</h1>
-    <p>정읍의 땅에서 곡식을 기르고,<br>농업이 사람과 지역을 잇는 가치를 만들어 갑니다.</p>
-    <p class="hero-notice"><a href="notice/">공고 →</a></p>
+    <p class="label">MOAON · 모아온</p>
+    <h1>가치를 모아,<br>따뜻함을 나누다.</h1>
+    <p>정읍의 땅에서 곡식을 기르고, 농업이 사람과 지역을 잇는 가치를 만들어 갑니다.</p>
+    <a class="more" href="moaon/">모아온 이야기 보기 →</a>
   </div>
 </section>
 
-<section class="band green stripes"><div class="wrap meaning">
-  <div class="rise"><b>모아</b><p>‘모으다’라는 말에 사람과 경험, 기술과 농산물의 가치를 모은다는 뜻을 담았습니다.</p></div>
-  <span class="plus" aria-hidden="true">+</span>
-  <div class="rise"><b>온<small>溫</small></b><p>‘온’에는 그 결실을 따뜻하게(溫) 나누고 싶은 마음을 담았습니다.</p></div>
+<section class="section"><div class="wrap">
+  <div class="lead">
+    <p class="label">JEONGEUP · TAEIN · MAEGYE</p>
+    <h2>정읍의 들녘에서 농사를 짓습니다.</h2>
+    <p>전북 정읍 태인면 매계리. 동진강이 흐르는 들녘에서 벼와 콩, 밀과 보리를 기릅니다.</p>
+  </div>
+  <!-- 사진 자리: moaon-land.jpg (16:9). 지금은 실제 촬영 사진을 쓴다 -->
+  <figure class="wide cine rise" style="margin-top:44px"><img src="assets/photos/summer-rice.webp" alt="산 아래로 펼쳐진 여름 벼논" loading="lazy"></figure>
 </div></section>
 
-<section class="band glance">
-  <img src="assets/photos/summer-rice.webp" alt="산 아래로 펼쳐진 여름 벼논" loading="lazy">
-  <div class="wrap"><div class="three">
-    <div class="fact rise">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 44S9 29 9 19a15 15 0 0 1 30 0c0 10-15 25-15 25Z"/><circle cx="24" cy="19" r="5"/></svg>
-      <b>정읍 태인 매계리</b><span>동진강 들녘에서 짓습니다</span>
-    </div>
-    <div class="fact rise">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 44V24M24 24C24 14 16 8 7 8c0 10 7 16 17 16ZM24 30c0-8 7-13 16-13 0 9-7 13-16 13Z"/></svg>
-      <b>10년 넘게 씨앗 농사</b><span>정읍 매계 채종단지에서 정부 보급종을 길러 왔습니다</span>
-    </div>
-    <div class="fact rise">
-      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 45V8M24 14c-5-1-7-4-8-8M24 14c5-1 7-4 8-8M24 24c-6-1-9-4-10-8M24 24c6-1 9-4 10-8M24 34c-6-1-9-4-10-8M24 34c6-1 9-4 10-8"/></svg>
-      <b>벼 · 콩 · 밀 · 보리 · 귀리</b><span>계절 따라 논에서 기르는 곡식들</span>
-    </div>
+<section class="section paper"><div class="wrap">
+  <p class="label">OUR VALUES</p>
+  <h2>모아온의 네 가지 가치</h2>
+  <div class="values">
+    <div class="value rise"><small>01</small><h3>기르다</h3><p>땅과 계절에 맞춰 곡식을 기릅니다.</p></div>
+    <div class="value rise"><small>02</small><h3>가꾸다</h3><p>생산 과정과 곡식의 품질을 살핍니다.</p></div>
+    <div class="value rise"><small>03</small><h3>모으다</h3><p>사람과 경험, 기술을 모읍니다.</p></div>
+    <div class="value rise"><small>04</small><h3>나누다</h3><p>농업의 결실을 함께 나눕니다.</p></div>
+  </div>
+</div></section>
+
+<section class="section"><div class="wrap split">
+  <div class="lead">
+    <p class="label">DOODOO</p>
+    <h2>우리 땅에서 자란 곡식, 두두.</h2>
+    <p>두두는 모아온이 직접 기른 곡식에 붙이는 농산물 브랜드입니다.</p>
+    <a class="more" href="doodoo/">두두 브랜드 알아보기 →</a>
+  </div>
+  <figure class="rise"><img src="assets/photos/doodoo-soy-flower.webp" alt="콩 줄기에 핀 작은 흰 콩꽃" loading="lazy"></figure>
+</div></section>
+
+<section class="photo-band section">
+  <img src="assets/photos/contact-sunset.webp" alt="" loading="lazy">
+  <div class="wrap"><div class="lead" style="margin:0 auto">
+    <p class="label" style="color:#E6D3A8">CONTACT</p>
+    <h2>함께할 이야기를 기다립니다.</h2>
+    <p>농업과 농산물, 농촌의 새로운 가능성에 관한 이야기를 나누고 싶습니다.</p>
+    <a class="more" href="contact/">문의하기 →</a>
   </div></div>
 </section>
-
-<section class="band soil"><div class="wrap"><div class="two">
-  <a class="go rise" href="moaon/"><b>모아온</b><span>어떤 회사인지 →</span></a>
-  <a class="go rise" href="doodoo/"><b>두두</b><span>우리가 기른 곡식 →</span></a>
-</div></div></section>
 </main>
 
-<footer><div class="wrap">
-  <span class="foot-logo"><img src="assets/logo-dudu.svg" alt="두두농장" width="66" height="30"></span><br>
-  <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
-  전북특별자치도 정읍시 태인면 매계리 25<br>
-  전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
-  대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
-  <p class="foot-last"><a href="notice/">공고</a> · Copyright © MOAON. All rights reserved.</p>
+<footer><div class="wrap foot">
+  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div>
+    <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
+    전북특별자치도 정읍시 태인면 매계리 25<br>
+    전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
+    대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
+  </div>
+  <p class="foot-last"><a href="notice/">NOTICE 공고</a> · Copyright © MOAON. All rights reserved.</p>
 </div></footer>
 </body>
 </html>

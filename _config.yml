@@ -3,3 +3,4 @@
 exclude:
   - README.md
   - _capture
+  - apps-script

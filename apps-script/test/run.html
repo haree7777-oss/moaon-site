@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><title>규칙 일꾼 시험</title>
+<style>body{font:15px/1.6 'Malgun Gothic',sans-serif;margin:24px}li.f{color:#b00;font-weight:700}li.p{color:#264}h1{font-size:20px}</style>
+<h1 id="sum">시험 중…</h1><ol id="out"></ol>
+<script>window.onerror = function (m, src, line) { window.__error = m + ' (' + src + ':' + line + ')'; };</script>
+<script src="shim.js"></script>
+<script src="../Code.js"></script>
+<script src="tests.js"></script>
+<script>
+(function () {
+  var out = document.getElementById('out'), fail = 0, list = window.results || [];
+  list.forEach(function (r) {
+    var li = document.createElement('li'); li.className = r.pass ? 'p' : 'f';
+    li.textContent = (r.pass ? '통과 ' : '실패 ') + r.name + (r.pass ? '' : ' — ' + r.detail);
+    out.appendChild(li); if (!r.pass) fail++;
+  });
+  document.getElementById('sum').textContent = window.__error ? '오류로 멈춤: ' + window.__error : (list.length - fail) + ' / ' + list.length + ' 통과';
+  window.__summary = { total: list.length, fail: fail, error: window.__error || '', failed: list.filter(function (r) { return !r.pass; }) };
+})();
+</script>
+</html>

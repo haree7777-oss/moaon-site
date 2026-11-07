@@ -59,6 +59,7 @@ var DEFAULT_SETTINGS = [
 var CONFIRM_BODY = '{곡식} {조합} {양} / {금액}원{할인 줄}. {기한}까지 {계좌}로 입금해 주세요(입금자명이 달라도 됩니다). 받으실 날: {받을 날} 무렵. 입금 확인 안내가 1시간 안에 오지 않으면 답장 주세요.';
 var DEFAULT_TEMPLATES = [
   ['접수', '확정', '{이름}님, 예약 신청을 받았습니다. 재고 확인 후 확정 안내를 드리겠습니다.', '{이름}님, 예약 받았습니다. 확정되면 문자 드리겠습니다.', '안내'],
+  ['상담접수', '확정', '{이름}님, 상담 신청을 받았습니다. 확인 후 연락드리겠습니다.', '같음', '안내'],
   ['확정', '확정', '{이름}님, 예약이 확정됐습니다. ' + CONFIRM_BODY, '같음', '안내'],
   ['확정·환불확인', '확정', '주문 후 찧는 쌀입니다. 찧기 전 취소는 전액 환불, 찧은 뒤 단순 변심 반품은 어렵습니다. 상품에 문제가 있으면 교환·환불해 드립니다. 입금하시면 이 내용에 동의하신 것으로 봅니다.', '같음', '안내'],
   ['첫고객', '확정', '{이름}님은 두두 {○호} 고객입니다. 앞으로 모든 주문이 10% 할인됩니다.', '같음', '안내'],
@@ -240,6 +241,7 @@ function intake(p) {
                         '시기': p['시작'] || '', '용도': [p['유형'], p['방식'], p['포장'], p['찹쌀']].filter(String).join(' · '), '출처': '상담', '기록일': t });
       rec['메모'] = '상담 요청 — 대표 직접 연락';
       res['상태'] = '상담';
+      send_('상담접수', c, null);
     } else if (items.length) {
       items.forEach(function (it) { saveTaste_(c['고객번호'], it, t); });
       if (p.mode === 'order') {
@@ -317,16 +319,20 @@ function grainsText_(items) { return items.map(itemText_).join(', '); }
 function byGrain_(items) { var m = {}; items.forEach(function (it) { m[it.grain] = (m[it.grain] || 0) + Number(it.size); }); return m; }
 
 // ───────── 할인 (설계 4·9장) ─────────
-// ○호 고객(전체 첫 ho_seats명)은 모든 주문 ho_rate%. 아니면 소식 동의가 살아 있을 때 loyalty_every번째마다 loyalty_rate%.
-// 기준은 곡식+소포장 합계. 둘은 겹치지 않는다. 회차는 같은 연락처의 모든 주문(취소·대기 제외)으로 센다.
+// ○호 고객(전체 첫 ho_seats명)은 모든 주문 ho_rate%. 아니면 소식 받기에 동의한 적이 있으면 loyalty_every번째마다 loyalty_rate%.
+// 소식 받기를 그만둬도 그때까지 센 횟수와 할인은 그대로(문안 03-1 · 법검토 1-8). 기준은 곡식+소포장 합계, 둘은 겹치지 않는다.
+// 회차는 같은 연락처의 모든 주문(취소·대기 제외)으로 센다.
 function discount_(c, n) {
   if (c['두두 호'] && Number(c['두두 호']) <= Number(val_('ho_seats', 100))) return { rate: Number(val_('ho_rate', 10)), why: '두두 ' + c['두두 호'] + '호 고객' };
   var every = Number(val_('loyalty_every', 3));
-  if (on_('loyalty') && newsOn_(c['고객번호']) && n % every === 0) return { rate: Number(val_('loyalty_rate', 10)), why: n + '번째 주문' };
+  if (on_('loyalty') && newsEver_(c['고객번호']) && n % every === 0) return { rate: Number(val_('loyalty_rate', 10)), why: n + '번째 주문' };
   return { rate: 0, why: '' };
 }
 function newsOn_(cid) {
   return rows_('동의').some(function (a) { return a['고객'] === cid && a['종류'] === '소식' && !a['철회 시각']; });
+}
+function newsEver_(cid) {
+  return rows_('동의').some(function (a) { return a['고객'] === cid && a['종류'] === '소식'; });
 }
 function seatsLeft_() {
   var used = rows_('고객').filter(function (r) { return Number(r['두두 호'] || 0) > 0; }).length;
@@ -712,7 +718,7 @@ function recall(tel) {
     combos[k['제품']] = { glutinous: k['찹쌀'] === '' ? null : Number(k['찹쌀']), size: Number(k['양(kg)']), subpack: k['소포장'] === 'Y',
                           repeat: k['주기(일)'] ? Number(k['주기(일)']) : 'once' };
   });
-  return { found: true, combos: combos, count: liveCount_(c['고객번호']), consent: newsOn_(c['고객번호']),
+  return { found: true, combos: combos, count: liveCount_(c['고객번호']), consent: newsOn_(c['고객번호']), newsEver: newsEver_(c['고객번호']),
            ho: c['두두 호'] || null, seatsLeft: seatsLeft_() };
 }
 

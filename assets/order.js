@@ -170,7 +170,8 @@
     var grain = prices.reduce(function (a, b) { return a + b; }, 0);
     var sub = list.map(itemSubpack).reduce(function (a, b) { return a + b; }, 0);
     var d = C.discount, info = state.info || {}, n = (info.count || 0) + 1, cut = 0, why = '';
-    var news = info.consent || ($('[name="news"]', form) && $('[name="news"]', form).checked);
+    // 소식 받기를 그만둬도 그때까지 센 횟수와 할인은 그대로 — 동의한 적이 있으면 회차 할인
+    var news = info.newsEver || info.consent || ($('[name="news"]', form) && $('[name="news"]', form).checked);
     if (info.ho) { cut = Math.round((grain + sub) * d.hoRate / 100); why = '두두 ' + info.ho + '호 고객 ' + d.hoRate + '% 할인'; }
     else if (news && n % d.every === 0) { cut = Math.round((grain + sub) * d.rate / 100); why = n + '번째 주문 ' + d.rate + '% 할인'; }
     var ship = C.shipping === null ? null : Number(C.shipping);

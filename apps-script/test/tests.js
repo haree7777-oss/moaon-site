@@ -166,6 +166,9 @@ optOut(A);
 ok('수신 거부 처리', cust(A)['수신 거부'] === 'Y' && !newsOn_(cust(A)['고객번호']));
 ok('수신거부 알림은 법검토 문구 그대로', /^보류.*— \(두두농장\) 11월 25일 소식 받기를 멈췄습니다\. 주문 안내 문자는 그대로 갑니다\.$/.test(msgs(cust(A)['고객번호'], '수신거부')[0]['결과']));
 ok('그 뒤 광고는 건너뜀', adOk_(cust(A)) === false);
+var a5 = web('시험삼', A, [rice(10, 10)], []), a6 = web('시험삼', A, [rice(10, 10)], []), a7 = web('시험삼', A, [rice(10, 10)], []);   // 앞 주문 하나는 확인필요라 회차에서 빠짐 → 4·5·6번째
+ok('소식 그만둔 뒤에도 6번째 10%(센 횟수·할인 그대로)', order(a5['주문번호'])['할인율'] === 0 && order(a6['주문번호'])['할인율'] === 0 && order(a7['주문번호'])['할인율'] === 10 && order(a7['주문번호'])['할인 사유'] === '6번째 주문', order(a7['주문번호'])['할인 사유']);
+ok('불러오기: 지금 동의는 꺼짐·동의한 적은 있음', recall(A).consent === false && recall(A).newsEver === true);
 
 // 16. 지난 주문 불러오기 — 조합만, 반복 조회 막기
 var rc = recall('010-0000-0010');
@@ -184,7 +187,7 @@ doPost({ postData: { contents: JSON.stringify({ kind: 'bulk', '경로': '상담'
 var cb = cust('01000000011');
 ok('상담 → 식당·가게 고객, 단계 식당·단체', cb['유형'] === '식당·가게' && cb['단계'] === '식당·단체');
 ok('상담 → 관심 한 줄·접수 메모', /식당·가게/.test(last('관심')['용도']) && last('접수')['경로'] === '상담' && /대표 직접 연락/.test(last('접수')['메모']));
-ok('상담은 자동 문자 없음', msgs(cb['고객번호']).length === 0);
+ok('상담 → 상담접수 안내 한 통만', msgs(cb['고객번호']).length === 1 && msgs(cb['고객번호'])[0]['문자틀'] === '상담접수' && /상담 신청을 받았습니다/.test(msgs(cb['고객번호'])[0]['결과']));
 var g = JSON.parse(doGet({ parameter: { action: 'switches' } }).text);
 ok('doGet 스위치 JSON', g.switches.order === false && g.switches.loyalty === true && g.seatsLeft === 0);
 var gr = JSON.parse(doGet({ parameter: { action: 'recall', tel: '01000000011' } }).text);

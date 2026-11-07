@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script>document.documentElement.classList.add('js')</script>
 <script src="../assets/site.js" defer></script>
+<script src="../assets/order-config.js" defer></script>
+<script src="../assets/order.js" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -37,13 +39,69 @@
   <p class="label">PARTNERSHIP</p>
   <h2>협력 분야</h2>
   <dl class="names">
-    <div class="rise"><dt>식당 · 가게 · 단체</dt><dd>쌀과 곡식의 생산·공급에 관한 이야기</dd></div>
+    <div class="rise"><dt><a href="#bulk">식당 · 가게 · 단체</a></dt><dd>쌀과 곡식의 생산·공급에 관한 이야기</dd></div>
     <div class="rise"><dt>이웃 농가</dt><dd>함께 농사짓고 성장할 수 있는 협력</dd></div>
     <div class="rise"><dt>가공 · 유통 · 디자인</dt><dd>농산물의 새로운 가치를 만드는 협력</dd></div>
   </dl>
 </div></section>
 
-<section class="section"><div class="wrap">
+<section class="section" id="bulk"><div class="wrap narrow">
+  <h2>대량·정기 주문 상담</h2>
+  <p>식당·가게·단체, 많은 양이나 정기 납품은 필요하신 조건에 맞춰 드립니다. 아래를 고르시면 확인 후 연락드립니다.</p>
+  <form id="bulk-form" class="order-form" novalidate>
+    <fieldset><legend>1. 어디에 쓰시나요?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="use" value="식당·가게" required><span>식당·가게</span></label>
+      <label class="opt"><input type="radio" name="use" value="단체·급식"><span>단체·급식</span></label>
+      <label class="opt"><input type="radio" name="use" value="가정(많은 양)"><span>가정(많은 양)</span></label>
+      <label class="opt"><input type="radio" name="use" value="기타"><span>기타</span></label></div></fieldset>
+    <fieldset><legend>2. 곡식 (여러 개)</legend><div class="opts">
+      <label class="opt"><input type="checkbox" name="grains" value="쌀"><span>쌀</span></label>
+      <label class="opt"><input type="checkbox" name="grains" value="찹쌀"><span>찹쌀</span></label>
+      <label class="opt"><input type="checkbox" name="grains" value="콩"><span>콩</span></label>
+      <label class="opt"><input type="checkbox" name="grains" value="보리"><span>보리 — 준비 중</span></label>
+      <label class="opt"><input type="checkbox" name="grains" value="밀"><span>밀 — 준비 중</span></label></div></fieldset>
+    <fieldset class="bulk-gl"><legend>3. 찹쌀 비율</legend><div class="opts">
+      <label class="opt"><input type="radio" name="gl" value="멥쌀만"><span>멥쌀만</span></label>
+      <label class="opt"><input type="radio" name="gl" value="10%"><span>10%</span></label>
+      <label class="opt"><input type="radio" name="gl" value="20%"><span>20%</span></label>
+      <label class="opt"><input type="radio" name="gl" value="30%"><span>30%</span></label>
+      <label class="opt"><input type="radio" name="gl" value="상담 후 정함"><span>상담 후 정함</span></label></div></fieldset>
+    <fieldset><legend>4. 한 번에 필요한 양</legend><div class="opts">
+      <label class="opt"><input type="radio" name="qty" value="20kg 이하"><span>20kg 이하</span></label>
+      <label class="opt"><input type="radio" name="qty" value="20~100kg"><span>20~100kg</span></label>
+      <label class="opt"><input type="radio" name="qty" value="100kg 이상"><span>100kg 이상</span></label></div>
+      <p class="cycle-custom">직접 입력 <input type="number" name="qtyKg" min="1" aria-label="직접 입력(kg)"> kg</p></fieldset>
+    <fieldset><legend>5. 필요한 방식</legend><div class="opts">
+      <label class="opt"><input type="radio" name="how" value="한 번만"><span>한 번만</span></label>
+      <label class="opt"><input type="radio" name="how" value="주기적으로"><span>주기적으로</span></label></div>
+      <div class="opts bulk-cycle">
+        <label class="opt"><input type="radio" name="cycle" value="1주"><span>1주</span></label>
+        <label class="opt"><input type="radio" name="cycle" value="2주"><span>2주</span></label>
+        <label class="opt"><input type="radio" name="cycle" value="4주"><span>4주</span></label>
+        <label class="opt"><input type="radio" name="cycle" value="기타"><span>기타</span></label></div></fieldset>
+    <fieldset><legend>6. 시작 시기</legend><div class="opts">
+      <label class="opt"><input type="radio" name="start" value="바로"><span>바로</span></label>
+      <label class="opt"><input type="radio" name="start" value="1개월 안"><span>1개월 안</span></label>
+      <label class="opt"><input type="radio" name="start" value="상담 후"><span>상담 후</span></label></div></fieldset>
+    <fieldset><legend>7. 포장</legend><div class="opts">
+      <label class="opt"><input type="radio" name="pack" value="상관없음"><span>상관없음</span></label>
+      <label class="opt"><input type="radio" name="pack" value="소포장 필요"><span>소포장 필요</span></label>
+      <label class="opt"><input type="radio" name="pack" value="큰 포대"><span>큰 포대</span></label></div></fieldset>
+    <fieldset><legend>8. 연락처</legend>
+      <label>상호(선택) <input name="shop" autocomplete="organization"></label>
+      <label>이름 <input name="name" required autocomplete="name"></label>
+      <label>휴대폰 <input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></label>
+      <label>지역(시·군) <input name="region"></label></fieldset>
+    <fieldset><legend>9. 요청사항</legend>
+      <label><span class="hint">원하시는 조건을 자유롭게 적어 주세요. (예: 도정일 지정, 배송 요일, 견적서·세금계산서)</span><textarea name="memo" rows="3"></textarea></label></fieldset>
+    <p class="hint">남겨 주신 내용은 상담에만 쓰고, 마지막 연락 1년 뒤 지웁니다. (<a href="../privacy/">개인정보 처리방침</a>)</p>
+    <label class="check"><input type="checkbox" name="news" value="소식"><span>(선택) 만 14세 이상이며, 소식(햅쌀 예약 이벤트 등) 받기에 동의합니다.</span></label>
+    <button type="submit" class="btn wide">상담 신청하기</button>
+    <p class="sent" hidden aria-live="polite" data-inquiry="접수했습니다. 확인 후 카카오톡 또는 문자로 연락드립니다. 통화가 편하시면 010-4689-8106."></p>
+  </form>
+</div></section>
+
+<section class="section paper"><div class="wrap">
   <p class="label">INFORMATION</p>
   <h2>연락처</h2>
   <dl class="contact-list">
@@ -64,7 +122,7 @@
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../notice/">NOTICE 공고</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../notice/">NOTICE 공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

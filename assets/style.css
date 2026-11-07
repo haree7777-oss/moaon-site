@@ -1,6 +1,7 @@
 :root{--green:#243D30;--gold:#C5A66A;--ivory:#F7F5EF;--paper:#FFFFFF;--ink:#333631;--sub:#77796F;--line:#E3E1D9;
   --display:'Noto Serif KR',serif;--display-w:600}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Noto Sans KR','Malgun Gothic',sans-serif;font-size:17px;line-height:1.85;word-break:keep-all;overflow-wrap:break-word}
 a{color:inherit}
 img{max-width:100%;height:auto;display:block}
@@ -190,3 +191,91 @@ html.js .rise{opacity:0;transform:translateY(14px);transition:opacity .6s ease,t
 html.js .rise.on{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){html.js .rise{opacity:1;transform:none;transition:none}}
 @media print{header.top,.back,footer{display:none}html.js .rise{opacity:1;transform:none}}
+
+/* 두두: 곡식 카드 넷 */
+.grain-cards{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:20px}
+@media(min-width:640px){.grain-cards{grid-template-columns:1fr 1fr}}
+@media(min-width:1000px){.grain-cards{grid-template-columns:repeat(4,1fr)}}
+.grain-cards li>a,.grain-cards li>div{display:flex;flex-direction:column;height:100%;background:var(--paper);border-radius:6px;overflow:hidden;text-decoration:none;color:var(--ink);padding-bottom:24px}
+.grain-cards li>a:hover{box-shadow:0 6px 18px rgba(36,61,48,.12)}
+.grain-cards img{width:100%;aspect-ratio:4/3;object-fit:cover;margin-bottom:18px}
+.grain-cards .tag{align-self:flex-start;margin:0 22px 10px;padding:3px 10px;border-radius:99px;background:var(--green);color:#fff;font-size:13px;font-weight:700}
+.grain-cards .tag.wait{background:var(--gold);color:var(--green)}
+.grain-cards b{margin:0 22px;font-family:var(--display);font-weight:var(--display-w);font-size:24px;color:var(--green)}
+.grain-cards small{margin:2px 22px 10px;color:var(--sub);font-size:14px}
+.grain-cards p{margin:0 22px;color:var(--sub);flex:1}
+.grain-cards .go-on{margin:16px 22px 0;font-weight:700;color:var(--green)}
+.soon-note{margin-top:22px;color:var(--sub)}
+.band-line{background:var(--green);color:#fff;padding:34px 0}
+.band-line .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 28px}
+.band-line p{margin:0}
+.band-line .more{margin:0;color:#fff;border-bottom-color:var(--gold)}
+
+/* 상품 페이지 */
+.wrap.narrow{max-width:760px}
+.prod-head h1{font-size:clamp(34px,5vw,50px);margin-bottom:14px}
+.prod-head .one{font-size:clamp(18px,2vw,21px);color:var(--green);font-weight:500}
+.label a{text-decoration:none}
+.perk{margin-top:18px;padding:12px 16px;background:var(--paper);border-left:4px solid var(--gold);font-size:16px}
+.src{font-size:14px;color:var(--sub)}
+.keep{color:var(--sub)}
+.kinds{display:grid;gap:12px}
+.kinds details,.calc,.more-text{background:var(--ivory);border-radius:6px;padding:14px 18px}
+.kinds summary,.calc summary,.more-text summary{cursor:pointer;color:var(--green)}
+.kinds details p{margin:10px 0 0}
+.recall{margin-bottom:18px}
+.recall .row,.calc .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.recall input{flex:1;min-width:180px}
+.recall-msg{min-height:1.5em;color:var(--sub);font-size:15px;margin-top:6px}
+.elder{padding:12px 16px;background:var(--paper);border-radius:6px;font-weight:500;color:var(--green);font-size:16px}
+.section.paper .elder{background:var(--ivory)}
+
+/* 고르기·양식 */
+.pick,.order-form{margin-top:24px}
+fieldset{border:0;margin:0 0 26px;padding:0}
+legend{font-family:var(--display);font-weight:var(--display-w);font-size:21px;color:var(--green);margin-bottom:12px;padding:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt span{display:inline-block;padding:11px 18px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);cursor:pointer;font-size:16px;line-height:1.4}
+.opt em{font-style:normal;font-size:12px;font-weight:700;color:#fff;background:var(--gold);border-radius:99px;padding:1px 8px;margin-left:4px;vertical-align:2px}
+.opt input:checked+span{border-color:var(--green);background:var(--green);color:#fff}
+.opt input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+.hint{margin-top:10px;font-size:15px;color:var(--sub)}
+.cycle-box{margin-top:12px}
+.cycle-custom{margin-top:10px}
+.cycle-custom input{width:80px}
+.acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.acts .btn{padding:13px 26px;font-size:17px}
+.added{margin-top:14px;color:var(--green);font-weight:500}
+.calc{margin-top:14px}
+.calc-out{margin-top:10px;font-weight:700;color:var(--green)}
+input,select,textarea{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.order-form label:not(.opt):not(.check){display:block;margin-bottom:12px;font-size:15px;color:var(--sub)}
+.order-form label:not(.opt):not(.check) input,.order-form textarea{display:block;width:100%;margin-top:4px}
+.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0 6px;font-size:16px;cursor:pointer}
+.check input{margin-top:5px;width:18px;height:18px;flex:none}
+.check.all{font-weight:700;color:var(--green);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.more-text{margin:4px 0 8px 28px;font-size:15px}
+.more-text ul{margin:8px 0 0;padding-left:18px}
+.notice-box{background:var(--paper);border-radius:6px;padding:16px 18px;margin:22px 0;font-size:15px}
+.notice-box ul{margin:8px 0;padding-left:18px}
+.btn.wide{display:block;width:100%;padding:15px;font-size:18px;margin-top:18px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.sent{margin-top:16px;padding:14px 16px;background:var(--paper);border-left:4px solid var(--green);font-weight:500}
+button.link{border:0;background:none;padding:0;font:inherit;color:var(--green);text-decoration:underline;cursor:pointer;margin-left:12px}
+.page-title{font-size:clamp(30px,4vw,42px);margin:6px 0 22px}
+.cart-items{list-style:none;margin:0 0 26px;padding:0;border-top:2px solid var(--green)}
+.cart-items li{padding:16px 2px;border-bottom:1px solid var(--line)}
+.cart-items li div{display:flex;justify-content:space-between;gap:12px}
+.cart-items li p{margin:6px 0 0;font-size:15px}
+.money{background:var(--paper);border-radius:6px;padding:16px 18px;margin:18px 0}
+.money .count{font-weight:700;color:var(--green)}
+.money dl{margin:0}
+.money dl div{display:flex;justify-content:space-between;padding:4px 0}
+.money dl div:last-child{border-top:1px solid var(--line);margin-top:6px;padding-top:10px;font-weight:700}
+.money dd{margin:0}
+.policy h2{font-size:21px;margin:28px 0 8px}
+.policy ul,.policy ol{padding-left:20px}
+.policy ol.circled{list-style:none;padding-left:0}

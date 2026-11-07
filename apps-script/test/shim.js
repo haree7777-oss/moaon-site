@@ -47,7 +47,7 @@ var __cache = {};
 var CacheService = { getScriptCache: function () { return { get: function (k) { return __cache[k] || null; }, put: function (k, v) { __cache[k] = v; } }; } };
 var LockService ={ getScriptLock: function () { return { waitLock: function () {}, releaseLock: function () {} }; } };
 var ScriptApp = { getProjectTriggers: function () { return []; }, deleteTrigger: function () {},
-  newTrigger: function () { var b = { timeBased: function () { return b; }, everyMinutes: function () { return b; }, create: function () {} }; return b; } };
+  newTrigger: function () { var b = { timeBased: function () { return b; }, everyMinutes: function () { return b; }, forSpreadsheet: function () { return b; }, onEdit: function () { return b; }, create: function () {} }; return b; } };
 var ContentService = { MimeType: { JSON: 'json' }, createTextOutput: function (s) { return { text: s, setMimeType: function () { return this; } }; } };
 var Utilities = { formatDate: function (d, tz, fmt) {
   var p = function (n) { return ('0' + n).slice(-2); };

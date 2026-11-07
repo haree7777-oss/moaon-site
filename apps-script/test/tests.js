@@ -84,9 +84,13 @@ var r4 = web('시험사', '01000000004', [soy(10)], []);
 ok('콩 모자라 대기', r4['상태'] === '대기' && /남은 양 부족/.test(order(r4['주문번호'])['메모']));
 ok('대기 문자', last('연락')['문자틀'] === '대기');
 var s = stock('soy'); s['남은 양(kg)'] = 30; save_('재고', s);
+onBookEdit({ range: { getSheet: function () { return { getName: function () { return '연락'; } }; } } });
+ok('다른 시트를 고치면 그대로 대기', order(r4['주문번호'])['상태'] === '대기');
+onBookEdit({ range: { getSheet: function () { return { getName: function () { return '재고'; } }; } } });
+ok('재고 칸 고치면 바로 대기확정(10분 안 기다림)', order(r4['주문번호'])['상태'] === '확정' && msgs(cust('01000000004')['고객번호'], '대기확정').length === 1);
 tick(10); runScheduled();
-ok('재고 넣고 예약 작업 → 대기확정', order(r4['주문번호'])['상태'] === '확정' && msgs(cust('01000000004')['고객번호'], '대기확정').length === 1);
 ok('last_run 기록', setting_('last_run')['값'] instanceof Date);
+ok('대기확정 문자는 한 번만', msgs(cust('01000000004')['고객번호'], '대기확정').length === 1);
 
 // 8. 입금 기한 — 독촉 1회 → 자동 취소·재고 복귀
 at(2026, 11, 14, 11); runScheduled();

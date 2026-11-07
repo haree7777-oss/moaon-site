@@ -201,12 +201,25 @@ function seed_(name, list, key) {
 }
 
 // 10분마다 도는 예약 작업을 건다(한 번만).
+// 장부의 「재고」「작업 달력」을 손으로 고치면 대기 주문을 바로 다시 본다(onBookEdit).
 function installTriggers() {
   ScriptApp.getProjectTriggers().forEach(function (t) {
-    if (t.getHandlerFunction() === 'runScheduled') ScriptApp.deleteTrigger(t);
+    if (['runScheduled', 'onBookEdit'].indexOf(t.getHandlerFunction()) >= 0) ScriptApp.deleteTrigger(t);
   });
   ScriptApp.newTrigger('runScheduled').timeBased().everyMinutes(10).create();
-  log_('installTriggers', '', '10분마다');
+  ScriptApp.newTrigger('onBookEdit').forSpreadsheet(book_()).onEdit().create();
+  log_('installTriggers', '', '10분마다 · 재고·작업 달력 고치면 바로');
+}
+
+function onBookEdit(e) {
+  var name = e && e.range ? e.range.getSheet().getName() : '';
+  if (['재고', '작업 달력'].indexOf(name) < 0) return;
+  var waiting = rows_('주문').filter(function (o) { return o['상태'] === '대기'; }).length;
+  if (!waiting) return;
+  withLock_(function () {
+    try { processWaitlist(); log_('재고 고침', name, '대기 ' + waiting + '건 다시 봄'); }
+    catch (err) { log_('재고 고침', name, '실패', String(err)); }
+  });
 }
 
 // ───────── 입구: 접수 ─────────

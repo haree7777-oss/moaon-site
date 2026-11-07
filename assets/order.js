@@ -51,7 +51,11 @@
     var edit = new URLSearchParams(location.search).get('edit');
     var cur = load().filter(function (x) { return x.id === edit; })[0] || null;
 
-    if (!g.sizes.length) { form.hidden = true; var rb = $('#recall'); if (rb) rb.hidden = true; return; }
+    if (!g.sizes.length) {
+      form.hidden = true; var rb = $('#recall'); if (rb) rb.hidden = true;
+      var after = form.nextElementSibling; if (after && after.classList.contains('elder')) after.hidden = true;   // 같은 안내가 두 번 붙지 않게
+      return;
+    }
     var gl = $('[data-opts="glutinous"]', form);
     if (gl) radios(gl, 'glutinous', g.glutinous.map(function (p) { return { value: p, label: glutinousLabel(p), tag: p === g.recommend ? '추천' : '' }; }), cur ? cur.glutinous : g.recommend);
     radios($('[data-opts="size"]', form), 'size', g.sizes.map(function (s) {

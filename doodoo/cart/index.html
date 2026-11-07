@@ -22,101 +22,143 @@
 
 <main>
 <section class="section"><div class="wrap narrow">
-  <p class="label"><a href="../">DOODOO</a></p>
-  <h1 class="page-title">장바구니</h1>
-  <ul id="cart-items" class="cart-items"></ul>
-  <div id="cart-empty" class="cart-empty" hidden>
-    <img src="../../assets/photos/cart-empty.webp" alt="비어 있는 대바구니" loading="lazy">
-    <p>담은 곡식이 없습니다. <a class="more" href="../">두두 둘러보기</a></p>
+  <ol class="steps-bar" aria-label="주문 단계"><li aria-current="step">장바구니</li><li>주문서</li><li>완료</li></ol>
+
+  <!-- 1단계 장바구니 -->
+  <div data-step="1">
+    <h1 class="page-title">장바구니</h1>
+    <div id="cart-empty" class="cart-empty" hidden>
+      <p>담은 곡식이 없습니다.</p>
+      <a class="btn" href="../">두두 곡식 보기</a>
+    </div>
+    <ul id="cart-items" class="cart-items"></ul>
+    <div id="money1" class="money" hidden></div>
+    <p id="money1-note" class="hint" hidden>할인은 다음 단계에서 휴대폰 번호로 확인됩니다.</p>
+    <div class="step-acts" data-has-items hidden>
+      <button type="button" class="btn" id="to-order">주문서 쓰기</button>
+      <a class="more" href="../">곡식 더 보기 →</a>
+    </div>
   </div>
 
-  <form id="cart-form" class="order-form" novalidate>
-    <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
+  <!-- 2단계 주문서 (문안 03-2b 순서) -->
+  <div data-step="2" hidden>
+    <a class="back-link" id="back-cart" href="./">← 장바구니로</a>
+    <h1 class="page-title">주문서</h1>
+    <ul id="order-items" class="order-items"></ul>
+    <form id="order-form" class="order-form" novalidate>
+      <fieldset><legend>주문하신 분</legend>
+        <label>이름 <input name="name" autocomplete="name"></label>
+        <p class="err" data-err="name" hidden>이름을 적어 주세요.</p>
+        <label>휴대폰 <input name="phone" type="tel" inputmode="numeric" autocomplete="tel"></label>
+        <p class="err" data-err="phone" hidden>휴대폰 번호를 다시 확인해 주세요.</p></fieldset>
 
-    <fieldset><legend>받는 분</legend>
-      <div class="opts">
-        <label class="opt"><input type="radio" name="to" value="self" checked><span>주문하신 분과 같아요</span></label>
-        <label class="opt"><input type="radio" name="to" value="gift"><span>선물로 보내요</span></label>
+      <fieldset><legend>받는 분</legend>
+        <div class="opts">
+          <label class="opt"><input type="radio" name="to" value="self" checked><span>주문하신 분과 같아요</span></label>
+          <label class="opt"><input type="radio" name="to" value="gift"><span>선물로 보내요</span></label>
+        </div>
+        <div class="gift-box" hidden>
+          <label>받는 분 이름 <input name="giftName" autocomplete="off"></label>
+          <p class="err" data-err="giftName" hidden>이름을 적어 주세요.</p>
+          <label>받는 분 휴대폰 <input name="giftPhone" type="tel" inputmode="numeric" autocomplete="off"></label>
+          <p class="err" data-err="giftPhone" hidden>휴대폰 번호를 다시 확인해 주세요.</p>
+        </div></fieldset>
+
+      <fieldset><legend>주소</legend>
+        <label><span class="sr">주소</span><input name="address" autocomplete="street-address"></label>
+        <p class="err" data-err="address" hidden>받으실 주소를 적어 주세요.</p></fieldset>
+
+      <fieldset><legend>받고 싶은 때</legend>
+        <!-- 날짜 고르기(찧을 수 있는 날만)는 작업 달력이 연결되면 연다 -->
+        <div class="opts"><label class="opt"><input type="radio" name="when" value="가장 빠른 날" checked><span>가장 빠른 날</span></label></div></fieldset>
+
+      <fieldset><legend>요청사항</legend>
+        <label><span class="hint">자유롭게 적어 주세요. (예: 문 앞에 두기, 시간 조율, 나눠 담는 단위 변경)</span><textarea name="memo" rows="3"></textarea></label></fieldset>
+
+      <div class="perks">
+        <h3>혜택</h3>
+        <p data-perk="ho"><b>두두 ○호 고객</b> — 첫 100분께 「두두 ○호 고객」 번호를 드리고, 첫 주문부터 모든 주문을 10% 할인합니다(같은 휴대전화 번호).<span class="seats" hidden> 남은 자리 <b></b>/100</span></p>
+        <p><b>소식 알림 동의 혜택</b> — 햅쌀 우선 안내와 3번째 주문마다 10% 할인.</p>
+        <details class="acc"><summary><span>소식 알림 동의 혜택</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+          <p>소식 받기에 동의하신 분은 같은 휴대전화 번호로 3번째 주문마다(3·6·9·12번째…) 곡식+나눠 담기 합계의 10%를 할인합니다. 소식 받기를 그만두셔도 그때까지 센 횟수와 할인은 그대로입니다. 두두 ○호 고객은 이 할인 대신 ○호 할인을 받습니다. 할인 조건이 바뀌면 홈페이지에 미리 알립니다.</p>
+        </div></details>
+        <p class="perk-line" data-perk="line" hidden></p>
       </div>
-      <div class="gift-box" hidden>
-        <label>받는 분 이름 <input name="giftName" autocomplete="off"></label>
-        <label>받는 분 휴대폰 <input name="giftPhone" type="tel" inputmode="numeric" autocomplete="off"></label>
-        <label>받는 분 주소 <input name="giftAddress" autocomplete="off"></label>
-      </div></fieldset>
 
-    <fieldset><legend>연락처·주소</legend>
-      <label>이름 <input name="name" required autocomplete="name"></label>
-      <label>휴대폰 <input name="phone" type="tel" inputmode="numeric" required autocomplete="tel"></label>
-      <label>주소 <input name="address" required autocomplete="street-address"></label></fieldset>
+      <div id="money2" class="money" hidden></div>
 
-    <fieldset><legend>받고 싶은 때</legend>
-      <div class="opts"><label class="opt"><input type="radio" name="when" value="가장 빠른 날" checked><span>가장 빠른 날</span></label></div></fieldset>
+      <div class="notice-box">
+        <p><b>주문에 꼭 필요한 정보만 받습니다</b></p>
+        <ul>
+          <li>받는 것: 주문하신 분 이름·휴대전화 / 받는 분 이름·휴대전화·주소 / 입금자명(다를 때만)</li>
+          <li>쓰는 곳: 주문 확인·입금 확인·배송·주문 관련 연락</li>
+          <li>보관: 거래 기록은 법에 따라 5년, 고객 정보는 마지막 주문 뒤 2년이 지나면 지웁니다</li>
+          <li>배송을 위해 택배사에, 안내 문자를 위해 문자 발송 업체에 맡깁니다</li>
+        </ul>
+        <p>자세한 내용은 <a href="../../privacy/">개인정보 처리방침</a>에 있습니다.</p>
+      </div>
 
-    <fieldset><legend>요청사항</legend>
-      <label><span class="hint">자유롭게 적어 주세요. (예: 문 앞에 두기, 시간 조율, 소포장 단위 변경)</span><textarea name="memo" rows="3"></textarea></label></fieldset>
+      <fieldset class="agree"><legend class="sr">확인</legend>
+        <label class="check all"><input type="checkbox" name="all" value="all"><span>모두 확인하고 동의합니다</span></label>
+        <div class="agree-item">
+          <label class="check"><input type="checkbox" name="refund" value="환불확인"><span>(필수) 찧기 전에는 전액 환불, 찧은 뒤에는 단순 변심 반품이 어렵다는 것을 확인했습니다</span></label>
+          <details class="acc more-acc"><summary><span>환불 안내</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+            <p>두두쌀과 두두미숫가루는 주문하신 조합대로 그때그때 찧고 볶습니다.</p>
+            <ul>
+              <li>찧기(볶기) 전: 언제든 취소하시면 전액 돌려 드립니다.</li>
+              <li>찧기(볶기) 뒤: 다른 분께 팔 수 없어 단순 변심으로는 취소·반품할 수 없습니다.</li>
+              <li>받은 상품이 설명과 다르거나 상했으면 받은 날부터 3개월 안에(그 사실을 아신 날부터 30일 안에) 바꿔 드리거나 돌려 드립니다.</li>
+            </ul></div></details>
+          <p class="err" data-err="refund" hidden>환불 안내를 확인해 주세요.</p>
+        </div>
+        <div class="agree-item agree-news">
+          <label class="check"><input type="checkbox" name="news" value="소식"><span><em class="opt-tag">선택</em> 만 14세 이상이며, 소식(햅쌀 우선 예약·첫 예약 먼저 열기 등, 한 달 2번 이하, 「그만」 답장으로 바로 멈춤) 받기에 동의합니다. 동의 시 3번째 주문마다 10% 할인.</span></label>
+          <details class="acc more-acc"><summary><span>소식 받기</span><span class="acc-more">자세히</span></summary><div class="acc-body"><ul>
+            <li>받는 소식: 햅쌀 예약·새 곡식·계절 농사 소식</li>
+            <li>받는 방법: 문자, 카카오톡</li>
+            <li>횟수: 한 달 두 번 이하, 오전 9시~오후 8시에만</li>
+            <li>언제든 「그만」이라고 답장하시면 바로 멈춥니다. 동의하지 않으셔도 주문은 그대로 됩니다.</li>
+            <li>보관: 동의를 거두실 때까지(2년마다 계속 받으실지 여쭙니다)</li>
+          </ul></div></details>
+        </div>
+      </fieldset>
 
-    <p class="perk">소식(햅쌀 우선 예약 등) 받기에 동의하시면 3번째 주문마다 10% 할인됩니다.</p>
-    <div id="money" class="money" hidden></div>
-    <p class="hint">소식 받기에 동의하신 분은 같은 휴대전화 번호로 3번째 주문마다(3·6·9·12번째…) 곡식+소포장 합계의 10%를 할인합니다. 소식 받기를 그만두셔도 그때까지 센 횟수와 할인은 그대로입니다. 이번 주문이 몇 번째인지, 할인까지 몇 번 남았는지 금액 상자 위에 보입니다. 할인 조건이 바뀌면 홈페이지에 미리 알립니다.</p>
-    <p class="hint">첫 100분께 「두두 ○호 고객」 번호를 드리고, 앞으로 모든 주문에서 10%를 할인해 드립니다(같은 휴대전화 번호 기준). 두두 ○호 고객은 3번째 주문 할인 대신 이 할인을 받습니다.<span class="seats" hidden> (남은 자리 <b></b>/100)</span></p>
-    <p class="hint" data-need="account" hidden>확정 안내를 받으신 뒤 <span class="pay-days"></span>일 안에 입금해 주세요. 입금자명이 달라도 됩니다. <span class="account"></span></p>
+      <p class="seller">판매자 모아온(농업회사법인 설립 준비 중) · 대표 최현철 · 전북특별자치도 정읍시 태인면 매계리 25 · 전화 010-4689-8106 · 이메일 haree7777@gmail.com</p>
+      <!-- 이용약관(문안 03-5) 펼침: ★법인관리 확인 뒤 연다 -->
 
-    <div class="notice-box">
-      <p><b>주문에 꼭 필요한 정보만 받습니다</b></p>
-      <ul>
-        <li>받는 것: 주문하신 분 이름·휴대전화 / 받는 분 이름·휴대전화·주소 / 입금자명(다를 때만)</li>
-        <li>쓰는 곳: 주문 확인·입금 확인·배송·주문 관련 연락</li>
-        <li>보관: 거래 기록은 법에 따라 5년, 고객 정보는 마지막 주문 뒤 2년이 지나면 지웁니다</li>
-        <li>배송을 위해 택배사에, 안내 문자를 위해 문자 발송 업체에 맡깁니다</li>
-      </ul>
-      <p>자세한 내용은 <a href="../../privacy/">개인정보 처리방침</a>에 있습니다.</p>
+      <button type="submit" class="btn wide">예약 문의 남기기</button>
+    </form>
+  </div>
+
+  <!-- 3단계 완료 -->
+  <div data-step="3" class="done" hidden>
+    <h1 data-done="title">접수했습니다.</h1>
+    <p data-done="text"></p>
+    <div class="done-list" data-done="items"></div>
+    <div data-done="next" hidden>
+      <h2 class="sr">다음 순서</h2>
+      <ol class="next-steps">
+        <li>확정 안내</li>
+        <li><span data-pay-days></span>일 안에 입금</li>
+        <li>찧어서 보냄(찧은 날·송장 번호를 알려 드립니다)</li>
+      </ol>
     </div>
-
-    <fieldset class="agree"><legend class="sr">확인</legend>
-      <label class="check all" data-show="order" hidden><input type="checkbox" name="all" value="all"><span>모두 확인하고 동의합니다</span></label>
-      <div data-show="order" hidden>
-        <label class="check"><input type="checkbox" name="refund" value="환불확인"><span>(필수) 찧기 전에는 전액 환불, 찧은 뒤에는 단순 변심 반품이 어렵다는 것을 확인했습니다</span></label>
-        <details class="more-text"><summary>자세히</summary>
-          <p>두두쌀과 두두미숫가루는 주문하신 조합대로 그때그때 찧고 볶습니다.</p>
-          <ul>
-            <li>찧기(볶기) 전: 언제든 취소하시면 전액 돌려 드립니다.</li>
-            <li>찧기(볶기) 뒤: 다른 분께 팔 수 없어 단순 변심으로는 취소·반품할 수 없습니다.</li>
-            <li>받은 상품이 설명과 다르거나 상했으면 받은 날부터 3개월 안에(그 사실을 아신 날부터 30일 안에) 바꿔 드리거나 돌려 드립니다.</li>
-          </ul></details>
-      </div>
-      <div class="agree-news">
-        <label class="check"><input type="checkbox" name="news" value="소식"><span><em class="opt-tag">선택</em> 만 14세 이상이며, 소식(햅쌀 우선 예약·첫 예약 먼저 열기 등, 한 달 2번 이하, 「그만」 답장으로 바로 멈춤) 받기에 동의합니다. 동의 시 3번째 주문마다 10% 할인.</span></label>
-        <details class="more-text"><summary>자세히</summary><ul>
-          <li>받는 소식: 햅쌀 예약·새 곡식·계절 농사 소식</li>
-          <li>받는 방법: 문자, 카카오톡</li>
-          <li>횟수: 한 달 두 번 이하, 오전 9시~오후 8시에만</li>
-          <li>언제든 「그만」이라고 답장하시면 바로 멈춥니다. 동의하지 않으셔도 주문은 그대로 됩니다.</li>
-          <li>보관: 동의를 거두실 때까지(2년마다 계속 받으실지 여쭙니다)</li>
-        </ul></details>
-      </div>
-    </fieldset>
-
-    <button type="submit" class="btn wide" data-order="주문하기" data-inquiry="예약 문의 남기기">예약 문의 남기기</button>
-    <p class="sent" hidden aria-live="polite" data-inquiry="접수했습니다. 예약을 시작하면 카카오톡 또는 문자로 먼저 알려 드립니다." data-order="주문을 받았습니다. 재고 확인 후 확정 안내를 보내 드립니다."></p>
-    <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
-  </form>
-</div></section>
-
-<section class="band-line photo"><img src="../../assets/photos/bulk-band.webp" alt="" loading="lazy"><div class="wrap">
-  <p><b>식당·가게·대량 주문은 조건을 맞춰 드립니다.</b></p>
-  <a class="more" href="../../contact/#bulk">대량·정기 주문 상담 →</a>
+    <p>문의: <span data-need="kakao" hidden>카카오톡 채널 「두두농장」 · </span>010-4689-8106</p>
+    <p class="call"><a class="btn line" href="tel:01046898106">전화</a><a class="btn line" href="sms:01046898106">문자</a></p>
+    <p><a class="btn" href="../">두두 곡식 보기</a></p>
+  </div>
 </div></section>
 </main>
 
 <footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div><p class="foot-wm">MOAON</p></div>
   <div>
     <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
     전북특별자치도 정읍시 태인면 매계리 25<br>
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../../notice/">NOTICE 공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../../notice/">공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

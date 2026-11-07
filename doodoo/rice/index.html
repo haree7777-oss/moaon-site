@@ -25,105 +25,133 @@
   <nav class="menu"><a href="../../">HOME</a><a href="../../moaon/">ABOUT</a><a href="../" aria-current="page">DOODOO</a><a href="../../contact/">CONTACT</a></nav>
 </div></header>
 
-<main>
-<section class="section"><div class="wrap split prod-head">
-  <div class="lead">
-    <p class="label"><a href="../">DOODOO</a> · <a href="../cart/">장바구니</a></p>
-    <h1>두두쌀</h1>
-    <p class="one">신동진 쌀에 동진찰 찹쌀을 원하는 만큼 섞어 드립니다.</p>
-    <p>주문을 받고 나서 찧습니다(백미). 고른 찹쌀 비율은 다음 주문에도 그대로 이어집니다.</p>
-    <p class="perk">소식(햅쌀 우선 예약 등) 받기에 동의하시면 3번째 주문마다 10% 할인됩니다.</p>
-    <p class="perk seats" hidden>첫 100분 모든 주문 10% · 남은 자리 <b></b></p>
-  </div>
-  <figure><picture>
-    <source media="(max-width:700px)" srcset="../../assets/photos/rice-hero-m.webp">
+<main class="prod">
+<!-- 01~03 구매 상자 (기획 3-1) -->
+<section class="buy-sec"><div class="wrap buy">
+  <figure class="buy-photo"><picture>
+    <source media="(min-width:900px)" srcset="../../assets/photos/rice-hero-m.webp">
     <img src="../../assets/photos/rice-hero.webp" alt="김이 오르는 갓 지은 흰쌀밥 한 그릇" fetchpriority="high">
   </picture></figure>
-</div></section>
+  <div class="buy-box" id="buy">
+    <p class="state"><span class="tag" data-state>곧 예약</span></p>
+    <h1>두두쌀</h1>
+    <p class="one">신동진 쌀에 동진찰 찹쌀을 원하는 만큼 섞어 드립니다.</p>
+    <p class="price" data-price>가격은 예약을 시작할 때 알려 드립니다.</p>
+    <dl class="facts">
+      <div><dt>품종</dt><dd>신동진(멥쌀) · 동진찰(찹쌀)</dd></div>
+      <div><dt>도정</dt><dd>백미, 주문받고 찧습니다</dd></div>
+      <div><dt>양</dt><dd>10kg · 20kg (2.5kg씩 나눠 담기 가능)</dd></div>
+      <div><dt>산지</dt><dd>전북 정읍 태인면 매계리</dd></div>
+      <div data-need="year" hidden><dt>생산연도</dt><dd></dd></div>
+      <div><dt>배송</dt><dd>택배<span data-ship></span></dd></div>
+    </dl>
 
-<section class="section paper"><div class="wrap">
-  <h2>품종</h2>
-  <div class="split kinds-split">
-  <!-- 사진 자리: real-rice-grain.jpg(대표 실사)가 오면 바꾼다 -->
-  <figure><img src="../../assets/photos/card-rice.webp" alt="나무 주걱에 소복이 담은 흰쌀" loading="lazy"></figure>
-  <div class="kinds">
-    <details open><summary><b>신동진 쌀</b> — 알이 굵은 전북의 밥쌀</summary>
-      <p>2001년부터 전북에서 널리 심어 온 밥쌀입니다. 쌀알 1,000개 무게 24.2g으로, 함께 비교한 19개 품종 평균보다 약 20% 무겁습니다.</p>
-      <p>어울리는 요리: 매일 먹는 밥 · 김밥 · 비빔밥 · 볶음밥</p>
-      <p class="src">근거: 한국식품과학회지 43권 2호(2011), 20개 품종 비교 · 전북일보(2024-12)</p>
-    </details>
-    <details><summary><b>동진찰 찹쌀</b> — 밥에 섞는 찹쌀</summary>
-      <p>멥쌀에 섞으면 찰기가 늘고, 식은 밥이 굳는 속도가 느려집니다. 5~20%는 멥쌀밥과 맛 차이가 크지 않습니다.</p>
-      <p>어울리는 요리: 찰밥 · 약밥 · 떡</p>
-      <p class="src">근거: 한국작물학회지 62권 2호(2017), 찹쌀 5~20% 섞은 밥 비교</p>
-    </details>
-  <p class="keep">보관: 서늘하고 그늘진 곳에 밀폐 보관. 여름에는 냉장 보관.</p>
-  </div>
-  </div>
-</div></section>
-
-<section class="section"><div class="wrap">
-  <h2>이렇게 드세요</h2>
-  <!-- 문안 03-1: 한 줄의 찹쌀 비율 추천은 ★대표 확인 전이라 요리 이름만 -->
-  <ul class="uses">
-    <li class="rise"><img src="../../assets/photos/rice-use-gimbap.webp" alt="도마 위에 썰어 놓은 김밥" loading="lazy"><b>김밥</b></li>
-    <li class="rise"><img src="../../assets/photos/rice-use-bibimbap.webp" alt="흰쌀밥 위에 나물을 올린 비빔밥" loading="lazy"><b>비빔밥·덮밥</b></li>
-    <li class="rise"><img src="../../assets/photos/rice-use-chalbap.webp" alt="팥과 밤을 넣은 찰밥" loading="lazy"><b>찰밥·약밥</b></li>
-  </ul>
-  <!-- 받으시는 것(문안 03-1): real-pack-10kg · real-pack-2_5kg · real-box 실사가 오면 연다. 그전엔 칸 숨김 -->
-</div></section>
-
-<section class="section"><div class="wrap narrow">
-  <div id="recall" class="recall">
-    <p>휴대폰 번호를 넣으면 지난번 찹쌀 비율·양·소포장이 채워집니다(이름·주소는 안 보임).</p>
-    <div class="row"><input type="tel" inputmode="numeric" placeholder="휴대폰 번호" aria-label="휴대폰 번호"><button type="button" class="btn line">불러오기</button></div>
-    <p class="recall-msg" aria-live="polite"></p>
-  </div>
-  <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
-
-  <form class="pick" data-grain="rice" onsubmit="return false">
-    <fieldset><legend>1. 찹쌀 섞기</legend><div class="opts" data-opts="glutinous"></div>
-      <p class="hint">찹쌀이 많을수록 차지고, 식은 밥이 덜 굳습니다.</p>
-      <figure class="ratio-fig" aria-hidden="true"><svg viewBox="0 0 400 120" role="img"><ellipse cx="16" cy="14" rx="6" ry="9" transform="rotate(20 16 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="33" cy="14" rx="6" ry="9" transform="rotate(20 33 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="50" cy="14" rx="6" ry="9" transform="rotate(20 50 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="67" cy="14" rx="6" ry="9" transform="rotate(20 67 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="84" cy="14" rx="6" ry="9" transform="rotate(20 84 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="16" cy="34" rx="6" ry="9" transform="rotate(20 16 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="33" cy="34" rx="6" ry="9" transform="rotate(20 33 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="50" cy="34" rx="6" ry="9" transform="rotate(20 50 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="67" cy="34" rx="6" ry="9" transform="rotate(20 67 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="84" cy="34" rx="6" ry="9" transform="rotate(20 84 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="16" cy="54" rx="6" ry="9" transform="rotate(20 16 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="33" cy="54" rx="6" ry="9" transform="rotate(20 33 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="50" cy="54" rx="6" ry="9" transform="rotate(20 50 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="67" cy="54" rx="6" ry="9" transform="rotate(20 67 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="84" cy="54" rx="6" ry="9" transform="rotate(20 84 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="16" cy="74" rx="6" ry="9" transform="rotate(20 16 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="33" cy="74" rx="6" ry="9" transform="rotate(20 33 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="50" cy="74" rx="6" ry="9" transform="rotate(20 50 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="67" cy="74" rx="6" ry="9" transform="rotate(20 67 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="84" cy="74" rx="6" ry="9" transform="rotate(20 84 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><text x="50" y="112" text-anchor="middle" font-size="14" fill="#243D30">멥쌀만</text><ellipse cx="116" cy="14" rx="6" ry="9" transform="rotate(20 116 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="133" cy="14" rx="6" ry="9" transform="rotate(20 133 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="150" cy="14" rx="6" ry="9" transform="rotate(20 150 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="167" cy="14" rx="6" ry="9" transform="rotate(20 167 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="184" cy="14" rx="6" ry="9" transform="rotate(20 184 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="116" cy="34" rx="6" ry="9" transform="rotate(20 116 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="133" cy="34" rx="6" ry="9" transform="rotate(20 133 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="150" cy="34" rx="6" ry="9" transform="rotate(20 150 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="167" cy="34" rx="6" ry="9" transform="rotate(20 167 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="184" cy="34" rx="6" ry="9" transform="rotate(20 184 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="116" cy="54" rx="6" ry="9" transform="rotate(20 116 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="133" cy="54" rx="6" ry="9" transform="rotate(20 133 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="150" cy="54" rx="6" ry="9" transform="rotate(20 150 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="167" cy="54" rx="6" ry="9" transform="rotate(20 167 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="184" cy="54" rx="6" ry="9" transform="rotate(20 184 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="116" cy="74" rx="6" ry="9" transform="rotate(20 116 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="133" cy="74" rx="6" ry="9" transform="rotate(20 133 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="150" cy="74" rx="6" ry="9" transform="rotate(20 150 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="167" cy="74" rx="6" ry="9" transform="rotate(20 167 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="184" cy="74" rx="6" ry="9" transform="rotate(20 184 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><text x="150" y="112" text-anchor="middle" font-size="14" fill="#243D30">10%</text><ellipse cx="216" cy="14" rx="6" ry="9" transform="rotate(20 216 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="233" cy="14" rx="6" ry="9" transform="rotate(20 233 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="250" cy="14" rx="6" ry="9" transform="rotate(20 250 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="267" cy="14" rx="6" ry="9" transform="rotate(20 267 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="284" cy="14" rx="6" ry="9" transform="rotate(20 284 14)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="216" cy="34" rx="6" ry="9" transform="rotate(20 216 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="233" cy="34" rx="6" ry="9" transform="rotate(20 233 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="250" cy="34" rx="6" ry="9" transform="rotate(20 250 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="267" cy="34" rx="6" ry="9" transform="rotate(20 267 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="284" cy="34" rx="6" ry="9" transform="rotate(20 284 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="216" cy="54" rx="6" ry="9" transform="rotate(20 216 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="233" cy="54" rx="6" ry="9" transform="rotate(20 233 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="250" cy="54" rx="6" ry="9" transform="rotate(20 250 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="267" cy="54" rx="6" ry="9" transform="rotate(20 267 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="284" cy="54" rx="6" ry="9" transform="rotate(20 284 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="216" cy="74" rx="6" ry="9" transform="rotate(20 216 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="233" cy="74" rx="6" ry="9" transform="rotate(20 233 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="250" cy="74" rx="6" ry="9" transform="rotate(20 250 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="267" cy="74" rx="6" ry="9" transform="rotate(20 267 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="284" cy="74" rx="6" ry="9" transform="rotate(20 284 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><text x="250" y="112" text-anchor="middle" font-size="14" fill="#243D30">20%</text><ellipse cx="316" cy="14" rx="6" ry="9" transform="rotate(20 316 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="333" cy="14" rx="6" ry="9" transform="rotate(20 333 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="350" cy="14" rx="6" ry="9" transform="rotate(20 350 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="367" cy="14" rx="6" ry="9" transform="rotate(20 367 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="384" cy="14" rx="6" ry="9" transform="rotate(20 384 14)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="316" cy="34" rx="6" ry="9" transform="rotate(20 316 34)" fill="#FFFFFF" stroke="#A88B4F" stroke-width="1.5"/><ellipse cx="333" cy="34" rx="6" ry="9" transform="rotate(20 333 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="350" cy="34" rx="6" ry="9" transform="rotate(20 350 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="367" cy="34" rx="6" ry="9" transform="rotate(20 367 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="384" cy="34" rx="6" ry="9" transform="rotate(20 384 34)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="316" cy="54" rx="6" ry="9" transform="rotate(20 316 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="333" cy="54" rx="6" ry="9" transform="rotate(20 333 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="350" cy="54" rx="6" ry="9" transform="rotate(20 350 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="367" cy="54" rx="6" ry="9" transform="rotate(20 367 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="384" cy="54" rx="6" ry="9" transform="rotate(20 384 54)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="316" cy="74" rx="6" ry="9" transform="rotate(20 316 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="333" cy="74" rx="6" ry="9" transform="rotate(20 333 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="350" cy="74" rx="6" ry="9" transform="rotate(20 350 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="367" cy="74" rx="6" ry="9" transform="rotate(20 367 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><ellipse cx="384" cy="74" rx="6" ry="9" transform="rotate(20 384 74)" fill="#DDD3BB" stroke="#C9BD9F" stroke-width="1.5"/><text x="350" y="112" text-anchor="middle" font-size="14" fill="#243D30">30%</text></svg></figure></fieldset>
-    <fieldset><legend>2. 양</legend><div class="opts" data-opts="size"></div>
-      <details id="calc" class="calc"><summary>한 달 양 보기</summary>
-        <div class="row">
-          <label>식구 <select name="people"><option value="1">1명</option><option value="2">2명</option><option value="3" selected>3명</option><option value="4">4명</option><option value="5">5명 이상</option></select></label>
-          <label>집밥 <select name="meals"><option>하루 1끼</option><option selected>하루 2끼</option><option>하루 3끼</option><option>주말만</option></select></label>
-        </div>
-        <p class="calc-out"></p>
-        <p class="hint">1인 하루 쌀 소비량 147.7g(2025 양곡소비량조사, 국가데이터처) 기준.</p>
-      </details></fieldset>
-    <fieldset><legend>3. 소포장</legend><div class="opts" data-opts="subpack"></div>
-      <p class="hint">나눠 담으면 뜯지 않은 봉은 더 오래 보관됩니다.</p></fieldset>
-    <fieldset><legend>4. 받는 방법</legend><div class="opts" data-opts="repeat"></div>
-      <div class="cycle-box">
-        <div class="opts" data-opts="cycle"></div>
-        <p class="cycle-custom"><input type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="주기(주)"> 주마다</p>
-        <p class="hint">같은 조합으로 주기마다 예약을 잡고, 보내기 전에 안내합니다. 언제든 답장으로 멈출 수 있습니다.</p>
+    <form class="pick" data-grain="rice" data-need="sizes" onsubmit="return false">
+      <p class="recall-open" data-recall-open hidden><button type="button" class="link">지난번과 같게 →</button></p>
+      <div id="recall" class="recall" hidden>
+        <p>휴대폰 번호를 넣으면 지난 찹쌀 비율·양·나눠 담기가 채워집니다(이름·주소는 안 보임).</p>
+        <div class="row"><input type="tel" inputmode="numeric" placeholder="휴대폰 번호" aria-label="휴대폰 번호"><button type="button" class="btn line">불러오기</button></div>
+        <p class="recall-msg" aria-live="polite"></p>
       </div>
-      <p class="hint">갓 찧은 맛을 위해 2주 안에 드실 양을 권합니다.</p></fieldset>
-    <div class="acts"><button type="button" class="btn line" data-act="add">장바구니에 담기</button><button type="button" class="btn" data-act="buy">바로 주문하기</button></div>
-    <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
-  </form>
-  <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
+      <fieldset><legend>1. 찹쌀 섞기</legend><div class="opts" data-opts="glutinous"></div>
+        <p class="feel" data-feel hidden></p></fieldset>
+      <fieldset><legend>2. 양</legend><div class="opts" data-opts="size"></div>
+        <details id="calc" class="acc calc"><summary><span>얼마나 필요할까요?</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+          <div class="row">
+            <label>식구 <select name="people"><option value="1">1명</option><option value="2">2명</option><option value="3" selected>3명</option><option value="4">4명</option><option value="5">5명 이상</option></select></label>
+            <label>집밥 <select name="meals"><option>하루 1끼</option><option selected>하루 2끼</option><option>하루 3끼</option><option>주말만</option></select></label>
+          </div>
+          <p class="calc-out"></p>
+          <p class="hint">1인 하루 쌀 소비량 147.7g(2025 양곡소비량조사, 국가데이터처) 기준.</p>
+        </div></details></fieldset>
+      <fieldset><legend>3. 나눠 담기</legend><div class="opts" data-opts="subpack"></div></fieldset>
+      <fieldset><legend>4. 받는 방법</legend><div class="opts" data-opts="repeat"></div>
+        <div class="cycle-box">
+          <div class="opts" data-opts="cycle"></div>
+          <p class="cycle-custom"><input type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="주기(주)"> 주마다</p>
+          <p class="hint">같은 조합으로 주기마다 예약하고, 보내기 전에 안내합니다. 답장으로 언제든 멈출 수 있습니다.</p>
+        </div></fieldset>
+      <div class="buy-cta">
+      <p class="amount" data-amount hidden><b></b> <small>할인은 주문서에서 확인</small></p>
+      <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
+      <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
+      </div>
+    </form>
+    <p class="bulk-link">대량 주문·식당 거래는 → <a href="../../contact/#bulk">대량 주문·협력업체 문의</a></p>
+  </div>
+</div></section>
+
+<!-- 04 품종 이야기 -->
+<section class="zone paper"><div class="wrap narrow">
+  <h2>품종 이야기</h2>
+  <details class="acc"><summary><span><b>신동진 쌀</b> — 밥알이 크고 식감이 또렷한 밥쌀.</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+    <p>쌀알 1,000개 무게 24.2g으로, 함께 비교한 19개 품종 평균보다 약 20% 무겁습니다. 2001년부터 전북에서 널리 심어 온 품종입니다.</p>
+    <p class="src">근거: 한국식품과학회지 43권 2호(2011), 20개 품종 비교 · 전북일보(2024-12)</p>
+  </div></details>
+  <details class="acc"><summary><span><b>동진찰 찹쌀</b> — 밥에 섞어 찰기를 더하는 찹쌀.</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+    <p>멥쌀에 5~20% 섞으면 맛 차이는 크지 않고, 식은 밥이 굳는 속도가 느려집니다.</p>
+    <p class="src">근거: 한국작물학회지 62권 2호(2017), 찹쌀 5~20% 섞은 밥 비교</p>
+  </div></details>
+</div></section>
+
+<!-- 05 잘 어울리는 밥 -->
+<section class="zone"><div class="wrap narrow">
+  <h2>잘 어울리는 밥</h2>
+  <ul class="mini-cards">
+    <li><figure data-use="gimbap"><img src="../../assets/photos/rice-use-gimbap.webp" alt="도마 위에 썰어 놓은 김밥" loading="lazy"><figcaption><b>김밥</b></figcaption></figure></li>
+    <li><figure data-use="bibimbap"><img src="../../assets/photos/rice-use-bibimbap.webp" alt="흰쌀밥 위에 나물을 올린 비빔밥" loading="lazy"><figcaption><b>비빔밥·덮밥</b></figcaption></figure></li>
+    <li><figure data-use="chalbap"><img src="../../assets/photos/rice-use-chalbap.webp" alt="팥과 밤을 넣은 찰밥" loading="lazy"><figcaption><b>찰밥·약밥</b></figcaption></figure></li>
+  </ul>
+</div></section>
+
+<!-- 06 고르는 이유 -->
+<section class="zone paper"><div class="wrap narrow">
+  <h2>두두쌀을 고르는 이유</h2>
+  <ul class="reasons">
+    <li><b>주문받고 찧습니다</b> — 찧은 날을 알려 드립니다.</li>
+    <li><b>우리 논에서 기른 쌀입니다</b> — 정읍 태인면 매계리.</li>
+    <li><b>고른 비율을 기억합니다</b> — 다음 주문은 휴대폰 번호로 불러옵니다.</li>
+  </ul>
+</div></section>
+
+<!-- 07 배송·주문 안내 -->
+<section class="zone"><div class="wrap narrow">
+  <h2>배송·주문 안내</h2>
+  <dl class="guide">
+    <div><dt>받는 날</dt><dd>주문 후 찧어서 보냅니다. 받으실 날은 확정 안내에 적어 드립니다.</dd></div>
+    <div data-need="shipping" hidden><dt>배송비</dt><dd></dd></div>
+    <div><dt>입금</dt><dd>확정 안내를 받으신 뒤 <span data-pay-days></span>일 안에 계좌로 보내 주세요. 입금자명이 달라도 됩니다.</dd></div>
+    <div><dt>보관</dt><dd>서늘하고 그늘진 곳에 밀폐 보관. 여름에는 냉장 보관.</dd></div>
+    <div><dt>취소·환불</dt><dd>찧기 전에는 전액 환불합니다. 찧은 뒤에는 단순 변심 반품이 어렵습니다. 상품에 문제가 있으면 교환·환불해 드립니다.</dd></div>
+  </dl>
+  <!-- [이용약관 보기]: 문안 03-5 ★법인관리 확인 뒤 연다 -->
+</div></section>
+
+<!-- 08 아래 주문 -->
+<section class="zone paper" data-need="sizes"><div class="wrap narrow end-order">
+  <p class="summary" data-summary></p>
+  <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
+  <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
 </div></section>
 
 <section class="band-line photo"><img src="../../assets/photos/bulk-band.webp" alt="" loading="lazy"><div class="wrap">
-  <p><b>식당·가게·대량 주문은 조건을 맞춰 드립니다.</b></p>
-  <a class="more" href="../../contact/#bulk">대량·정기 주문 상담 →</a>
+  <p><b>식당·가게처럼 꾸준히 많은 양이 필요하시거나 대량 주문이시면 조건을 맞춰 드립니다.</b></p>
+  <a class="more" href="../../contact/#bulk">대량 주문·협력업체 문의 →</a>
 </div></section>
+
+<!-- 폰 고정 바 -->
+<div class="fixbar" data-need="sizes"><span data-summary-short></span><button type="button" class="btn" data-act="buy" data-short="1">주문하기</button></div>
 </main>
 
 <footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div><p class="foot-wm">MOAON</p></div>
   <div>
     <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
     전북특별자치도 정읍시 태인면 매계리 25<br>
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../../notice/">NOTICE 공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../../notice/">공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>두두 DOODOO | 모아온의 농산물 브랜드</title>
-<meta name="description" content="두두는 모아온이 정읍의 땅에서 직접 기른 곡식에 붙이는 농산물 브랜드입니다. 두두쌀 · 선풍 콩 · 큰알보리 · 밀.">
+<meta name="description" content="모아온이 직접 기른 곡식, 두두. 정읍 매계리에서 기른 쌀과 콩입니다. 보리와 밀은 준비 중입니다.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://moaonfarm.kr/doodoo/">
@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="../assets/style.css">
 <script>document.documentElement.classList.add('js')</script>
 <script src="../assets/site.js" defer></script>
+<script src="../assets/order-config.js" defer></script>
+<script src="../assets/order.js" defer></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -27,59 +29,51 @@
 <section class="dd-hero"><div class="wrap">
   <img class="dd-logo" src="../assets/logo-doodoo.svg" alt="doodoo FARM — PREMIUM RICE · GRAIN" width="1000" height="560" fetchpriority="high">
   <h1>모아온이 직접 기른 곡식, 두두.</h1>
-  <p>두두는 모아온이 정읍의 땅에서 직접 기른 곡식에 붙이는 농산물 브랜드입니다.</p>
-  <p>쌀과 콩, 보리처럼 우리 땅에서 자라는 곡식의 모습을 담아가고자 합니다.</p>
-  <p class="dd-ready">— 준비 중입니다 —</p>
+  <p>정읍 매계리에서 기른 쌀과 콩입니다. 보리와 밀은 준비 중입니다.</p>
 </div></section>
 
 <section class="section"><div class="wrap">
-  <h2>우리가 기른 곡식</h2>
+  <h2 class="sr">두두 곡식</h2>
   <ul class="grain-cards">
-    <li class="rise"><a href="rice/">
+    <li class="rise" data-card="rice"><a href="rice/">
       <img src="../assets/photos/card-rice.webp" alt="나무 주걱에 소복이 담은 흰쌀" loading="lazy">
-      <span class="tag">곧 예약</span><b>두두쌀</b><small>신동진 + 동진찰</small>
-      <p>주문받고 찧는 쌀. 찹쌀 비율을 고르세요.</p><span class="go-on">자세히 →</span></a></li>
-    <li class="rise"><a href="soy/">
+      <span class="tag">곧 예약</span><b>두두쌀</b>
+      <p>신동진 쌀에 동진찰 찹쌀을 섞어 드립니다.</p><span class="card-price" data-card-price hidden></span><span class="go-on" aria-hidden="true">→</span></a></li>
+    <li class="rise" data-card="soy"><a href="soy/">
       <img src="../assets/photos/card-soy.webp" alt="그릇에 담은 노란 콩" loading="lazy">
-      <span class="tag">곧 예약</span><b>선풍 콩</b><small>&nbsp;</small>
-      <p>된장·두부 담그는 노란 메주콩</p><span class="go-on">자세히 →</span></a></li>
+      <span class="tag">곧 예약</span><b>선풍 콩</b>
+      <p>된장·두부 담그는 노란 메주콩</p><span class="card-price" data-card-price hidden></span><span class="go-on" aria-hidden="true">→</span></a></li>
     <li class="rise"><div>
       <img src="../assets/photos/card-barley.webp" alt="겉보리 낟알과 보리 이삭" loading="lazy">
-      <span class="tag wait">준비 중</span><b>큰알보리</b><small>겉보리</small>
-      <p>볶아서 차로 끓이는 보리</p></div></li>
+      <span class="tag wait">준비 중</span><b>큰알보리</b>
+      <p>볶아서 차로 끓이는 겉보리</p></div></li>
     <li class="rise"><div>
       <img src="../assets/photos/card-wheat.webp" alt="밀 이삭과 밀 낟알" loading="lazy">
-      <span class="tag wait">준비 중</span><b>밀</b><small>&nbsp;</small>
+      <span class="tag wait">준비 중</span><b>밀</b>
       <p>우리 논에서 기르는 밀</p></div></li>
   </ul>
-  <p class="soon-note">준비되면 카카오톡 채널 소식으로 알려 드립니다.</p>
+  <p class="soon-note">준비 중인 곡식은 카카오톡 채널 소식으로 알려 드립니다. <a class="more" data-need="kakao" data-kakao href="#" target="_blank" rel="noopener" hidden>소식 받기 →</a></p>
 </div></section>
 
 <section class="band-line photo"><img src="../assets/photos/bulk-band.webp" alt="" loading="lazy"><div class="wrap">
-  <p><b>식당·가게·단체, 대량·정기 주문은 조건을 맞춰 드립니다.</b></p>
-  <a class="more" href="../contact/#bulk">대량·정기 주문 상담 →</a>
+  <p><b>식당·가게처럼 꾸준히 많은 양이 필요하시거나 대량 주문이시면 조건을 맞춰 드립니다.</b></p>
+  <a class="more" href="../contact/#bulk">대량 주문·협력업체 문의 →</a>
 </div></section>
 
 <section class="section paper"><div class="wrap">
-  <h2>세 이름</h2>
-  <dl class="names">
-    <div class="rise"><dt>모아온</dt><dd>농사짓는 회사</dd></div>
-    <div class="rise"><dt>두두농장</dt><dd>농사를 짓는 농장</dd></div>
-    <div class="rise"><dt>두두</dt><dd>그 농장에서 기른 곡식</dd></div>
-  </dl>
   <p class="closing">두두는 모아온이 운영하는 농산물 브랜드입니다.</p>
 </div></section>
 </main>
 
 <footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div><p class="foot-wm">MOAON</p></div>
   <div>
     <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
     전북특별자치도 정읍시 태인면 매계리 25<br>
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../notice/">NOTICE 공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../notice/">공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

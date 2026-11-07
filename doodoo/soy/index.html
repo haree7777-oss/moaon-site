@@ -25,72 +25,115 @@
   <nav class="menu"><a href="../../">HOME</a><a href="../../moaon/">ABOUT</a><a href="../" aria-current="page">DOODOO</a><a href="../../contact/">CONTACT</a></nav>
 </div></header>
 
-<main>
-<section class="section"><div class="wrap split prod-head">
-  <div class="lead">
-    <p class="label"><a href="../">DOODOO</a> · <a href="../cart/">장바구니</a></p>
-    <h1>선풍 콩</h1>
-    <p class="one">된장·두부 담그는 노란 메주콩</p>
-    <p>농촌진흥청이 된장·두부용으로 육성한 품종입니다. 대원콩보다 알이 굵습니다. 논에서 재배해 직접 말렸습니다.</p>
-    <p>어울리는 요리: 메주·된장·청국장 · 두부 · 콩밥 · 콩물</p>
-    <p class="keep">보관: 서늘하고 건조한 곳에 밀폐 보관.</p>
-    <p class="src">근거: 농촌진흥청 보급 기사(농축유통신문)</p>
-    <p class="perk">소식(햅쌀 우선 예약 등) 받기에 동의하시면 3번째 주문마다 10% 할인됩니다.</p>
-    <p class="perk seats" hidden>첫 100분 모든 주문 10% · 남은 자리 <b></b></p>
-  </div>
-  <figure><picture>
-    <source media="(max-width:700px)" srcset="../../assets/photos/soy-hero-m.webp">
+<main class="prod">
+<!-- 01~03 구매 상자 (기획 3-1 — 두두쌀과 같은 틀) -->
+<section class="buy-sec"><div class="wrap buy">
+  <figure class="buy-photo"><picture>
+    <source media="(min-width:900px)" srcset="../../assets/photos/soy-hero-m.webp">
     <img src="../../assets/photos/soy-hero.webp" alt="삼베 자루에서 쏟아진 노란 콩" fetchpriority="high">
   </picture></figure>
+  <div class="buy-box" id="buy">
+    <p class="state"><span class="tag" data-state>곧 예약</span></p>
+    <h1>선풍 콩</h1>
+    <p class="one">된장·두부 담그는 노란 메주콩</p>
+    <p class="price" data-price>가격은 예약을 시작할 때 알려 드립니다.</p>
+    <dl class="facts">
+      <div><dt>품종</dt><dd>선풍(노란 콩)</dd></div>
+      <div><dt>산지</dt><dd>전북 정읍 태인면 매계리 논</dd></div>
+      <div><dt>건조</dt><dd>직접 말림</dd></div>
+      <div data-need="sizes"><dt>양</dt><dd data-sizes></dd></div>
+      <div data-need="year" hidden><dt>생산연도</dt><dd></dd></div>
+      <div><dt>배송</dt><dd>택배<span data-ship></span></dd></div>
+    </dl>
+
+    <form class="pick" data-grain="soy" data-need="sizes" onsubmit="return false">
+      <p class="recall-open" data-recall-open hidden><button type="button" class="link">지난번과 같게 →</button></p>
+      <div id="recall" class="recall" hidden>
+        <p>휴대폰 번호를 넣으면 지난 양이 채워집니다(이름·주소는 안 보임).</p>
+        <div class="row"><input type="tel" inputmode="numeric" placeholder="휴대폰 번호" aria-label="휴대폰 번호"><button type="button" class="btn line">불러오기</button></div>
+        <p class="recall-msg" aria-live="polite"></p>
+      </div>
+      <fieldset><legend>1. 양</legend><div class="opts" data-opts="size"></div></fieldset>
+      <fieldset><legend>2. 받는 방법</legend><div class="opts" data-opts="repeat"></div>
+        <div class="cycle-box">
+          <div class="opts" data-opts="cycle"></div>
+          <p class="cycle-custom"><input type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="주기(주)"> 주마다</p>
+          <p class="hint">같은 조합으로 주기마다 예약하고, 보내기 전에 안내합니다. 답장으로 언제든 멈출 수 있습니다.</p>
+        </div></fieldset>
+      <div class="buy-cta">
+      <p class="amount" data-amount hidden><b></b> <small>할인은 주문서에서 확인</small></p>
+      <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
+      <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
+      </div>
+    </form>
+    <p class="bulk-link">대량 주문·식당 거래는 → <a href="../../contact/#bulk">대량 주문·협력업체 문의</a></p>
+  </div>
 </div></section>
 
-<section class="section paper"><div class="wrap">
-  <h2>이렇게 드세요</h2>
-  <ul class="uses">
-    <li class="rise"><img src="../../assets/photos/soy-use-doenjang.webp" alt="옹기에 담은 된장" loading="lazy"><b>메주·된장</b></li>
-    <li class="rise"><img src="../../assets/photos/soy-use-tofu.webp" alt="접시에 올린 두부" loading="lazy"><b>두부</b></li>
-    <li class="rise"><img src="../../assets/photos/soy-use-kongmul.webp" alt="유리컵에 담은 콩물" loading="lazy"><b>콩물</b></li>
+<!-- 04 품종 이야기 -->
+<section class="zone paper"><div class="wrap narrow">
+  <h2>품종 이야기</h2>
+  <details class="acc"><summary><span><b>선풍 콩</b> — 된장·두부용으로 육성한 노란 메주콩.</span><span class="acc-more">자세히</span></summary><div class="acc-body">
+    <p>농촌진흥청이 된장·두부용으로 육성한 품종입니다. 대원콩보다 알이 굵습니다.</p>
+    <p class="src">근거: 농촌진흥청 보급 기사(농축유통신문)</p>
+  </div></details>
+</div></section>
+
+<!-- 05 잘 어울리는 음식 -->
+<section class="zone"><div class="wrap narrow">
+  <h2>잘 어울리는 음식</h2>
+  <ul class="mini-cards">
+    <li><figure data-use="doenjang"><img src="../../assets/photos/soy-use-doenjang.webp" alt="옹기에 담은 된장" loading="lazy"><figcaption><b>메주·된장</b></figcaption></figure></li>
+    <li><figure data-use="tofu"><img src="../../assets/photos/soy-use-tofu.webp" alt="접시에 올린 두부" loading="lazy"><figcaption><b>두부</b></figcaption></figure></li>
+    <li><figure data-use="kongmul"><img src="../../assets/photos/soy-use-kongmul.webp" alt="유리컵에 담은 콩물" loading="lazy"><figcaption><b>콩물·콩밥</b></figcaption></figure></li>
   </ul>
 </div></section>
 
-<section class="section"><div class="wrap narrow">
-  <!-- 사진 자리: real-soy.jpg(대표 실사)가 오면 바꾼다 -->
-  <figure class="soy-real"><img src="../../assets/photos/card-soy.webp" alt="그릇에 담은 노란 콩" loading="lazy"></figure>
-  <div id="recall" class="recall">
-    <p>휴대폰 번호를 넣으면 지난번 양이 채워집니다(이름·주소는 안 보임).</p>
-    <div class="row"><input type="tel" inputmode="numeric" placeholder="휴대폰 번호" aria-label="휴대폰 번호"><button type="button" class="btn line">불러오기</button></div>
-    <p class="recall-msg" aria-live="polite"></p>
-  </div>
-  <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
+<!-- 06 고르는 이유 -->
+<section class="zone paper"><div class="wrap narrow">
+  <h2>선풍 콩을 고르는 이유</h2>
+  <ul class="reasons">
+    <li><b>논에서 기르고 직접 말렸습니다</b> — 정읍 태인면 매계리.</li>
+  </ul>
+</div></section>
 
-  <form class="pick" data-grain="soy" onsubmit="return false">
-    <fieldset><legend>1. 양</legend><div class="opts" data-opts="size"></div></fieldset>
-    <fieldset><legend>2. 받는 방법</legend><div class="opts" data-opts="repeat"></div>
-      <div class="cycle-box">
-        <div class="opts" data-opts="cycle"></div>
-        <p class="cycle-custom"><input type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="주기(주)"> 주마다</p>
-      </div></fieldset>
-    <div class="acts"><button type="button" class="btn line" data-act="add">장바구니에 담기</button><button type="button" class="btn" data-act="buy">바로 주문하기</button></div>
-    <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
-  </form>
-  <p class="elder">입력이 어려우시면 카카오톡 채널 「두두농장」이나 010-4689-8106으로 문자 주세요(이름·곡식·양·받을 때).</p>
+<!-- 07 배송·주문 안내 -->
+<section class="zone"><div class="wrap narrow">
+  <h2>배송·주문 안내</h2>
+  <dl class="guide">
+    <div><dt>받는 날</dt><dd>받으실 날은 확정 안내에 적어 드립니다.</dd></div>
+    <div data-need="shipping" hidden><dt>배송비</dt><dd></dd></div>
+    <div><dt>입금</dt><dd>확정 안내를 받으신 뒤 <span data-pay-days></span>일 안에 계좌로 보내 주세요. 입금자명이 달라도 됩니다.</dd></div>
+    <div><dt>보관</dt><dd>서늘하고 건조한 곳에 밀폐 보관.</dd></div>
+    <!-- 취소·환불: 문안 03-2 ★법인관리 확인 대기 — 확인 뒤 연다 -->
+  </dl>
+</div></section>
+
+<!-- 08 아래 주문 -->
+<section class="zone paper" data-need="sizes"><div class="wrap narrow end-order">
+  <p class="summary" data-summary></p>
+  <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
+  <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
 </div></section>
 
 <section class="band-line photo"><img src="../../assets/photos/bulk-band.webp" alt="" loading="lazy"><div class="wrap">
-  <p><b>식당·가게·대량 주문은 조건을 맞춰 드립니다.</b></p>
-  <a class="more" href="../../contact/#bulk">대량·정기 주문 상담 →</a>
+  <p><b>식당·가게처럼 꾸준히 많은 양이 필요하시거나 대량 주문이시면 조건을 맞춰 드립니다.</b></p>
+  <a class="more" href="../../contact/#bulk">대량 주문·협력업체 문의 →</a>
 </div></section>
+
+<!-- 폰 고정 바 -->
+<div class="fixbar" data-need="sizes"><span data-summary-short></span><button type="button" class="btn" data-act="buy" data-short="1">주문하기</button></div>
 </main>
 
 <footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div><p class="foot-wm">MOAON</p></div>
   <div>
     <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
     전북특별자치도 정읍시 태인면 매계리 25<br>
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../../notice/">NOTICE 공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../../notice/">공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

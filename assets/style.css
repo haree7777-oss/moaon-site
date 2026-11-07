@@ -1,4 +1,4 @@
-:root{--green:#243D30;--gold:#C5A66A;--ivory:#F7F5EF;--paper:#FFFFFF;--ink:#333631;--sub:#77796F;--line:#E3E1D9;
+:root{--green:#243D30;--gold:#C5A66A;--ivory:#F7F5EF;--paper:#FFFFFF;--ink:#333631;--sub:#5F6158;--line:#E3E1D9;
   --display:'Noto Serif KR',serif;--display-w:600}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -88,16 +88,8 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 .photo-band .more{color:#fff;border-bottom-color:rgba(255,255,255,.6)}
 
 /* 모아온: 이름 뜻 */
-.meaning{display:grid;grid-template-columns:1fr auto 1fr;gap:36px;max-width:940px;margin:0 auto}
-.meaning b{display:block;font-family:var(--display);font-weight:var(--display-w);font-size:clamp(38px,5vw,52px);line-height:1.2;color:var(--green);margin-bottom:14px}
-.meaning b small{margin-left:8px;font-size:.5em;color:var(--gold)}
-.meaning p{color:var(--sub)}
-.meaning .plus{align-self:center;font-family:var(--display);font-size:44px;color:var(--gold)}
-@media(max-width:700px){.meaning{grid-template-columns:1fr;gap:14px}.meaning .plus{font-size:34px;line-height:1}}
 
 /* 모아온: 지향점 */
-.vision h2{font-size:clamp(28px,4vw,42px)}
-.vision p{font-size:clamp(17px,1.9vw,20px)}
 
 /* 모아온: 계절 */
 .seasons{display:grid;gap:28px 24px;margin-top:40px}
@@ -113,7 +105,6 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 .dd-logo{width:min(560px,100%);height:auto;margin:0 auto 44px;object-fit:contain}
 .dd-hero h1{font-size:clamp(30px,4.6vw,48px);line-height:1.35;margin-bottom:20px}
 .dd-hero p{max-width:620px;margin:0 auto;color:var(--sub);font-size:clamp(16px,1.7vw,18px)}
-.dd-hero .dd-ready{margin-top:22px;color:var(--gold);font-weight:700;letter-spacing:.06em}
 .products{display:grid;gap:64px}
 @media(min-width:900px){.products{grid-template-columns:1fr 1fr;gap:56px}}
 .product img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin-bottom:28px}
@@ -134,11 +125,6 @@ nav.menu a[aria-current]{color:var(--green);font-weight:700;box-shadow:inset 0 -
 .steps p{color:var(--sub)}
 .btn.gold{margin-top:28px;background:var(--gold);color:var(--green)!important;padding:13px 32px;font-size:17px}
 
-.names{display:grid;gap:18px;margin:40px 0 0}
-@media(min-width:760px){.names{grid-template-columns:repeat(3,1fr);gap:24px}}
-.names div{background:var(--paper);border-top:3px solid var(--gold);padding:28px 26px}
-.names dt{font-family:var(--display);font-weight:var(--display-w);font-size:25px;color:var(--green);line-height:1.4}
-.names dd{margin:6px 0 0;color:var(--sub)}
 
 /* 연락하기 */
 .contact-list{display:grid;grid-template-columns:auto 1fr;gap:16px 28px;margin:0;max-width:680px;font-size:18px}
@@ -217,15 +203,14 @@ html.js .rise.on{opacity:1;transform:none}
 .prod-head h1{font-size:clamp(34px,5vw,50px);margin-bottom:14px}
 .prod-head .one{font-size:clamp(18px,2vw,21px);color:var(--green);font-weight:500}
 .label a{text-decoration:none}
-.perk{margin-top:18px;padding:12px 16px;background:var(--paper);border-left:4px solid var(--gold);font-size:16px}
 .src{font-size:14px;color:var(--sub)}
 .keep{color:var(--sub)}
 .kinds{display:grid;gap:12px}
-.kinds details,.calc,.more-text{background:var(--ivory);border-radius:6px;padding:14px 18px}
-.kinds summary,.calc summary,.more-text summary{cursor:pointer;color:var(--green)}
+.kinds details,.more-text{background:var(--ivory);border-radius:6px;padding:14px 18px}
+.kinds summary,.more-text summary{cursor:pointer;color:var(--green)}
 .kinds details p{margin:10px 0 0}
 .recall{margin-bottom:18px}
-.recall .row,.calc .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.recall .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
 .recall input{flex:1;min-width:180px}
 .recall-msg{min-height:1.5em;color:var(--sub);font-size:15px;margin-top:6px}
 .elder{padding:12px 16px;background:var(--paper);border-radius:6px;font-weight:500;color:var(--green);font-size:16px}
@@ -240,7 +225,7 @@ legend{font-family:var(--display);font-weight:var(--display-w);font-size:21px;co
 .opt{position:relative}
 .opt input{position:absolute;opacity:0;width:1px;height:1px}
 .opt span{display:inline-block;padding:11px 18px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);cursor:pointer;font-size:16px;line-height:1.4}
-.opt em{font-style:normal;font-size:12px;font-weight:700;color:#fff;background:var(--gold);border-radius:99px;padding:1px 8px;margin-left:4px;vertical-align:2px}
+.opt em{font-style:normal;font-size:12px;font-weight:700;color:var(--green);background:var(--gold);border-radius:99px;padding:1px 8px;margin-left:4px;vertical-align:2px}
 .opt input:checked+span{border-color:var(--green);background:var(--green);color:#fff}
 .opt input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
 .hint{margin-top:10px;font-size:15px;color:var(--sub)}
@@ -250,7 +235,6 @@ legend{font-family:var(--display);font-weight:var(--display-w);font-size:21px;co
 .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
 .acts .btn{padding:13px 26px;font-size:17px}
 .added{margin-top:14px;color:var(--green);font-weight:500}
-.calc{margin-top:14px}
 .calc-out{margin-top:10px;font-weight:700;color:var(--green)}
 input,select,textarea{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
 .order-form label:not(.opt):not(.check){display:block;margin-bottom:12px;font-size:15px;color:var(--sub)}
@@ -295,16 +279,170 @@ button.link{border:0;background:none;padding:0;font:inherit;color:var(--green);t
 @media(max-width:700px){.prod-head picture img{aspect-ratio:4/5}}
 .kinds-split{align-items:start}
 .kinds-split>figure img{aspect-ratio:4/3}
-.ratio-fig{margin:16px 0 0;max-width:420px}
-.ratio-fig svg{width:100%;height:auto;display:block}
-.uses{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
-@media(min-width:640px){.uses{gap:20px}}
-@media(max-width:639px){.uses b{font-size:16px}}
-.uses img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:6px;margin-bottom:10px}
-.uses b{font-family:var(--display);font-weight:var(--display-w);font-size:20px;color:var(--green)}
-.soy-real{margin:0 0 22px}
-.soy-real img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
-.table-fig{margin:40px auto 0;max-width:760px}
-.table-fig img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px}
-.cart-empty{text-align:center}
-.cart-empty img{width:min(360px,100%);margin:0 auto 18px;border-radius:6px;aspect-ratio:1/1;object-fit:cover}
+
+/* ───── 상품 상세 8구역 (기획 3-1 · 쌀·콩 같은 틀) ───── */
+.buy-sec{padding:28px 0 clamp(56px,7vw,88px)}
+.buy{display:grid;gap:26px}
+.buy-photo img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px}
+@media(min-width:900px){
+  .buy{grid-template-columns:1.05fr 1fr;gap:56px;align-items:start}
+  .buy-photo{position:sticky;top:92px}
+  .buy-photo img{aspect-ratio:4/5;max-height:calc(100vh - 120px)}
+}
+.buy-box h1{font-size:clamp(32px,4.4vw,44px);margin:8px 0 8px}
+.buy-box .one{font-size:clamp(17px,1.9vw,19px);color:var(--green);font-weight:500;margin-bottom:10px}
+.state{margin:0}
+.tag{display:inline-block;padding:3px 12px;border-radius:99px;background:var(--green);color:#fff;font-size:13px;font-weight:700;letter-spacing:.02em}
+.tag.wait{background:var(--gold);color:var(--green)}
+.price{font-size:19px;font-weight:700;color:var(--ink);margin:0 0 18px}
+.facts{margin:0 0 22px;border-top:1px solid var(--line)}
+.facts div{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.6}
+.facts dt{color:var(--sub)}
+.facts dd{margin:0}
+.pick{margin-top:0}
+.pick fieldset{margin-bottom:20px}
+.pick legend{font-size:18px;margin-bottom:10px}
+.opt span{min-height:44px;display:inline-flex;align-items:center}
+.feel{margin:10px 0 0;font-size:15px;color:var(--green)}
+.recall-open{margin:0 0 14px}
+.recall-open .link{margin-left:0}
+.recall{background:var(--ivory);border-radius:6px;padding:14px 16px;margin-bottom:18px;font-size:15px}
+.amount{margin:6px 0 14px;font-size:22px;color:var(--green)}
+.amount small{font-size:14px;color:var(--sub);font-weight:400;margin-left:6px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.acts .btn{flex:1 1 180px;min-height:52px;padding:13px 20px;font-size:17px}
+.bulk-link{margin:16px 0 0;font-size:15px;color:var(--sub)}
+.bulk-link a{color:var(--green);font-weight:500}
+.zone{padding:clamp(52px,7vw,84px) 0}
+.zone.paper{background:var(--paper)}
+.zone h2{font-size:clamp(23px,3vw,30px);margin-bottom:20px}
+
+/* 같은 종류는 같은 동작 — 아코디언(기획 4장 13) */
+.acc{border:1px solid var(--line);border-radius:6px;background:var(--paper);margin-bottom:10px}
+.zone.paper .acc{background:var(--ivory)}
+.acc>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:52px;padding:12px 16px;cursor:pointer;color:var(--ink)}
+.acc>summary::-webkit-details-marker{display:none}
+.acc>summary b{color:var(--green)}
+.acc-more{flex:none;font-size:14px;font-weight:700;color:var(--green);white-space:nowrap}
+.acc-more::after{content:'';display:inline-block;width:7px;height:7px;margin-left:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-3px) rotate(45deg);transition:transform .2s ease}
+.acc[open]>summary .acc-more::after{transform:translateY(1px) rotate(-135deg)}
+.acc-body{padding:0 16px 14px}
+.acc-body p{margin:0 0 8px}
+.acc-body ul{margin:0;padding-left:18px}
+.calc{margin-top:12px}
+.calc .row{display:flex;flex-wrap:wrap;gap:10px}
+
+.mini-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mini-cards figure{background:var(--paper);border-radius:6px;overflow:hidden;height:100%}
+.zone.paper .mini-cards figure{background:var(--ivory)}
+.mini-cards img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.mini-cards figcaption{padding:10px 12px 12px;font-size:15px;line-height:1.5}
+.mini-cards figcaption b{display:block;color:var(--green);font-size:16px}
+.mini-cards figcaption span{display:block;color:var(--sub);margin-top:4px}
+.mini-cards .pickable{cursor:pointer;outline-offset:3px}
+.mini-cards .pickable:hover{box-shadow:0 6px 18px rgba(36,61,48,.12)}
+.reasons{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.reasons li{padding:14px 16px;background:var(--ivory);border-radius:6px}
+.reasons b{color:var(--green)}
+.guide{margin:0;border-top:1px solid var(--line)}
+.guide div{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:16px;line-height:1.7}
+.guide dt{font-weight:700;color:var(--green)}
+.guide dd{margin:0}
+.end-order .summary{font-weight:700;color:var(--green);margin-bottom:12px}
+
+/* 폰 고정 바 — 구매 상자·08 단추가 보이면 숨김 */
+.fixbar{display:none}
+@media(max-width:759px){
+  .fixbar.show{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+  .fixbar span{font-size:15px;font-weight:700;color:var(--green);line-height:1.4}
+  .fixbar .btn{flex:none;min-height:48px;padding:12px 22px}
+  .prod{padding-bottom:72px}
+}
+
+/* ───── 장바구니 · 주문서 · 완료 (기획 3-2) ───── */
+.steps-bar{list-style:none;display:flex;gap:6px;margin:0 0 26px;padding:0;font-size:15px;color:var(--sub)}
+.steps-bar li{flex:1;text-align:center;padding:8px 4px;border-bottom:3px solid var(--line)}
+.steps-bar li[aria-current]{color:var(--green);font-weight:700;border-bottom-color:var(--green)}
+.cart-items li{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+.cart-items li div{display:block}
+.cart-items li div span{display:block;font-size:15px;color:var(--sub)}
+.cart-items li p{grid-column:1/-1;display:flex;gap:16px}
+.cart-items li p a,.cart-items li p .link{margin:0;min-height:36px;display:inline-flex;align-items:center}
+.cart-items .amt{font-weight:700}
+.step-acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin-top:20px}
+.step-acts .btn{min-height:52px;padding:13px 32px;font-size:17px}
+.order-form fieldset{margin-bottom:24px}
+.order-items{margin:0 0 22px;padding:14px 16px 14px 34px;background:var(--paper);border-radius:6px;font-size:15px}
+.err{margin:-6px 0 12px;font-size:15px;font-weight:700;color:#A3362A}
+.perks{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin:0 0 22px}
+.perks h3,.money h3{font-family:inherit;font-size:17px;font-weight:700;margin:0 0 10px}
+.perks p{margin:0 0 10px;font-size:16px}
+.perks .acc{margin:6px 0 10px;background:var(--ivory)}
+.perk-line{font-weight:700;color:var(--green)}
+.seller{font-size:15px;color:var(--sub);margin:18px 0 0}
+.back-link{display:inline-block;margin:0 0 12px;color:var(--green);font-weight:500}
+.done h1{font-size:clamp(28px,4vw,38px);margin-bottom:12px}
+.done .money{margin:20px 0}
+.next-steps{margin:0 0 20px;padding-left:22px}
+.cart-empty p{font-size:18px}
+/* PC: 구매 상자 단추 줄이 화면 아래에 붙어 따라온다(상자 안에서만 — 같은 단추가 두 번 보이지 않게) */
+@media(min-width:760px){
+  .buy-box .buy-cta{position:sticky;bottom:0;z-index:5;background:var(--ivory);padding:12px 0 14px;margin-top:4px;box-shadow:0 -10px 14px -10px rgba(0,0,0,.08)}
+}
+.done-list{background:var(--paper);border-radius:6px;padding:6px 18px;margin:20px 0}
+.done-list dl{margin:0}
+.done-list dl div{padding:10px 0;border-bottom:1px solid var(--line)}
+.done-list dl div:last-child{border-bottom:0}
+.done-list dt{font-size:14px;color:var(--sub)}
+.done-list dd{margin:0;font-weight:500}
+.grain-cards .card-price{margin:10px 22px 0;font-weight:700;color:var(--ink)}
+@media(max-width:639px){.grain-cards .card-price{margin-left:14px;margin-right:14px}}
+.grain-cards .go-on{font-size:20px;line-height:1}
+.soon-note .more{margin:0 0 0 6px}
+/* 홈 (문안 01) */
+.hero-acts{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;margin-top:26px}
+.hero-acts .btn{margin:0;min-height:52px;display:inline-flex;align-items:center}
+.hero-acts .more{margin:0}
+.hero-notice{margin:28px 0 0;font-size:15px}
+.hero-notice a{color:#E6D3A8;text-decoration:none;border-bottom:1px solid rgba(230,211,168,.6);padding-bottom:2px}
+.values-line{background:var(--paper);padding:clamp(40px,6vw,64px) 0;text-align:center}
+.values-line .label{margin-bottom:10px}
+.values-line .words{margin:0;font-family:var(--display);font-weight:var(--display-w);font-size:clamp(22px,3.2vw,34px);color:var(--green);letter-spacing:.04em}
+.call .btn{min-height:48px;display:inline-flex;align-items:center;justify-content:center}
+.soon{margin-top:18px;color:var(--sub)}
+.soon a{color:var(--green);font-weight:500}
+.center-call{justify-content:center;margin-top:24px}
+.btn.line.light{color:#fff!important;border-color:rgba(255,255,255,.8)}
+.photo-band .btn.gold{margin-top:0}
+/* 모아온 (문안 02) */
+.who{margin:6px 0 18px;display:grid;gap:8px}
+.who div{display:grid;grid-template-columns:64px 1fr;gap:12px;font-size:clamp(17px,1.8vw,19px)}
+.who dt{font-weight:700;color:var(--green)}
+.who dd{margin:0}
+.name-line{color:var(--sub)}
+.closing+.center .btn{margin-top:22px;min-height:48px;display:inline-flex;align-items:center}
+/* 연락하기 (문안 04) */
+.contact-call{margin-top:26px;gap:10px}
+.contact-call .btn{min-height:48px}
+.partners{list-style:none;margin:36px 0 0;padding:0;display:grid;gap:18px}
+@media(min-width:760px){.partners{grid-template-columns:repeat(3,1fr);gap:24px}}
+.partners li{display:flex;flex-direction:column;background:var(--ivory);border-top:3px solid var(--gold);padding:26px 24px}
+.partners b{font-family:var(--display);font-weight:var(--display-w);font-size:23px;color:var(--green);line-height:1.4}
+.partners p{flex:1;margin:6px 0 18px;color:var(--sub)}
+.partners .btn{align-self:flex-start;min-height:48px;display:inline-flex;align-items:center}
+.map-link{margin-left:8px;font-size:15px}
+/* 누르는 영역 44px 이상(기획 4장 14·9장) */
+.more{padding-top:9px}
+.back,.back-link{display:inline-flex;align-items:center;min-height:44px}
+.cart-items li p a,.cart-items li p .link{min-height:44px}
+/* 두두: 배지는 크게, 그래도 곡식 카드가 첫 화면에 걸리게 */
+.dd-hero{padding:clamp(36px,5vw,56px) 0 clamp(36px,5vw,52px)}
+.dd-logo{width:min(400px,86%);margin-bottom:26px}
+.dd-hero+.section{padding-top:clamp(36px,5vw,56px)}
+.dd-hero+.section .grain-cards{margin-top:0}
+/* 키보드 초점(기획 4장 18) — 밝은 바탕 진초록, 어두운 띠 금색 */
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.opt input:focus-visible+span{outline:3px solid var(--green);outline-offset:2px}
+.hero :focus-visible,.photo-band :focus-visible,.band-line :focus-visible,footer :focus-visible{outline-color:#E6D3A8}
+.hero-acts .more{padding-top:10px}

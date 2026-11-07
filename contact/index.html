@@ -32,22 +32,28 @@
     <h1>함께할 이야기를 기다립니다.</h1>
     <p>농업과 농산물, 농촌의 새로운 가능성에 관한 이야기를 나누고 싶습니다.</p>
   </div>
-  <figure class="wide cine rise" style="margin-top:48px"><img src="../assets/photos/contact-sunset.webp" alt="들녘 너머로 해가 지는 노을 하늘" fetchpriority="high"></figure>
+  <p class="call contact-call">
+    <a class="btn" href="tel:01046898106">전화하기</a>
+    <a class="btn" href="sms:01046898106">문자 보내기</a>
+    <a class="btn" data-need="kakao" data-kakao href="#" target="_blank" rel="noopener" hidden>카카오톡 채널</a>
+    <a class="btn" href="mailto:haree7777@gmail.com">메일 보내기</a>
+  </p>
+  <figure class="wide cine rise" style="margin-top:40px"><img src="../assets/photos/contact-sunset.webp" alt="들녘 너머로 해가 지는 노을 하늘" fetchpriority="high"></figure>
 </div></section>
 
 <section class="section paper"><div class="wrap">
   <p class="label">PARTNERSHIP</p>
   <h2>협력 분야</h2>
-  <dl class="names">
-    <div class="rise"><dt><a href="#bulk">식당 · 가게 · 단체</a></dt><dd>쌀과 곡식의 생산·공급에 관한 이야기</dd></div>
-    <div class="rise"><dt>이웃 농가</dt><dd>함께 농사짓고 성장할 수 있는 협력</dd></div>
-    <div class="rise"><dt>가공 · 유통 · 디자인</dt><dd>농산물의 새로운 가치를 만드는 협력</dd></div>
-  </dl>
+  <ul class="partners">
+    <li class="rise"><b>식당 · 가게 · 단체</b><p>쌀과 곡식의 생산·공급에 관한 이야기</p><a class="btn line" href="#bulk">대량 주문·협력업체 문의 →</a></li>
+    <li class="rise"><b>이웃 농가</b><p>함께 농사짓고 성장할 수 있는 협력</p><a class="btn line" href="sms:01046898106">문자 보내기</a></li>
+    <li class="rise"><b>가공 · 유통 · 디자인</b><p>농산물의 새로운 가치를 만드는 협력</p><a class="btn line" href="mailto:haree7777@gmail.com">메일 보내기</a></li>
+  </ul>
 </div></section>
 
 <section class="section" id="bulk"><div class="wrap narrow">
-  <h2>대량·정기 주문 상담</h2>
-  <p>식당·가게·단체, 많은 양이나 정기 납품은 필요하신 조건에 맞춰 드립니다. 아래를 고르시면 확인 후 연락드립니다.</p>
+  <h2>대량 주문·협력업체 문의</h2>
+  <p>식당·가게·단체처럼 꾸준히 많은 양이 필요하시거나, 한 번에 많이 주문하시면 조건을 맞춰 드립니다. 아래를 고르시면 확인 후 연락드립니다.</p>
   <form id="bulk-form" class="order-form" novalidate>
     <fieldset><legend>1. 어디에 쓰시나요?</legend><div class="opts">
       <label class="opt"><input type="radio" name="use" value="식당·가게" required><span>식당·가게</span></label>
@@ -94,10 +100,10 @@
       <label>지역(시·군) <input name="region"></label></fieldset>
     <fieldset><legend>9. 요청사항</legend>
       <label><span class="hint">원하시는 조건을 자유롭게 적어 주세요. (예: 도정일 지정, 배송 요일, 견적서·세금계산서)</span><textarea name="memo" rows="3"></textarea></label></fieldset>
-    <p class="hint">남겨 주신 내용은 상담에만 쓰고, 마지막 연락 1년 뒤 지웁니다. (<a href="../privacy/">개인정보 처리방침</a>)</p>
+    <p class="hint notice-line">남겨 주신 내용은 상담에만 쓰고, 마지막 연락 1년 뒤 지웁니다. (<a href="../privacy/">개인정보 처리방침</a>)</p>
     <label class="check"><input type="checkbox" name="news" value="소식"><span><em class="opt-tag">선택</em> 만 14세 이상이며, 소식(햅쌀 우선 예약·첫 예약 먼저 열기 등, 한 달 2번 이하, 「그만」 답장으로 바로 멈춤) 받기에 동의합니다. 동의 시 3번째 주문마다 10% 할인.</span></label>
-    <button type="submit" class="btn wide">상담 신청하기</button>
-    <p class="sent" hidden aria-live="polite" data-inquiry="접수했습니다. 확인 후 카카오톡 또는 문자로 연락드립니다. 통화가 편하시면 010-4689-8106."></p>
+    <button type="submit" class="btn wide">문의 보내기</button>
+    <p class="sent" hidden aria-live="polite">접수했습니다. 확인 후 카카오톡 또는 문자로 연락드립니다. 통화가 편하시면 010-4689-8106.</p>
   </form>
 </div></section>
 
@@ -106,23 +112,23 @@
   <h2>연락처</h2>
   <dl class="contact-list">
     <dt>회사</dt><dd>모아온(농업회사법인 설립 준비 중)</dd>
-    <dt>전화</dt><dd><a href="tel:01046898106">010-4689-8106</a>
-      <div class="call"><a class="btn" href="tel:01046898106">전화</a><a class="btn line" href="sms:01046898106">문자</a></div></dd>
+    <dt data-need="kakao" hidden>카카오톡 채널</dt><dd data-need="kakao" hidden><a data-kakao href="#" target="_blank" rel="noopener">「두두농장」</a></dd>
+    <dt>전화</dt><dd><a href="tel:01046898106">010-4689-8106</a></dd>
     <dt>이메일</dt><dd><a href="mailto:haree7777@gmail.com">haree7777@gmail.com</a></dd>
-    <dt>주소</dt><dd>전북특별자치도 정읍시 태인면 매계리 25</dd>
+    <dt>주소</dt><dd>전북특별자치도 정읍시 태인면 매계리 25 <a class="map-link" href="https://map.naver.com/p/search/%EC%A0%84%EB%B6%81%ED%8A%B9%EB%B3%84%EC%9E%90%EC%B9%98%EB%8F%84%20%EC%A0%95%EC%9D%8D%EC%8B%9C%20%ED%83%9C%EC%9D%B8%EB%A9%B4%20%EB%A7%A4%EA%B3%84%EB%A6%AC%2025" target="_blank" rel="noopener">지도 보기</a></dd>
   </dl>
 </div></section>
 </main>
 
 <footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p><p class="foot-motto">가치를 모아, 따뜻함을 나누다.</p></div>
+  <div><p class="foot-wm">MOAON</p></div>
   <div>
     <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
     전북특별자치도 정읍시 태인면 매계리 25<br>
     전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
     대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
   </div>
-  <div class="foot-last"><p><a href="../notice/">NOTICE 공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+  <div class="foot-last"><p><a href="../notice/">공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
 </div></footer>
 </body>
 </html>

@@ -127,7 +127,9 @@ function pairs_(s) { var o = {}; String(s || '').split(',').forEach(function (p)
 function hours_(s, a, b) { var m = String(s || '').match(/\d+/g); return m && m.length >= 2 ? [Number(m[0]), Number(m[1])] : [a, b]; }
 
 // ───────── 표 읽고 쓰기 ─────────
-function book_() { return SpreadsheetApp.getActive(); }
+// 장부에 붙인(bound) 프로젝트면 getActive(), 따로 만든 프로젝트면 아래 장부 ID로 연다(ID만으로는 열람 권한이 생기지 않는다).
+var BOOK_ID = '1yfEsV8uxlwXRmSt9dTuEMhBDeF09eCtbKlGj3T01xTM';
+function book_() { return SpreadsheetApp.getActive() || SpreadsheetApp.openById(BOOK_ID); }
 function sheet_(name) {
   var sh = book_().getSheetByName(name);
   if (!sh) throw new Error('시트 없음: ' + name + ' — setup()을 먼저 돌리세요');
@@ -144,15 +146,17 @@ function rows_(name) {
   }
   return out;
 }
+// 시트는 「010…」 같은 글자를 숫자로 바꿔 앞의 0을 지운다 — 0으로 시작하는 숫자 글자는 앞에 '를 붙여 글자로 둔다.
+function cell_(v) { return v === undefined ? '' : (typeof v === 'string' && /^0\d+$/.test(v) ? "'" + v : v); }
 function append_(name, obj) {
   var sh = sheet_(name);
-  sh.appendRow(SCHEMA[name].map(function (h) { return obj[h] === undefined ? '' : obj[h]; }));
+  sh.appendRow(SCHEMA[name].map(function (h) { return cell_(obj[h]); }));
   obj._row = sh.getLastRow();
   return obj;
 }
 function save_(name, obj) {
   sheet_(name).getRange(obj._row, 1, 1, SCHEMA[name].length)
-    .setValues([SCHEMA[name].map(function (h) { return obj[h] === undefined ? '' : obj[h]; })]);
+    .setValues([SCHEMA[name].map(function (h) { return cell_(obj[h]); })]);
 }
 function nextId_(name, prefix, width) {
   var n = rows_(name).length + 1, s = String(n);

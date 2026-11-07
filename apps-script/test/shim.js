@@ -2,7 +2,13 @@
 function FakeSheet(name) { this.name = name; this.data = []; this.frozen = 0; }
 FakeSheet.prototype.width_ = function () { return this.data.reduce(function (m, r) { return Math.max(m, r.length); }, 0); };
 FakeSheet.prototype.getLastRow = function () { return this.data.length; };
-FakeSheet.prototype.appendRow = function (row) { this.data.push(row.slice()); };
+// 진짜 시트처럼: 숫자 모양 글자는 숫자로 바꾸고(앞의 0이 사라짐), 앞에 '가 붙은 글자는 그대로 글자로 둔다.
+function sheetValue_(v) {
+  if (typeof v !== 'string') return v;
+  if (v.charAt(0) === "'") return v.slice(1);
+  return /^-?\d+(\.\d+)?$/.test(v) ? Number(v) : v;
+}
+FakeSheet.prototype.appendRow = function (row) { this.data.push(row.map(sheetValue_)); };
 FakeSheet.prototype.setFrozenRows = function (n) { this.frozen = n; };
 FakeSheet.prototype.getDataRange = function () {
   var self = this;
@@ -24,7 +30,7 @@ FakeSheet.prototype.getRange = function (r, c, nr, nc) {
       for (var i = 0; i < nr; i++) {
         while (self.data.length < r + i) self.data.push([]);
         var row = self.data[r - 1 + i];
-        for (var j = 0; j < nc; j++) row[c - 1 + j] = vals[i][j];
+        for (var j = 0; j < nc; j++) row[c - 1 + j] = sheetValue_(vals[i][j]);
       }
     }
   };

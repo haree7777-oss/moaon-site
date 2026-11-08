@@ -4,14 +4,16 @@
 
 // ───────── 장부 구조 (시트 이름과 칸 순서) ─────────
 var SCHEMA = {
-  '접수': ['접수번호', '시각', '경로', '원문', '이름', '연락처', '처리상태', '연결 고객', '연결 주문', '메모'],
+  '접수': ['접수번호', '시각', '경로', '원문', '이름', '연락처', '처리상태', '연결 고객', '연결 주문', '메모', '시험'],
   '고객': ['고객번호', '이름', '연락처', '지역', '유형', '식구 수', '처음 온 날', '처음 경로', '입금자명들', '단골 회차', '두두 호',
-          '단계', '첫 주문일', '마지막 주문일', '예상 소진일', '문자 판', '수신 거부', '메모'],
+          '단계', '첫 주문일', '마지막 주문일', '예상 소진일', '문자 판', '수신 거부', '메모', '시험',
+          '회원', '가입일', '비밀번호', '소금', '약관 동의일', '만14세 확인일', '마지막 로그인', '주소', '상세 주소', '우편번호'],
   '동의': ['동의번호', '고객', '종류', '문구 판', '동의 시각', '철회 시각', '경로', '보관 끝나는 날'],
   '관심': ['관심번호', '고객', '곡식', '양', '시기', '용도', '출처', '기록일'],
   '취향': ['취향번호', '고객', '제품', '도정', '찹쌀', '콩 비율', '양(kg)', '소포장', '주기(일)', '판', '확정일'],
   '주문': ['주문번호', '접수번호', '고객', '곡식', '조합', '양(kg)', '곡식 금액', '소포장', '할인율', '할인 사유', '할인액', '배송비', '청구액',
-          '상태', '작업일', '받을 날', '입금 기한', '입금 안내 횟수', '입금일', '송장', '피드백', '받는 분', '상태 바뀐 시각', '메모'],
+          '상태', '작업일', '받을 날', '입금 기한', '입금 안내 횟수', '입금일', '송장', '피드백', '받는 분', '상태 바뀐 시각', '메모', '정기', '시험',
+          '결제수단', '결제 키', '결제 상태', '결제 시각', '취소 금액', '결제 비밀', '가상계좌'],
   '연락': ['시각', '고객', '주문', '경로', '문자틀', '종류', '결과'],
   '곡식': ['코드', '제품', '상태', '부르는 이름', '한 줄', '맛', '요리', '보관', '수확', '단위(kg)', '가격(원/kg)', '단백질(g/100g)',
           '사진', '출처', '공개'],
@@ -20,17 +22,22 @@ var SCHEMA = {
   '문자틀': ['코드', '상태', '문구', '짧은 판', '종류'],
   '연락 규칙': ['규칙', '때(조건)', '받는 단계', '문자틀', '종류', '하루 시간대', '월 상한', '켬/끔'],
   '설정': ['이름', '켬/끔', '값', '설명', '공개'],
-  '처리 기록': ['시각', '무엇', '대상', '결과', '실패 이유']
+  '처리 기록': ['시각', '무엇', '대상', '결과', '실패 이유'],
+  '인증': ['번호', '용도', '인증번호', '보낸 시각', '틀린 횟수', '확인'],
+  '로그인': ['토큰', '고객', '만든 시각', '만료']
 };
 
 // 홈페이지가 읽는 스위치(설계 7장). 처음엔 전부 끔.
 var SWITCHES = ['order', 'survey', 'notify', 'kakao_bot', 'sms_send', 'bank_match', 'loyalty', 'refill_alert',
-                'live_stock', 'countdown', 'doodoo_rice', 'doodoo_misu'];
+                'live_stock', 'countdown', 'doodoo_rice', 'doodoo_misu', 'member', 'pay_pg'];
 
 var DEFAULT_SETTINGS = [
   ['order', '끔', '', '주문 받기', 'Y'], ['survey', '끔', '', '취향 설문(보류)', 'Y'], ['notify', '끔', '', '소식 받기', 'Y'],
   ['kakao_bot', '끔', '', '카톡 챗봇', 'Y'], ['sms_send', '끔', '', '문자 실제 발송(끄면 연락 시트에 「보류」만)', 'Y'],
-  ['bank_match', '끔', '', '입금 대조', 'Y'], ['loyalty', '끔', '', '소식 동의자 3번째 주문 할인', 'Y'],
+  ['bank_match', '끔', '', '입금 대조', 'Y'], ['loyalty', '끔', '', '소식 동의자 3번째 주문 할인(구매금액의 10%, 배송비 제외)', 'Y'],
+  ['member', '끔', '', '간편 회원(휴대폰 인증) — 문자 업체 연결 뒤 켬', 'Y'],
+  ['pay_pg', '끔', '', '토스페이먼츠 결제 — 시크릿 키는 스크립트 속성 TOSS_SECRET_KEY 에만', 'Y'],
+  ['pay_bank', '켬', '', '농협 통장 직접 입금(문자·전화·카톡·대량 주문만)', ''],
   ['refill_alert', '끔', '', '떨어질 때쯤 알림', 'Y'], ['live_stock', '끔', '', '남은 양 실시간 표시', 'Y'],
   ['countdown', '끔', '', '오픈 예고', 'Y'], ['doodoo_rice', '끔', '', '두두쌀', 'Y'], ['doodoo_misu', '끔', '', '두두미숫가루(보류)', 'Y'],
   ['pay_days', '', 3, '입금 기한(일). 지나면 안내 1회, 다시 지나면 자동 취소', ''],
@@ -38,9 +45,13 @@ var DEFAULT_SETTINGS = [
   ['ship_days', '', 2, '작업일 뒤 받을 날까지(일)', ''],
   ['feedback_days', '', 3, '받은 뒤 밥맛 묻기까지(일)', ''],
   ['loyalty_every', '', 3, '소식 동의자 할인 회차 간격(3이면 3·6·9번째)', ''],
-  ['loyalty_rate', '', 10, '회차 할인율(%) — 임시값', ''],
+  ['loyalty_rate', '', 10, '회차 할인율(%) — 구매금액(주문 상품 금액, 배송비 제외) 기준 · 임시값', ''],
   ['ho_seats', '', 100, '두두 ○호 번호를 주는 첫 고객 수', ''],
-  ['ho_rate', '', 10, '○호 고객 모든 주문 할인율(%) — 회차 할인과 겹치지 않음', ''],
+  ['ho_rate', '', 10, '○호 고객 모든 주문 할인율(%) — 구매금액(배송비 제외) 기준 · 회차 할인과 겹치지 않음', ''],
+  ['pay_hold_minutes', '', 30, '결제창에서 돌아오지 않은 주문의 재고를 풀어 주는 시간(분)', ''],
+  ['login_days', '', 30, '로그인 상태 유지(일)', ''],
+  ['code_per_day', '', 5, '인증번호 — 번호 하나당 하루 횟수', ''],
+  ['login_fail_max', '', 5, '비밀번호 틀림 — 이만큼이면 10분 잠금', ''],
   ['subpack_fee', '', '10:1000,20:2000', '소포장 추가 금액(포장 kg:원)', ''],
   ['shipping_fee', '', '', '배송비(원) 【대표】 — 0이면 무료 배송', ''],
   ['account', '', '', '입금 계좌 【대표】', ''],
@@ -52,26 +63,29 @@ var DEFAULT_SETTINGS = [
   ['ad_hours', '', '9~20', '광고 보내는 시간대(시~시)', ''],
   ['ad_monthly_max', '', 2, '사람마다 한 달 광고 상한', ''],
   ['recall_per_hour', '', 5, '지난 주문 불러오기 — 번호 하나당 한 시간 횟수', ''],
+  ['lookup_fail_per_hour', '', 5, '내 주문 조회 — 번호 하나당 한 시간에 틀릴 수 있는 횟수', ''],
+  ['min_mill_kg', '', 10, '홈페이지 도정일: 이만큼 자리가 남은 가장 가까운 도정일', ''],
+  ['regular_ahead_days', '', 3, '정기 주문: 다음 도정일 며칠 전에 다음 예약을 만듦', ''],
   ['last_run', '', '', '규칙 일꾼이 마지막으로 돈 시각(자동)', '']
 ];
 
 // 문자틀 — 문안 부록 1~3 그대로. {이름} 등은 장부 값으로 채운다. 「같음」은 일반 판과 같다는 뜻.
-var CONFIRM_BODY = '{곡식} {조합} {양} / {금액}원{할인 줄}. {기한}까지 {계좌}로 입금해 주세요(입금자명이 달라도 됩니다). 받으실 날: {받을 날} 무렵. 입금 확인 안내가 1시간 안에 오지 않으면 답장 주세요.';
+var CONFIRM_BODY = '{곡식} {조합} {양} / {금액}원{할인 줄}. {기한}까지 {계좌}로 입금해 주세요(입금자명이 달라도 됩니다). {도정일}에 도정해 보내 드립니다. 입금 확인 안내가 1시간 안에 오지 않으면 답장 주세요.';
 var DEFAULT_TEMPLATES = [
-  ['접수', '확정', '{이름}님, 예약 신청을 받았습니다. 재고 확인 후 확정 안내를 드리겠습니다.', '{이름}님, 예약 받았습니다. 확정되면 문자 드리겠습니다.', '안내'],
-  ['상담접수', '확정', '{이름}님, 상담 신청을 받았습니다. 확인 후 연락드리겠습니다.', '같음', '안내'],
-  ['확정', '확정', '{이름}님, 예약이 확정됐습니다. ' + CONFIRM_BODY, '같음', '안내'],
+  ['접수', '확정', '{이름}님, 예약 신청을 받았습니다. 주문번호 {주문번호}. 재고 확인 후 확정 안내를 드리겠습니다.', '{이름}님, 예약 받았습니다. 확정되면 문자 드리겠습니다.', '안내'],
+  ['상담접수', '확정', '{이름}님, 문의를 받았습니다. 확인 후 연락드리겠습니다.', '같음', '안내'],
+  ['확정', '확정', '{이름}님, 주문({주문번호})이 확정됐습니다. ' + CONFIRM_BODY, '같음', '안내'],
   ['확정·환불확인', '확정', '주문 후 찧는 쌀입니다. 찧기 전 취소는 전액 환불, 찧은 뒤 단순 변심 반품은 어렵습니다. 상품에 문제가 있으면 교환·환불해 드립니다. 입금하시면 이 내용에 동의하신 것으로 봅니다.', '같음', '안내'],
   ['첫고객', '확정', '{이름}님은 두두 {○호} 고객입니다. 앞으로 모든 주문이 10% 할인됩니다.', '같음', '안내'],
   ['대기', '확정', '{이름}님, 재고가 부족해 바로 확정하지 못했습니다. 준비되는 대로 순서대로 연락드리겠습니다.', '같음', '안내'],
-  ['대기확정', '확정', '{이름}님, 기다려 주셔서 감사합니다. 예약이 확정됐습니다. ' + CONFIRM_BODY, '같음', '안내'],
-  ['입금확인', '확정', '{이름}님, {금액}원 입금 확인했습니다. {받을 날} 무렵 보내 드립니다.', '같음', '안내'],
+  ['대기확정', '확정', '{이름}님, 기다려 주셔서 감사합니다. 예약이 확정됐습니다. 주문번호 {주문번호}. ' + CONFIRM_BODY, '같음', '안내'],
+  ['입금확인', '확정', '{이름}님, {금액}원 입금 확인했습니다. {도정일}에 도정해 보내 드립니다.', '같음', '안내'],
   ['입금독촉', '확정', '{이름}님, {곡식} 예약 입금이 아직 확인되지 않았습니다. {새 기한}까지 입금해 주세요. 이미 보내셨다면 답장 주세요.', '같음', '안내'],
   ['자동취소', '확정', '{이름}님, 입금 기한이 지나 {곡식} 예약을 취소했습니다. 다시 필요하시면 답장 주세요.', '같음', '안내'],
   ['취소확인', '확정', '{이름}님, {곡식} 예약을 취소했습니다. 입금하신 {금액}원은 {환불일}까지 전액 환불해 드립니다.', '같음', '안내'],
   ['찧은날', '확정', '{이름}님, 오늘 {이름}님 쌀을 찧었습니다. {조합}.', '같음', '안내'],
   ['발송', '확정', '{이름}님, {택배사} {송장번호}로 보냈습니다. {받을 날} 무렵 도착합니다.', '같음', '안내'],
-  ['늦어짐', '확정', '{이름}님, 죄송합니다. 작업 일정이 밀려 {받을 날}에 보내 드리기 어렵습니다. {새 날짜}에 보내 드려도 될까요? 취소를 원하시면 답장 주세요.', '같음', '안내'],
+  ['늦어짐', '확정', '{이름}님, 죄송합니다. 작업 일정이 밀려 {도정일} 도정이 어렵습니다. {새 도정일}에 도정해 보내 드려도 될까요? 취소를 원하시면 답장 주세요.', '같음', '안내'],
   ['도착다음날', '확정', '{이름}님, 잘 받으셨나요? {밥 짓기 한 줄} 문제가 있으면 답장 주세요.', '같음', '안내'],
   ['밥맛', '확정', '{이름}님, 밥맛은 어떠셨나요? 하나만 골라 주세요. [더 차지게] [그대로] [덜 차지게] [별로였어요]', '{이름}님, 밥맛은 어떠셨나요? 숫자로 답장 주세요. 1 더 차지게 2 그대로 3 덜 차지게 4 별로였어요', '안내'],
   ['다음조합', '확정', '다음 주문은 찹쌀 {새 비율}로 바꿀까요? [바꾸기] [그대로]', '다음 주문은 찹쌀 {새 비율}로 바꿀까요? 바꾸시려면 「네」라고 답장 주세요.', '안내'],
@@ -96,7 +110,7 @@ var DEFAULT_RULES = [
   ['고객 취소', '고객 취소', '해당 주문', '취소확인', '안내', '08~21시', '', '켬'],
   ['작업 완료', '작업 완료', '해당 주문', '찧은날', '안내', '08~21시', '', '켬'],
   ['송장', '송장 입력', '해당 주문', '발송', '안내', '08~21시', '', '켬'],
-  ['늦어짐', '받을 날 위험', '해당 주문', '늦어짐', '안내', '08~21시', '', '켬'],
+  ['늦어짐', '도정일 위험', '해당 주문', '늦어짐', '안내', '08~21시', '', '켬'],
   ['도착 다음 날', '도착 다음 날', '해당 주문', '도착다음날', '안내', '09~20시', '', '켬'],
   ['밥맛', '도착 {피드백 날수}일 뒤', '해당 주문', '밥맛 → 다음조합', '안내', '09~20시', '', '켬'],
   ['떨어질 때쯤', '예상 소진일 무렵', '첫 고객·단골(소식 동의)', '떨어질때', '광고', '09~20시', '광고 합쳐 2회', '켬'],
@@ -111,7 +125,10 @@ var DEFAULT_RULES = [
 ];
 
 var LIVE = ['확정', '입금', '작업', '발송', '도착'];   // 취소·대기·확인필요가 아닌 주문
-var GRAIN_NAME = { rice: '두두쌀', soy: '선풍 콩' };
+var GRAIN_NAME = { rice: '두두쌀', soy: '두두콩' };
+var STEPS = ['접수', '확정', '입금 확인', '도정', '발송'];   // 내 주문 진행 단계(문안 03-2c)
+var STEP_OF = { '결제대기': 0, '접수': 0, '대기': 0, '확인필요': 0, '확정': 1, '입금': 2, '작업': 3, '발송': 4, '도착': 4 };
+var CANCELABLE = ['접수', '대기', '확정', '입금'];   // 도정 전
 var TAIL = '두두농장 최현철 010-4689-8106';
 
 // ───────── 시계(시험 때 바꿔 끼움) ─────────
@@ -180,16 +197,35 @@ function setup() {
     var sh = ss.getSheetByName(name) || ss.insertSheet(name);
     var head = SCHEMA[name];
     var cur = sh.getRange(1, 1, 1, head.length).getValues()[0];
-    if (cur.join('') === '') sh.getRange(1, 1, 1, head.length).setValues([head]);
-    else if (cur.join('|') !== head.join('|')) throw new Error(name + ' 머리줄이 설계와 다릅니다 — 손으로 맞춘 뒤 다시');
+    var filled = cur.filter(String).length;   // 끝에 새 칸(정기·시험 등)이 생기면 빈 머리칸만 채운다
+    var same = cur.slice(0, filled).join('|') === head.slice(0, filled).join('|') && cur.slice(filled).join('') === '';
+    if (!same) throw new Error(name + ' 머리줄이 설계와 다릅니다 — 손으로 맞춘 뒤 다시');
+    if (filled < head.length) sh.getRange(1, 1, 1, head.length).setValues([head]);
     sh.setFrozenRows(1);
   });
   var first = ss.getSheetByName('시트1') || ss.getSheetByName('Sheet1');
   if (first && first.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(first);
   seed_('설정', DEFAULT_SETTINGS, '이름');
   seed_('문자틀', DEFAULT_TEMPLATES, '코드');
+  syncTemplates_();
+  syncSettingNotes_();
   seed_('연락 규칙', DEFAULT_RULES, '규칙');
   log_('setup', '', '끝');
+}
+// 문안 부록 1이 바뀌면 장부 「문자틀」 문구도 같게 맞춘다(상태 칸은 대표 것이라 그대로).
+function syncTemplates_() {
+  var byCode = {};
+  DEFAULT_TEMPLATES.forEach(function (t) { byCode[t[0]] = t; });
+  rows_('문자틀').forEach(function (r) {
+    var t = byCode[r['코드']]; if (!t) return;
+    if (r['문구'] !== t[2] || r['짧은 판'] !== t[3] || r['종류'] !== t[4]) { r['문구'] = t[2]; r['짧은 판'] = t[3]; r['종류'] = t[4]; save_('문자틀', r); }
+  });
+}
+// 설정 시트의 「설명」 칸도 설계와 같게(켬/끔·값은 대표 것이라 그대로).
+function syncSettingNotes_() {
+  var byKey = {};
+  DEFAULT_SETTINGS.forEach(function (s) { byKey[s[0]] = s; });
+  rows_('설정').forEach(function (r) { var s = byKey[r['이름']]; if (s && r['설명'] !== s[3]) { r['설명'] = s[3]; save_('설정', r); } });
 }
 function seed_(name, list, key) {
   var have = rows_(name).map(function (r) { return r[key]; });
@@ -224,7 +260,7 @@ function onBookEdit(e) {
 
 // ───────── 입구: 접수 ─────────
 // 홈페이지 장바구니: { kind:'order', mode:'order'|'inquiry', 경로, 이름, 연락처, 주소, 받는 분:{이름,연락처,주소}|null,
-//                     받고 싶은 때, 요청사항, items:[{grain:'rice'|'soy', glutinous, size, subpack, repeat, text}], 동의:['소식','환불확인'] }
+//                     요청사항, test(시범 운행이면 true), items:[{grain:'rice'|'soy', glutinous, size, subpack, repeat, text}], 동의:['소식','환불확인'] }
 // 대량 상담:          { kind:'bulk', 경로:'상담', 이름, 연락처, 상호, 지역, 유형, 곡식, 찹쌀, 양, 방식, 시작, 포장, 요청사항, 동의 }
 // 문자·전화·기록방:   { 경로:'문자'|'전화'|'카톡', 원문, 이름, 연락처, mode:'order', items:[…] } — 클로드가 정리해 넣는다
 function intake(p) {
@@ -233,8 +269,9 @@ function intake(p) {
     var tel = phone_(p['연락처']);
     var route = p['경로'] || '홈페이지';
     var raw = p['원문'] || JSON.stringify(p);
+    var test = p.test ? 'Y' : '';   // 시범 운행 — 끝나면 purgeTest()로 지운다
     var rec = append_('접수', { '접수번호': nextId_('접수', 'R', 5), '시각': t, '경로': route, '원문': raw,
-                                '이름': p['이름'] || '', '연락처': tel, '처리상태': '새로' });
+                                '이름': p['이름'] || '', '연락처': tel, '처리상태': '새로', '시험': test });
     if (!tel) { rec['처리상태'] = '확인필요'; rec['메모'] = '연락처 없음'; save_('접수', rec); log_('접수', rec['접수번호'], '확인필요', '연락처 없음'); return { ok: false, 접수번호: rec['접수번호'] }; }
 
     var dupMin = Number(val_('dup_minutes', 10));
@@ -243,7 +280,7 @@ function intake(p) {
     })[0];
     if (dup) { rec['처리상태'] = '중복'; rec['메모'] = dup['접수번호'] + '와 같음 — 확인필요'; save_('접수', rec); log_('접수', rec['접수번호'], '중복', dup['접수번호']); return { ok: true, 중복: true, 접수번호: rec['접수번호'] }; }
 
-    var c = customer_(p, tel, t, route);
+    var c = customer_(p, tel, t, route, test);
     rec['연결 고객'] = c['고객번호'];
     (p['동의'] || []).forEach(function (kind) {
       if (kind === '소식' && newsOn_(c['고객번호'])) return;   // 이미 동의한 번호는 다시 쌓지 않는다
@@ -265,11 +302,13 @@ function intake(p) {
         var o = append_('주문', { '주문번호': orderNo_(t), '접수번호': rec['접수번호'], '고객': c['고객번호'], '곡식': grainsText_(items),
                                  '조합': JSON.stringify(items), '양(kg)': totalKg_(items), '상태': '접수', '입금 안내 횟수': 0,
                                  '받는 분': p['받는 분'] ? JSON.stringify(p['받는 분']) : '', '상태 바뀐 시각': t,
-                                 '메모': [p['받고 싶은 때'], p['요청사항']].filter(String).join(' / ') });
+                                 '메모': p['요청사항'] || '', '정기': regularItems_(items).length ? 'Y' : '', '시험': test });
         rec['연결 주문'] = o['주문번호'];
         res['주문번호'] = o['주문번호'];
         if (['문자', '전화', '카톡'].indexOf(route) >= 0) send_('접수', c, o);
         res['상태'] = confirm_(o, c);
+        res['도정일'] = o['작업일'] ? ymd_(o['작업일']) : (millDate_() || '');
+        if (o['청구액'] !== '' && o['청구액'] !== undefined) res['청구액'] = Number(o['청구액']);
       } else {
         items.forEach(function (it) {
           append_('관심', { '관심번호': nextId_('관심', 'I', 5), '고객': c['고객번호'], '곡식': GRAIN_NAME[it.grain], '양': it.size + 'kg',
@@ -291,7 +330,7 @@ function intake(p) {
 }
 
 var BULK_TYPE = { '식당·가게': '식당·가게', '단체·급식': '단체', '가정(많은 양)': '가정', '기타': '가정' };
-function customer_(p, tel, t, route) {
+function customer_(p, tel, t, route, test) {
   var type = p.kind === 'bulk' ? (BULK_TYPE[p['유형']] || '가정') : (p['유형'] || '가정');
   var c = rows_('고객').filter(function (r) { return phone_(r['연락처']) === tel; })[0];
   if (c) {
@@ -305,7 +344,7 @@ function customer_(p, tel, t, route) {
   return append_('고객', { '고객번호': nextId_('고객', 'C', 4), '이름': p['이름'] || '', '연락처': tel, '지역': p['지역'] || '',
                            '유형': type, '처음 온 날': t, '처음 경로': route, '단골 회차': 0, '단계': '관심',
                            '문자 판': route === '문자' || route === '전화' ? '짧은 판' : '일반', '수신 거부': '',
-                           '메모': p['상호'] ? '상호 ' + p['상호'] : '' });
+                           '메모': p['상호'] ? '상호 ' + p['상호'] : '', '시험': test || '' });
 }
 
 function saveTaste_(cid, it, t) {
@@ -323,21 +362,24 @@ function orderNo_(t) {
 
 // ───────── 주문 품목 ─────────
 function items_(o) { try { var a = JSON.parse(o['조합']); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-function totalKg_(items) { return items.reduce(function (s, it) { return s + Number(it.size); }, 0); }
-function millKg_(items) { return items.filter(function (it) { return it.grain === 'rice'; }).reduce(function (s, it) { return s + Number(it.size); }, 0); }
+function qty_(it) { return Math.max(1, Math.round(Number(it.qty) || 1)); }
+function totalKg_(items) { return items.reduce(function (s, it) { return s + Number(it.size) * qty_(it); }, 0); }
+function millKg_(items) { return items.filter(function (it) { return it.grain === 'rice'; }).reduce(function (s, it) { return s + Number(it.size) * qty_(it); }, 0); }
 function itemText_(it) {
   var parts = [GRAIN_NAME[it.grain]];
   if (it.grain === 'rice') parts.push(Number(it.glutinous) ? '찹쌀 ' + it.glutinous + '%' : '멥쌀만');
   parts.push(it.size + 'kg');
   if (it.subpack) parts.push('소포장');
+  if (qty_(it) > 1) parts.push('× ' + qty_(it));
   return parts.join(' ');
 }
 function grainsText_(items) { return items.map(itemText_).join(', '); }
-function byGrain_(items) { var m = {}; items.forEach(function (it) { m[it.grain] = (m[it.grain] || 0) + Number(it.size); }); return m; }
+function regularItems_(items) { return items.filter(function (it) { return it.repeat && it.repeat !== 'once' && Number(it.repeat) > 0; }); }
+function byGrain_(items) { var m = {}; items.forEach(function (it) { m[it.grain] = (m[it.grain] || 0) + Number(it.size) * qty_(it); }); return m; }
 
 // ───────── 할인 (설계 4·9장) ─────────
 // ○호 고객(전체 첫 ho_seats명)은 모든 주문 ho_rate%. 아니면 소식 받기에 동의한 적이 있으면 loyalty_every번째마다 loyalty_rate%.
-// 소식 받기를 그만둬도 그때까지 센 횟수와 할인은 그대로(문안 03-1 · 법검토 1-8). 기준은 곡식+소포장 합계, 둘은 겹치지 않는다.
+// 소식 받기를 그만둬도 그때까지 센 횟수와 할인은 그대로(법검토 1-8). 기준은 구매금액(주문 상품 금액, 배송비 제외), 둘은 겹치지 않는다.
 // 회차는 같은 연락처의 모든 주문(취소·대기 제외)으로 센다.
 function discount_(c, n) {
   if (c['두두 호'] && Number(c['두두 호']) <= Number(val_('ho_seats', 100))) return { rate: Number(val_('ho_rate', 10)), why: '두두 ' + c['두두 호'] + '호 고객' };
@@ -384,40 +426,69 @@ function confirm_(o, c) {
     return '대기';
   }
   var fromWait = o['상태'] === '대기';
-  stocks.forEach(function (s) { if (need[s['곡식']]) { s['예약된 양(kg)'] = Number(s['예약된 양(kg)'] || 0) + need[s['곡식']]; save_('재고', s); } });
-  if (!day._none) { day['배정된 양(kg)'] = Number(day['배정된 양(kg)'] || 0) + mill; save_('작업 달력', day); }
+  reserve_(o, need, day, mill, stocks);
+  var r = price_(o, c, grains);
+  o['입금 기한'] = addDays_(t, val_('pay_days', 3)); o['입금 안내 횟수'] = 0;
+  o['상태'] = '확정'; o['상태 바뀐 시각'] = t; o['메모'] = '';
+  save_('주문', o);
+  var firstEver = settle_(c, r.n, t);
+  var route = (one_('접수', '접수번호', o['접수번호']) || {})['경로'];
+  send_(fromWait ? '대기확정' : '확정', c, o, {
+    append: [firstEver && c['두두 호'] ? '첫고객' : '', ['문자', '전화', '카톡'].indexOf(route) >= 0 ? '확정·환불확인' : ''] });
+  log_('확정', o['주문번호'], '확정', r.why);
+  return '확정';
+}
 
-  var firstEver = !c['두두 호'] && liveCount_(c['고객번호']) === 0;
-  if (firstEver && seatsLeft_() > 0) c['두두 호'] = nextHo_();
-  var fee = pairs_(val_('subpack_fee', ''));
-  var price = {};
-  grains.forEach(function (g) { price[g['코드']] = Number(g['가격(원/kg)'] || 0); });
-  var grainSum = items.reduce(function (s, it) { return s + price[it.grain] * Number(it.size); }, 0);
-  var subSum = items.reduce(function (s, it) { return s + (it.subpack ? Number(fee[Number(it.size)] || 0) : 0); }, 0);
+// 남은 양·도정일 자리 확인(결제 전 두 번 — 주문서 진입·결제 단추). 모자라면 이유 글, 되면 ''.
+function shortage_(items) {
+  var need = byGrain_(items), stocks = rows_('재고'), grains = rows_('곡식'), why = '';
+  Object.keys(need).forEach(function (g) {
+    if (why) return;
+    var gr = grains.filter(function (r) { return r['코드'] === g; })[0];
+    var s = stocks.filter(function (r) { return r['곡식'] === g; })[0];
+    if (!gr) why = '곡식 표에 없음(' + g + ')';
+    else if (!s) why = '재고 줄 없음(' + g + ')';
+    else if (Number(s['남은 양(kg)'] || 0) - Number(s['예약된 양(kg)'] || 0) < need[g]) why = '남은 양 부족(' + g + ')';
+  });
+  var mill = millKg_(items);
+  if (!why && mill > 0 && !workDay_(mill, now_())) why = '작업일 없음(하루 최대량·도정 가능일 확인)';
+  return why;
+}
+// 재고 예약·작업 달력 배정
+function reserve_(o, need, day, mill, stocks) {
+  (stocks || rows_('재고')).forEach(function (s) { if (need[s['곡식']]) { s['예약된 양(kg)'] = Number(s['예약된 양(kg)'] || 0) + need[s['곡식']]; save_('재고', s); } });
+  if (!day._none) { day['배정된 양(kg)'] = Number(day['배정된 양(kg)'] || 0) + mill; save_('작업 달력', day); }
+  o['작업일'] = day_(day['날짜']); o['받을 날'] = addDays_(o['작업일'], val_('ship_days', 2));
+}
+// 금액 — 할인은 구매금액(주문 상품 금액 = 곡식 + 소포장, 배송비 제외)의 10%. 첫 주문이고 ○호 자리가 남으면 ○호 할인.
+function price_(o, c, grains) {
+  var items = items_(o), fee = pairs_(val_('subpack_fee', '')), price = {};
+  (grains || rows_('곡식')).forEach(function (g) { price[g['코드']] = Number(g['가격(원/kg)'] || 0); });
+  var grainSum = items.reduce(function (s, it) { return s + price[it.grain] * Number(it.size) * qty_(it); }, 0);
+  var subSum = items.reduce(function (s, it) { return s + (it.subpack ? Number(fee[Number(it.size)] || 0) * qty_(it) : 0); }, 0);
   var n = liveCount_(c['고객번호']) + 1;
   var d = discount_(c, n);
+  if (!d.rate && !c['두두 호'] && n === 1 && seatsLeft_() > 0) d = { rate: Number(val_('ho_rate', 10)), why: '두두 ' + nextHo_() + '호 고객' };
   o['곡식 금액'] = grainSum; o['소포장'] = subSum; o['할인율'] = d.rate; o['할인 사유'] = d.why;
   o['할인액'] = Math.round((grainSum + subSum) * d.rate / 100);
   o['배송비'] = Number(val_('shipping_fee', 0)) || 0;
   o['청구액'] = grainSum + subSum - o['할인액'] + o['배송비'];
-  o['작업일'] = day_(day['날짜']); o['받을 날'] = addDays_(o['작업일'], val_('ship_days', 2));
-  o['입금 기한'] = addDays_(t, val_('pay_days', 3)); o['입금 안내 횟수'] = 0;
-  o['상태'] = '확정'; o['상태 바뀐 시각'] = t; o['메모'] = '';
-  save_('주문', o);
-
+  return { n: n, why: d.why };
+}
+// 주문이 맺어진 때 고객 칸(○호·첫 주문일·회차)
+function settle_(c, n, t) {
+  var firstEver = !c['두두 호'] && liveCount_(c['고객번호']) <= 1 && !c['첫 주문일'];
+  if (firstEver && seatsLeft_() > 0) c['두두 호'] = nextHo_();
   if (firstEver) c['첫 주문일'] = t;
   c['마지막 주문일'] = t;
   c['단골 회차'] = n;
   save_('고객', c);
-  var route = (one_('접수', '접수번호', o['접수번호']) || {})['경로'];
-  send_(fromWait ? '대기확정' : '확정', c, o, {
-    append: [firstEver && c['두두 호'] ? '첫고객' : '', ['문자', '전화', '카톡'].indexOf(route) >= 0 ? '확정·환불확인' : ''] });
-  log_('확정', o['주문번호'], '확정', d.why);
-  return '확정';
+  return firstEver;
 }
 
-function workDay_(qty, t) {
-  var from = day_(addDays_(t, val_('lead_days', 1)));
+function workDay_(qty, t) { return workDayFrom_(qty, addDays_(t, val_('lead_days', 1))); }
+function workDayFrom_(qty, fromDate) {
+  var from = day_(fromDate);
   return rows_('작업 달력')
     .filter(function (d) {
       return d['도정 가능'] === '가능' && day_(d['날짜']) >= from &&
@@ -449,9 +520,17 @@ function processWaitlist() {
 // ───────── 입금 기한·자동 취소 ─────────
 function checkDeadlines() {
   var t = now_();
+  // 결제창에서 돌아오지 않은 주문 — 재고·작업 달력 자리를 풀어 준다(문자 없음)
+  rows_('주문').filter(function (o) { return o['상태'] === '결제대기' && toDate_(o['입금 기한']) < t; })
+    .forEach(function (o) { o['결제 상태'] = '안 함'; cancel_(o, '결제 안 함'); });
   rows_('주문').filter(function (o) { return o['상태'] === '확정' && o['입금 기한'] && toDate_(o['입금 기한']) < t; })
     .forEach(function (o) {
       var c = one_('고객', '고객번호', o['고객']);
+      if (o['결제수단'] === '가상계좌') {   // PG 가상계좌는 기한이 지나면 계좌가 닫힌다 → 바로 자동 취소
+        o['결제 상태'] = '취소'; cancel_(o, '가상계좌 입금 기한 지남');
+        send_('자동취소', c, o);
+        return;
+      }
       if (Number(o['입금 안내 횟수'] || 0) < 1) {
         o['입금 안내 횟수'] = 1; o['입금 기한'] = addDays_(t, val_('pay_days', 3)); save_('주문', o);
         send_('입금독촉', c, o);
@@ -464,7 +543,7 @@ function checkDeadlines() {
 }
 
 function cancel_(o, why) {
-  if (['확정', '입금'].indexOf(o['상태']) >= 0) {
+  if (['확정', '입금', '결제대기'].indexOf(o['상태']) >= 0) {
     var need = byGrain_(items_(o));
     rows_('재고').forEach(function (s) {
       if (need[s['곡식']]) { s['예약된 양(kg)'] = Math.max(0, Number(s['예약된 양(kg)'] || 0) - need[s['곡식']]); save_('재고', s); }
@@ -481,10 +560,14 @@ function cancel_(o, why) {
 // extra: 입금 {입금자명} · 발송 {택배사, 송장} · 취소 {이유}
 function setStatus(orderNo, status, extra) {
   return withLock_(function () {
-    extra = extra || {};
     var o = one_('주문', '주문번호', orderNo);
     if (!o) { log_('상태', orderNo, '실패', '주문 없음'); return false; }
-    var c = one_('고객', '고객번호', o['고객']);
+    return setStatusIn_(o, one_('고객', '고객번호', o['고객']), status, extra || {});
+  });
+}
+function setStatusIn_(o, c, status, extra) {
+  var orderNo = o['주문번호'];
+  return (function () {
     var t = now_();
     if (status === '취소') {
       if (['작업', '발송', '도착'].indexOf(o['상태']) >= 0) { o['메모'] = '작업 뒤 취소 요청 — 확인필요'; o['상태'] = '확인필요'; save_('주문', o); log_('상태', orderNo, '확인필요', '작업 뒤 취소'); return false; }
@@ -513,7 +596,7 @@ function setStatus(orderNo, status, extra) {
     if (status === '도착') { c['예상 소진일'] = addDays_(t, cycleDays_(c['고객번호'])); save_('고객', c); }
     log_('상태', orderNo, status);
     return true;
-  });
+  })();
 }
 
 // 밥맛 답(1 더 차지게 · 2 그대로 · 3 덜 차지게 · 4 별로) — 6단계 수신 처리가 부른다.
@@ -591,8 +674,8 @@ function detectLate() {
       var c = one_('고객', '고객번호', o['고객']);
       if (sentEver_(c['고객번호'], '늦어짐', o['주문번호'])) return;
       var d = workDay_(millKg_(items_(o)), now_());
-      send_('늦어짐', c, o, { '새 날짜': d ? md_(addDays_(d['날짜'], val_('ship_days', 2))) : '' });
-      o['메모'] = '받을 날 위험 — 늦어짐 안내'; save_('주문', o);
+      send_('늦어짐', c, o, { '새 도정일': d ? md_(d['날짜']) : '' });
+      o['메모'] = '도정일 위험 — 늦어짐 안내'; save_('주문', o);
     });
 }
 function refillAlert() {
@@ -652,7 +735,9 @@ function compose_(tpl, c, o, extra) {
   var body = function (t) { return short && t['짧은 판'] && t['짧은 판'] !== '같음' ? t['짧은 판'] : t['문구']; };
   var parts = [body(tpl)];
   (extra.append || []).filter(String).forEach(function (code) { var t = one_('문자틀', '코드', code); if (t) parts.push(body(t)); });
-  var text = fill_(parts.join(' '), c, o, extra);
+  var joined = parts.join(' ');
+  if (extra.unpaid) joined = joined.replace(/\s*입금하신[^.]*\./, '');   // 입금 전 취소면 환불 문장을 뺀다
+  var text = fill_(joined, c, o, extra);
   if (/^\(두두농장\)/.test(text)) return text;
   return tpl['종류'] === '광고' ? '(광고) 두두농장(모아온)\n' + text + '\n무료 수신거부: 「그만」 답장' : '[두두농장] ' + text + '\n' + TAIL;
 }
@@ -668,14 +753,16 @@ function fill_(text, c, o, extra) {
     map['할인 줄'] = Number(o['할인액']) > 0 ? ' (' + o['할인 사유'] + ' ' + o['할인율'] + '% 할인 ' + Number(o['할인액']).toLocaleString('ko-KR') + '원 적용)' : '';
     map['기한'] = o['입금 기한'] ? md_(o['입금 기한']) : ''; map['새 기한'] = map['기한'];
     map['받을 날'] = o['받을 날'] ? md_(o['받을 날']) : '';
+    map['도정일'] = o['작업일'] ? md_(o['작업일']) : '';
+    map['주문번호'] = o['주문번호'];
     map['환불일'] = md_(addDays_(now_(), 3));
     var inv = String(o['송장'] || '').split(' ');
     map['택배사'] = inv.length > 1 ? inv[0] : ''; map['송장번호'] = inv.length > 1 ? inv.slice(1).join(' ') : inv[0];
   }
-  Object.keys(extra || {}).forEach(function (k) { if (k !== 'append') map[k] = extra[k]; });
+  Object.keys(extra || {}).forEach(function (k) { if (k !== 'append' && k !== 'unpaid') map[k] = extra[k]; });
   // 장바구니 주문은 품목이 여럿이라 「{곡식} {조합} {양}」 자리에 품목 전체를 한 번에 쓴다
   if (o) text = String(text || '').split('{곡식} {조합} {양}').join(o['곡식']);
-  var must = ['이름', '계좌', '금액', '기한', '새 기한', '받을 날', '○호', '송장번호', '새 비율', '날짜', '동의한 날'];   // 비면 보내지 않고 확인필요
+  var must = ['이름', '계좌', '금액', '기한', '새 기한', '받을 날', '도정일', '새 도정일', '주문번호', '○호', '송장번호', '새 비율', '날짜', '동의한 날'];   // 비면 보내지 않고 확인필요
   return String(text || '').replace(/\{([^}]+)\}/g, function (m, k) {
     var v = map[k];
     return v === undefined || v === null || (v === '' && must.indexOf(k) >= 0) ? m : v;
@@ -718,7 +805,473 @@ function exportSwitches() {
     }
     return out;
   });
-  return { switches: sw, grains: grains, seatsLeft: seatsLeft_(), at: now_().toISOString() };
+  return { switches: sw, grains: grains, seatsLeft: seatsLeft_(), millDate: millDate_() || '', at: now_().toISOString() };
+}
+
+// 홈페이지 상품 딱지·주문서·완료에 보이는 도정일 — 작업 달력에서 자리가 남은 가장 가까운 날(확정 때 배정과 같은 규칙).
+function millDate_() {
+  var d = workDay_(Number(val_('min_mill_kg', 10)), now_());
+  return d ? ymd_(d['날짜']) : '';
+}
+
+// ───────── 내 주문 (문안 03-2c) — 휴대폰 번호 + 주문번호. 회원가입 없음 ─────────
+// 틀리면 번호마다 한 시간 lookup_fail_per_hour 번까지. 받는 분은 이름 첫 글자·주소 시·군까지만.
+function findMine_(tel, no) {
+  tel = phone_(tel); no = String(no || '').trim().toUpperCase();
+  var cache = CacheService.getScriptCache(), key = 'lookup_' + tel, fails = Number(cache.get(key) || 0);
+  if (fails >= Number(val_('lookup_fail_per_hour', 5))) return { limited: true };
+  var o = tel.length >= 10 && no ? one_('주문', '주문번호', no) : null;
+  var c = o ? one_('고객', '고객번호', o['고객']) : null;
+  if (!o || !c || phone_(c['연락처']) !== tel) { cache.put(key, String(fails + 1), 3600); return { found: false }; }
+  return { found: true, o: o, c: c };
+}
+function maskName_(s) { s = String(s || ''); return s ? s.charAt(0) + new Array(Math.max(2, s.length)).join('○') : ''; }
+function region_(addr) {
+  var w = String(addr || '').split(/\s+/), out = [];
+  for (var i = 0; i < w.length && i < 2; i++) { out.push(w[i]); if (/(시|군)$/.test(w[i])) return out.join(' '); }
+  return out[0] || '';   // 시·군을 못 찾으면 첫 낱말만
+}
+function orderDate_(o) { var r = one_('접수', '접수번호', o['접수번호']); return r ? ymd_(r['시각']) : ''; }
+function recipient_(o, c) {
+  var to = null; try { to = o['받는 분'] ? JSON.parse(o['받는 분']) : null; } catch (e) {}
+  var addr = to && to['주소'];
+  if (!addr) { var r = one_('접수', '접수번호', o['접수번호']); try { addr = JSON.parse(r['원문'])['주소']; } catch (e) {} }
+  return { name: maskName_(to ? to['이름'] : c['이름']), region: region_(addr) };
+}
+function nextRegular_(o) {
+  if (o['정기'] !== 'Y') return null;
+  var reg = regularItems_(items_(o)); if (!reg.length) return null;
+  var cycle = Math.min.apply(null, reg.map(function (it) { return Number(it.repeat); }));
+  var base = o['작업일'] ? toDate_(o['작업일']) : now_();
+  var d = workDayFrom_(millKg_(reg) || Number(val_('min_mill_kg', 10)), addDays_(base, cycle));
+  return d ? ymd_(d['날짜']) : ymd_(addDays_(base, cycle));
+}
+function mineView_(o, c) {
+  var step = o['상태'] === '취소' ? -1 : (STEP_OF[o['상태']] === undefined ? 0 : STEP_OF[o['상태']]);
+  var inv = String(o['송장'] || '');
+  var others = rows_('주문').filter(function (r) { return r['고객'] === c['고객번호'] && r['주문번호'] !== o['주문번호'] && r['결제 상태'] !== '안 함' && r['상태'] !== '결제대기'; })
+    .reverse().map(function (r) { return { no: r['주문번호'], date: orderDate_(r), grain: r['곡식'], step: r['상태'] === '취소' ? '취소' : STEPS[STEP_OF[r['상태']] || 0] }; });
+  return {
+    found: true, no: o['주문번호'], date: orderDate_(o), items: items_(o).map(itemText_), regularText: regularItems_(items_(o)).length ? '정기' : '',
+    total: o['청구액'] === '' ? null : Number(o['청구액']), steps: STEPS, step: step, canceled: o['상태'] === '취소', waiting: o['상태'] === '대기',
+    millDate: o['작업일'] && millKg_(items_(o)) > 0 ? ymd_(o['작업일']) : '', invoice: inv, trackUrl: inv ? 'https://search.naver.com/search.naver?query=' + encodeURIComponent(inv + ' 배송조회') : '',
+    to: recipient_(o, c), canCancel: CANCELABLE.indexOf(o['상태']) >= 0,
+    regular: o['정기'] === 'Y' && o['상태'] !== '취소', paused: o['정기'] === '멈춤', nextDate: nextRegular_(o), others: others,
+    pay: o['결제수단'] || '', va: o['결제 상태'] === '입금 대기' ? payResult_(o)['가상계좌'] : null,
+    cancelAsked: o['상태'] === '확인필요' && /^취소 요청/.test(String(o['메모']))
+  };
+}
+function lookup(tel, no) {
+  var m = findMine_(tel, no);
+  return m.found ? mineView_(m.o, m.c) : m;
+}
+// 도정 전이면 바로 취소 → 재고·작업 달력 복귀 → 「취소확인」 문자(입금 전이면 환불 문장 뺌) → 대기 주문 다시 봄
+function cancelMine(tel, no) {
+  return withLock_(function () {
+    var m = findMine_(tel, no); if (!m.found) return m;
+    return customerCancel_(m.o, m.c, '고객 취소(내 주문)');
+  });
+}
+// 고객이 도정 전에 취소 — PG 결제면 결제도 취소. 휴대폰 결제 달 넘김·입금 끝난 가상계좌(환불 계좌 필요)는 대표 확인(확인필요).
+function customerCancel_(o, c, why) {
+  if (CANCELABLE.indexOf(o['상태']) < 0) return { ok: false, reason: o['상태'] === '취소' ? '이미 취소' : '도정 뒤', view: mineView_(o, c) };
+  var paid = o['상태'] === '입금';
+  if (o['결제 키'] && ['완료', '입금 대기'].indexOf(o['결제 상태']) >= 0) {
+    var manual = '';
+    if (o['결제수단'] === '휴대폰' && Utilities.formatDate(toDate_(o['결제 시각']), 'Asia/Seoul', 'yyMM') !== Utilities.formatDate(now_(), 'Asia/Seoul', 'yyMM')) manual = '휴대폰 결제 달 넘김 — 대표 직접 환불';
+    if (o['결제수단'] === '가상계좌' && o['결제 상태'] === '완료') manual = '가상계좌 입금 뒤 취소 — 환불 계좌 받아 대표 처리';
+    if (!manual) {
+      var r = tossCancel_(o, why);
+      if (!r.ok) manual = 'PG 취소 실패 ' + (r.code || '') + ' — 대표 확인';
+    }
+    if (manual) {
+      o['상태'] = '확인필요'; o['메모'] = '취소 요청: ' + manual; o['상태 바뀐 시각'] = now_(); save_('주문', o);
+      log_('취소 요청', o['주문번호'], '확인필요', manual);
+      return { ok: false, reason: '확인필요', view: mineView_(o, c) };
+    }
+    o['결제 상태'] = '취소'; o['취소 금액'] = o['청구액'];
+  }
+  cancel_(o, why);
+  if (o['정기'] === 'Y') { o['정기'] = '멈춤'; save_('주문', o); }
+  send_('취소확인', c, o, paid ? {} : { unpaid: true });
+  processWaitlist();
+  return { ok: true, view: mineView_(one_('주문', '주문번호', o['주문번호']), c) };
+}
+
+// ───────── 결제(토스페이먼츠 결제위젯 · 설계 13장) ─────────
+// 흐름: 주문서 진입 때 stock(남은 양 확인 1) → [결제하기] 때 checkout(남은 양 확인 2 + 자리 잡기 · 금액은 여기서 정함)
+//       → 토스 결제창 → successUrl → payConfirm(승인 API) → 카드·간편결제·휴대폰 = 입금 / 가상계좌 = 확정 + 계좌 안내
+//       → 가상계좌 입금 웹훅(DEPOSIT_CALLBACK, secret 대조) → 입금. 결제창에서 돌아오지 않으면 pay_hold_minutes 뒤 자리를 푼다.
+// 시크릿 키는 스크립트 속성 TOSS_SECRET_KEY 에만(대표가 넣음). 시범 운행(test)이고 결제 키가 mock_ 로 시작하면 토스를 부르지 않는다.
+var TOSS_API = 'https://api.tosspayments.com/v1/payments/';
+var METHOD_NAME = { '카드': '카드', '가상계좌': '가상계좌', '간편결제': '간편결제', '휴대폰': '휴대폰' };
+function payOpen_(p) { return p.test || (on_('order') && on_('pay_pg')); }
+function stockCheck(p) {
+  var items = (p.items || []).filter(function (it) { return GRAIN_NAME[it.grain] && Number(it.size) > 0; });
+  if (!items.length) return { ok: false, empty: true };
+  var why = shortage_(items);
+  return why ? { ok: false, short: true } : { ok: true, 도정일: millKg_(items) > 0 ? (millDate_() || '') : '' };
+}
+function checkout(p) {
+  return withLock_(function () {
+    if (!payOpen_(p)) return { ok: false, closed: true };
+    var items = (p.items || []).filter(function (it) { return GRAIN_NAME[it.grain] && Number(it.size) > 0; });
+    if (!items.length) return { ok: false, empty: true };
+    var t = now_(), test = p.test ? 'Y' : '';
+    var me = p.token ? auth_(p.token) : null;
+    var tel = me ? phone_(me['연락처']) : phone_(p['연락처']);
+    if (!tel) return { ok: false, error: 'tel' };
+    if (shortage_(items)) return { ok: false, short: true };
+    var rec = append_('접수', { '접수번호': nextId_('접수', 'R', 5), '시각': t, '경로': '홈페이지', '원문': JSON.stringify(p.public || p),
+                                '이름': p['이름'] || (me && me['이름']) || '', '연락처': tel, '처리상태': '처리됨', '시험': test });
+    var c = me || customer_(p, tel, t, '홈페이지', test);
+    rec['연결 고객'] = c['고객번호'];
+    (p['동의'] || []).forEach(function (kind) {
+      if (kind === '소식' && newsOn_(c['고객번호'])) return;
+      append_('동의', { '동의번호': nextId_('동의', 'A', 5), '고객': c['고객번호'], '종류': kind, '문구 판': '문안 3차 2026-11-08', '동의 시각': t, '경로': '홈페이지' });
+    });
+    items.forEach(function (it) { saveTaste_(c['고객번호'], it, t); });
+    var o = append_('주문', { '주문번호': orderNo_(t), '접수번호': rec['접수번호'], '고객': c['고객번호'], '곡식': grainsText_(items), '조합': JSON.stringify(items),
+                             '양(kg)': totalKg_(items), '상태': '결제대기', '입금 안내 횟수': 0, '받는 분': p['받는 분'] ? JSON.stringify(p['받는 분']) : '',
+                             '상태 바뀐 시각': t, '메모': p['요청사항'] || '', '정기': regularItems_(items).length ? 'Y' : '', '시험': test, '결제 상태': '대기' });
+    rec['연결 주문'] = o['주문번호']; save_('접수', rec);
+    var mill = millKg_(items);
+    var day = mill > 0 ? workDay_(mill, t) : { 날짜: day_(addDays_(t, val_('lead_days', 1))), _none: true };
+    reserve_(o, byGrain_(items), day, mill);
+    price_(o, c);
+    o['입금 기한'] = new Date(t.getTime() + Number(val_('pay_hold_minutes', 30)) * 60000);
+    save_('주문', o);
+    log_('결제 준비', o['주문번호'], '결제대기');
+    var name = GRAIN_NAME[items[0].grain] + (items.length > 1 ? ' 외 ' + (items.length - 1) + '건' : '');
+    return { ok: true, 주문번호: o['주문번호'], 청구액: Number(o['청구액']), orderName: name, 도정일: mill > 0 ? ymd_(o['작업일']) : '',
+             할인: o['할인액'] ? { 사유: o['할인 사유'], 율: o['할인율'], 액: Number(o['할인액']) } : null };
+  });
+}
+function payConfirm(p) {
+  return withLock_(function () {
+    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    if (!o) return { ok: false, code: 'NO_ORDER' };
+    var c = one_('고객', '고객번호', o['고객']);
+    if (o['결제 키'] && o['결제 키'] === p.paymentKey) return payResult_(o);   // 새로 고침 — 이미 승인됨
+    if (o['상태'] !== '결제대기') return { ok: false, code: 'NOT_PENDING' };
+    if (Number(p.amount) !== Number(o['청구액'])) { abort_(o, '금액 다름'); return { ok: false, code: 'AMOUNT' }; }
+    var r = tossConfirm_(p.paymentKey, o, !!(p.test && o['시험'] === 'Y'));
+    if (!r.ok) { abort_(o, 'PG 승인 실패 ' + r.code); return { ok: false, code: r.code, message: r.message }; }
+    var t = now_(), pay = r.body;
+    o['결제수단'] = METHOD_NAME[pay.method] || pay.method || ''; o['결제 키'] = p.paymentKey; o['결제 비밀'] = pay.secret || '';
+    o['결제 시각'] = t; o['상태 바뀐 시각'] = t;
+    var n = liveCount_(c['고객번호']) + 1;
+    if (pay.status === 'WAITING_FOR_DEPOSIT' && pay.virtualAccount) {
+      var va = pay.virtualAccount;
+      o['결제 상태'] = '입금 대기'; o['상태'] = '확정';
+      o['가상계좌'] = JSON.stringify({ bank: va.bankCode, account: va.accountNumber, due: va.dueDate });
+      o['입금 기한'] = va.dueDate ? new Date(String(va.dueDate)) : addDays_(t, val_('pay_days', 3));
+      save_('주문', o);
+      var first = settle_(c, n, t);
+      send_('확정', c, o, { '계좌': bankName_(va.bankCode) + ' ' + va.accountNumber, append: [first && c['두두 호'] ? '첫고객' : ''] });
+    } else if (pay.status === 'DONE') {
+      o['결제 상태'] = '완료'; o['상태'] = '입금'; o['입금일'] = t;
+      save_('주문', o);
+      var firstEver = settle_(c, n, t);
+      send_('입금확인', c, o, { append: [firstEver && c['두두 호'] ? '첫고객' : ''] });
+    } else { abort_(o, 'PG 상태 ' + pay.status); return { ok: false, code: pay.status }; }
+    log_('결제 승인', o['주문번호'], o['결제 상태'], o['결제수단']);
+    return payResult_(one_('주문', '주문번호', o['주문번호']));
+  });
+}
+function payResult_(o) {
+  var va = null; try { va = o['가상계좌'] ? JSON.parse(o['가상계좌']) : null; } catch (e) {}
+  return { ok: true, 주문번호: o['주문번호'], 상태: o['상태'], 결제수단: o['결제수단'], 결제상태: o['결제 상태'], 청구액: Number(o['청구액']),
+           도정일: o['작업일'] && millKg_(items_(o)) > 0 ? ymd_(o['작업일']) : '', 가상계좌: va && o['결제 상태'] === '입금 대기' ? { 은행: bankName_(va.bank), 계좌: va.account, 기한: ymd_(o['입금 기한']) } : null };
+}
+// 결제창에서 실패·취소로 돌아왔을 때 — 자리를 바로 푼다(주문한 번호가 맞아야)
+function payAbort(p) {
+  return withLock_(function () {
+    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    var c = o ? one_('고객', '고객번호', o['고객']) : null;
+    if (!o || !c || o['상태'] !== '결제대기') return { ok: true };
+    if (phone_(p.tel) !== phone_(c['연락처']) && !(p.token && auth_(p.token) && auth_(p.token)['고객번호'] === c['고객번호'])) return { ok: false };
+    abort_(o, '결제 안 함(' + (p.code || '') + ')');
+    return { ok: true };
+  });
+}
+function abort_(o, why) { o['결제 상태'] = '안 함'; cancel_(o, why); }
+// 가상계좌 입금 웹훅 — secret 이 승인 때 받은 값과 같아야 진짜
+function depositCallback(p) {
+  return withLock_(function () {
+    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    if (!o || !o['결제 비밀'] || o['결제 비밀'] !== p.secret) { log_('입금 알림', p.orderId || '', '거절', 'secret 다름'); return { ok: false }; }
+    var c = one_('고객', '고객번호', o['고객']);
+    if (p.status === 'DONE' && o['상태'] === '확정') {
+      o['결제 상태'] = '완료'; save_('주문', o);
+      setStatusIn_(o, c, '입금', {});
+    } else if (p.status === 'CANCELED' && o['상태'] !== '취소') {
+      o['결제 상태'] = '취소'; cancel_(o, '가상계좌 취소 알림');
+    } else if (p.status === 'WAITING_FOR_DEPOSIT' && o['상태'] === '입금') {
+      o['상태'] = '확인필요'; o['메모'] = '입금 오류 알림 — 대표 확인'; save_('주문', o);
+    }
+    log_('입금 알림', o['주문번호'], p.status);
+    return { ok: true };
+  });
+}
+function tossAuth_() {
+  var key = PropertiesService.getScriptProperties().getProperty('TOSS_SECRET_KEY');
+  if (!key) throw new Error('TOSS_SECRET_KEY 없음 — 스크립트 속성에 넣어 주세요');
+  return 'Basic ' + Utilities.base64Encode(key + ':');
+}
+function tossCall_(path, body) {
+  var res = UrlFetchApp.fetch(TOSS_API + path, { method: 'post', contentType: 'application/json', headers: { Authorization: tossAuth_() },
+                                                payload: JSON.stringify(body), muteHttpExceptions: true });
+  var j = {}; try { j = JSON.parse(res.getContentText()); } catch (e) {}
+  return res.getResponseCode() < 300 ? { ok: true, body: j } : { ok: false, code: j.code || res.getResponseCode(), message: j.message || '' };
+}
+function tossConfirm_(paymentKey, o, mock) {
+  if (mock && /^mock_/.test(paymentKey)) {   // 시범 운행 — 결제 키 mock_<수단>_… 로 결제수단을 흉내
+    var m = paymentKey.split('_')[1];
+    if (m === 'FAIL') return { ok: false, code: 'REJECT_CARD_COMPANY', message: '시험 실패' };
+    var method = { VA: '가상계좌', CARD: '카드', EASY: '간편결제', PHONE: '휴대폰' }[m] || '카드';
+    var body = { method: method, status: method === '가상계좌' ? 'WAITING_FOR_DEPOSIT' : 'DONE', secret: 'mocksecret' + Math.floor(Math.random() * 1e9) };
+    if (method === '가상계좌') body.virtualAccount = { bankCode: '11', accountNumber: '79000' + String(Math.floor(Math.random() * 1e8)), dueDate: Utilities.formatDate(addDays_(now_(), val_('pay_days', 3)), 'Asia/Seoul', "yyyy-MM-dd'T'23:59:59") };
+    return { ok: true, body: body };
+  }
+  try { return tossCall_('confirm', { paymentKey: paymentKey, orderId: o['주문번호'], amount: Number(o['청구액']) }); }
+  catch (err) { return { ok: false, code: 'CALL', message: String(err) }; }
+}
+function tossCancel_(o, why) {
+  if (o['시험'] === 'Y' && /^mock_/.test(o['결제 키'])) return { ok: true };
+  try { return tossCall_(encodeURIComponent(o['결제 키']) + '/cancel', { cancelReason: why || '고객 요청' }); }
+  catch (err) { return { ok: false, code: 'CALL', message: String(err) }; }
+}
+var BANKS = { '39': '경남은행', '34': '광주은행', '12': '단위농협', '32': '부산은행', '45': '새마을금고', '88': '신한은행', '48': '신협', '27': '씨티은행', '20': '우리은행', '71': '우체국', '50': '저축은행', '37': '전북은행', '35': '제주은행', '90': '카카오뱅크', '89': '케이뱅크', '92': '토스뱅크', '81': '하나은행', '03': '기업은행', '06': '국민은행', '31': '대구은행', '02': '산업은행', '11': '농협은행', '23': 'SC제일은행', '07': '수협은행' };
+function bankName_(code) { return BANKS[String(code)] || String(code || ''); }
+
+// ───────── 간편 회원 — 휴대폰 번호가 아이디 (설계 12장 · 문안 03-6) ─────────
+// 비밀번호는 원문을 남기지 않는다: 번호마다 다른 소금값 + SHA-256 여러 번. 5번 틀리면 10분 잠금. 로그인 표(토큰)는 장부에 해시만.
+var HASH_ROUNDS = 1000;
+function hex_(bytes) { return bytes.map(function (b) { return ('0' + ((b < 0 ? b + 256 : b)).toString(16)).slice(-2); }).join(''); }
+function sha_(s) { return hex_(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, s, Utilities.Charset.UTF_8)); }
+function hashPw_(pw, salt) { var h = salt + ':' + pw; for (var i = 0; i < HASH_ROUNDS; i++) h = sha_(salt + h); return h; }
+function rand_() { return Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''); }
+function memberOpen_(p) { return p.test || on_('member'); }
+function pwOk_(pw) { return /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(String(pw || '')); }
+function isMember_(c) { return !!c && c['회원'] === 'Y'; }
+function custByTel_(tel) { tel = phone_(tel); return rows_('고객').filter(function (r) { return phone_(r['연락처']) === tel; })[0] || null; }
+
+// 인증번호 — 6자리, 3분, 하루 code_per_day 번. 문자 업체 전에는 시범 운행에서만 화면에 번호를 돌려준다(devCode).
+function sendCode(p) {
+  if (!memberOpen_(p)) return { ok: false, closed: true };
+  var tel = phone_(p.tel), purpose = p.purpose === 'reset' ? 'reset' : 'join';
+  if (!/^01\d{8,9}$/.test(tel)) return { ok: false, error: 'tel' };
+  var c = custByTel_(tel);
+  if (purpose === 'join' && isMember_(c)) return { ok: false, exists: true };
+  if (purpose === 'reset' && !isMember_(c)) return { ok: false, notMember: true };
+  var today = ymd_(now_());
+  var used = rows_('인증').filter(function (r) { return phone_(r['번호']) === tel && ymd_(r['보낸 시각']) === today; }).length;
+  if (used >= Number(val_('code_per_day', 5))) return { ok: false, limited: true };
+  var code = String(100000 + Math.floor(Math.random() * 900000));
+  append_('인증', { '번호': tel, '용도': purpose, '인증번호': sha_('code:' + tel + ':' + code), '보낸 시각': now_(), '틀린 횟수': 0, '확인': '' });
+  log_('인증번호', tel.slice(0, 3) + '****' + tel.slice(-4), on_('sms_send') ? '보낼 차례(문자 업체 연결 전)' : '보류(sms_send 끔)');
+  return p.test ? { ok: true, ttl: 180, devCode: code } : { ok: true, ttl: 180 };
+}
+function verifyCode(p) {
+  if (!memberOpen_(p)) return { ok: false, closed: true };
+  var tel = phone_(p.tel), purpose = p.purpose === 'reset' ? 'reset' : 'join';
+  var r = rows_('인증').filter(function (x) { return phone_(x['번호']) === tel && x['용도'] === purpose && !x['확인']; }).pop();
+  if (!r || now_() - toDate_(r['보낸 시각']) > 180000) return { ok: false, expired: true };
+  if (Number(r['틀린 횟수']) >= 5) return { ok: false, expired: true };
+  if (r['인증번호'] !== sha_('code:' + tel + ':' + String(p.code || '').trim())) { r['틀린 횟수'] = Number(r['틀린 횟수']) + 1; save_('인증', r); return { ok: false, wrong: true }; }
+  r['확인'] = 'Y'; save_('인증', r);
+  var vt = rand_();
+  CacheService.getScriptCache().put('vt_' + vt, tel + '|' + purpose, 600);
+  return { ok: true, verifyToken: vt };
+}
+function useVerify_(vt, tel, purpose) {
+  var cache = CacheService.getScriptCache(), v = vt && cache.get('vt_' + vt);
+  return v === phone_(tel) + '|' + purpose;
+}
+function issueToken_(c, keep) {
+  var tok = rand_(), t = now_();
+  append_('로그인', { '토큰': sha_('tok:' + tok), '고객': c['고객번호'], '만든 시각': t, '만료': addDays_(t, keep ? val_('login_days', 30) : 1) });
+  return tok;
+}
+function auth_(token) {
+  if (!token) return null;
+  var h = sha_('tok:' + token), now = now_();
+  var row = rows_('로그인').filter(function (r) { return r['토큰'] === h && toDate_(r['만료']) > now; })[0];
+  if (!row) return null;
+  var c = one_('고객', '고객번호', row['고객']);
+  return isMember_(c) ? c : null;
+}
+function join(p) {
+  return withLock_(function () {
+    if (!memberOpen_(p)) return { ok: false, closed: true };
+    var tel = phone_(p.tel);
+    if (!useVerify_(p.verifyToken, tel, 'join')) return { ok: false, verify: true };
+    if (!pwOk_(p.password)) return { ok: false, password: true };
+    if (!String(p['이름'] || '').trim()) return { ok: false, name: true };
+    if (!String(p['주소'] || '').trim()) return { ok: false, address: true };
+    var t = now_(), c = custByTel_(tel);
+    if (isMember_(c)) return { ok: false, exists: true };
+    if (!c) c = customer_({ '이름': p['이름'] }, tel, t, '회원가입', p.test ? 'Y' : '');
+    var salt = rand_().slice(0, 32);
+    c['이름'] = String(p['이름']).trim(); c['회원'] = 'Y'; c['가입일'] = t; c['소금'] = salt; c['비밀번호'] = hashPw_(p.password, salt);
+    c['약관 동의일'] = t; c['만14세 확인일'] = t; c['주소'] = p['주소']; c['상세 주소'] = p['상세 주소'] || ''; c['우편번호'] = p['우편번호'] || '';
+    c['마지막 로그인'] = t;
+    save_('고객', c);
+    ['이용약관', '개인정보', '만14세'].concat(p.news && !newsOn_(c['고객번호']) ? ['소식'] : []).forEach(function (kind) {
+      append_('동의', { '동의번호': nextId_('동의', 'A', 5), '고객': c['고객번호'], '종류': kind, '문구 판': '문안 03-6 2026-11-08', '동의 시각': t, '경로': '회원가입' });
+    });
+    CacheService.getScriptCache().put('vt_' + p.verifyToken, 'used', 1);
+    log_('회원가입', c['고객번호'], '끝');
+    return { ok: true, token: issueToken_(c, true), me: meView_(c) };
+  });
+}
+function login(p) {
+  if (!memberOpen_(p)) return { ok: false, closed: true };
+  var tel = phone_(p.tel), cache = CacheService.getScriptCache(), key = 'lock_' + tel, fails = Number(cache.get(key) || 0);
+  if (fails >= Number(val_('login_fail_max', 5))) return { ok: false, locked: true };
+  var c = custByTel_(tel);
+  if (!isMember_(c) || hashPw_(String(p.password || ''), c['소금']) !== c['비밀번호']) { cache.put(key, String(fails + 1), 600); return { ok: false, wrong: true }; }
+  cache.put(key, '0', 1);
+  c['마지막 로그인'] = now_(); save_('고객', c);
+  return { ok: true, token: issueToken_(c, !!p.keep), me: meView_(c) };
+}
+function resetPw(p) {
+  return withLock_(function () {
+    if (!memberOpen_(p)) return { ok: false, closed: true };
+    var tel = phone_(p.tel), c = custByTel_(tel);
+    if (!isMember_(c) || !useVerify_(p.verifyToken, tel, 'reset')) return { ok: false, verify: true };
+    if (!pwOk_(p.password)) return { ok: false, password: true };
+    c['소금'] = rand_().slice(0, 32); c['비밀번호'] = hashPw_(p.password, c['소금']); save_('고객', c);
+    dropTokens_(c['고객번호']);
+    CacheService.getScriptCache().put('vt_' + p.verifyToken, 'used', 1);
+    log_('비밀번호 찾기', c['고객번호'], '바꿈');
+    return { ok: true };
+  });
+}
+function dropTokens_(cid, only) {
+  var sh = sheet_('로그인');
+  rows_('로그인').filter(function (r) { return r['고객'] === cid && (!only || r['토큰'] === only); }).map(function (r) { return r._row; })
+    .sort(function (a, b) { return b - a; }).forEach(function (row) { sh.deleteRow(row); });
+}
+function meView_(c) {
+  var n = liveCount_(c['고객번호']), every = Number(val_('loyalty_every', 3));
+  var orders = rows_('주문').filter(function (o) { return o['고객'] === c['고객번호'] && o['상태'] !== '결제대기' && o['결제 상태'] !== '안 함'; }).reverse();
+  return { 이름: c['이름'], 연락처: phone_(c['연락처']), 주소: c['주소'] || '', 상세주소: c['상세 주소'] || '', 우편번호: c['우편번호'] || '',
+           호: c['두두 호'] || null, 횟수: n, 다음할인까지: newsEver_(c['고객번호']) && !c['두두 호'] ? every - (n % every) : null,
+           소식: newsOn_(c['고객번호']),
+           주문: orders.slice(0, 30).map(function (o) { var v = mineView_(o, c); v.items_raw = items_(o); return v; }) };
+}
+// 로그인한 회원의 요청 한곳: me · 정보 수정 · 로그아웃 · 탈퇴 · 주문 취소 · 정기 멈춤/주기 · 지난번과 같게
+function member(p) {
+  return withLock_(function () {
+    if (!memberOpen_(p)) return { ok: false, closed: true };
+    var c = auth_(p.token);
+    if (!c) return { ok: false, auth: true };
+    var a = p.action, o = p.no ? one_('주문', '주문번호', String(p.no)) : null;
+    if (o && o['고객'] !== c['고객번호']) return { ok: false, auth: true };
+    if (a === 'me') return { ok: true, me: meView_(c) };
+    if (a === 'recall') return recallOf_(c);
+    if (a === 'update') {
+      if (p['이름'] !== undefined && String(p['이름']).trim()) c['이름'] = String(p['이름']).trim();
+      if (p['주소'] !== undefined) { c['주소'] = p['주소']; c['상세 주소'] = p['상세 주소'] || ''; c['우편번호'] = p['우편번호'] || ''; }
+      if (p.newPassword) {
+        if (hashPw_(String(p.password || ''), c['소금']) !== c['비밀번호']) return { ok: false, wrong: true };
+        if (!pwOk_(p.newPassword)) return { ok: false, password: true };
+        c['소금'] = rand_().slice(0, 32); c['비밀번호'] = hashPw_(p.newPassword, c['소금']);
+        dropTokens_(c['고객번호']);
+        save_('고객', c);
+        return { ok: true, relogin: true };
+      }
+      save_('고객', c);
+      if (p.news === true && !newsOn_(c['고객번호'])) append_('동의', { '동의번호': nextId_('동의', 'A', 5), '고객': c['고객번호'], '종류': '소식', '문구 판': '문안 03-6 2026-11-08', '동의 시각': now_(), '경로': '마이페이지' });
+      if (p.news === false && newsOn_(c['고객번호'])) rows_('동의').forEach(function (x) { if (x['고객'] === c['고객번호'] && x['종류'] === '소식' && !x['철회 시각']) { x['철회 시각'] = now_(); save_('동의', x); } });
+      return { ok: true, me: meView_(c) };
+    }
+    if (a === 'logout') { dropTokens_(c['고객번호'], sha_('tok:' + p.token)); return { ok: true }; }
+    if (a === 'leave') {
+      ['회원', '가입일', '비밀번호', '소금', '약관 동의일', '만14세 확인일', '마지막 로그인', '주소', '상세 주소', '우편번호'].forEach(function (k) { c[k] = ''; });
+      save_('고객', c); dropTokens_(c['고객번호']);
+      log_('회원 탈퇴', c['고객번호'], '회원 정보 지움(주문 기록은 5년 보관)');
+      return { ok: true };
+    }
+    if (!o) return { ok: false, error: 'no' };
+    if (a === 'cancel') return customerCancel_(o, c, '고객 취소(마이페이지)');
+    if (a === 'pause') { if (o['정기'] !== 'Y') return { ok: false, reason: '정기 아님' }; o['정기'] = '멈춤'; save_('주문', o); log_('정기 멈춤', o['주문번호'], '회원'); return { ok: true, view: mineView_(o, c) }; }
+    if (a === 'cycle') {
+      var days = Math.round(Number(p.days)); if (o['정기'] !== 'Y' || !(days >= 7 && days <= 182)) return { ok: false };
+      var items = items_(o).map(function (it) { if (it.repeat && it.repeat !== 'once') it.repeat = days; return it; });
+      o['조합'] = JSON.stringify(items); save_('주문', o); log_('정기 주기', o['주문번호'], days + '일');
+      return { ok: true, view: mineView_(o, c) };
+    }
+    return { ok: false, error: 'action' };
+  });
+}
+function recallOf_(c) {
+  var combos = {};
+  rows_('취향').filter(function (k) { return k['고객'] === c['고객번호']; }).forEach(function (k) {
+    combos[k['제품']] = { glutinous: k['찹쌀'] === '' ? null : Number(k['찹쌀']), size: Number(k['양(kg)']), subpack: k['소포장'] === 'Y',
+                          repeat: k['주기(일)'] ? Number(k['주기(일)']) : 'once' };
+  });
+  return { ok: true, found: Object.keys(combos).length > 0, combos: combos };
+}
+// 정기 멈추기 — 다음 예약부터. 장부 「주문」 정기 칸을 「멈춤」으로.
+function pauseMine(tel, no) {
+  return withLock_(function () {
+    var m = findMine_(tel, no); if (!m.found) return m;
+    if (m.o['정기'] !== 'Y') return { ok: false, reason: '정기 아님', view: mineView_(m.o, m.c) };
+    m.o['정기'] = '멈춤'; save_('주문', m.o);
+    log_('정기 멈춤', m.o['주문번호'], '고객');
+    return { ok: true, view: mineView_(m.o, m.c) };
+  });
+}
+
+// 정기 주문 — 다음 도정일 regular_ahead_days 전에 정기로 고른 곡식만 같은 조합으로 다시 예약(확정 문자가 「보내기 전 안내」).
+function scheduleRegular() {
+  var today = day_(now_()), ahead = Number(val_('regular_ahead_days', 3));
+  rows_('주문').filter(function (o) { return o['정기'] === 'Y' && ['작업', '발송', '도착'].indexOf(o['상태']) >= 0 && o['작업일']; })
+    .forEach(function (o) {
+      var reg = regularItems_(items_(o)), cycle = Math.min.apply(null, reg.map(function (it) { return Number(it.repeat); }));
+      if (!reg.length || today < day_(addDays_(o['작업일'], cycle - ahead))) return;
+      var c = one_('고객', '고객번호', o['고객']); if (!c) return;
+      var t = now_();
+      var rec = append_('접수', { '접수번호': nextId_('접수', 'R', 5), '시각': t, '경로': '정기', '원문': '정기 — ' + o['주문번호'] + ' 다음 예약',
+                                  '이름': c['이름'], '연락처': c['연락처'], '처리상태': '처리됨', '연결 고객': c['고객번호'], '시험': o['시험'] });
+      var n = append_('주문', { '주문번호': orderNo_(t), '접수번호': rec['접수번호'], '고객': c['고객번호'], '곡식': grainsText_(reg), '조합': JSON.stringify(reg),
+                               '양(kg)': totalKg_(reg), '상태': '접수', '입금 안내 횟수': 0, '받는 분': o['받는 분'], '상태 바뀐 시각': t,
+                               '메모': '정기 — ' + o['주문번호'] + ' 다음', '정기': 'Y', '시험': o['시험'] });
+      rec['연결 주문'] = n['주문번호']; save_('접수', rec);
+      o['정기'] = '이어짐'; save_('주문', o);
+      log_('정기 예약', n['주문번호'], confirm_(n, c), o['주문번호'] + ' 다음');
+    });
+}
+
+// 시범 운행 정리 — 「시험」 표시 줄과 그 고객의 동의·취향·관심·연락·처리 기록을 지운다. 확정분은 먼저 취소해 재고·작업 달력을 되돌린다.
+function purgeTest() {
+  return withLock_(function () {
+    var orders = rows_('주문').filter(function (o) { return o['시험'] === 'Y'; });
+    orders.forEach(function (o) { if (['확정', '입금'].indexOf(o['상태']) >= 0) cancel_(o, '시험 정리'); });
+    var cids = rows_('고객').filter(function (c) { return c['시험'] === 'Y'; }).map(function (c) { return c['고객번호']; });
+    var rids = rows_('접수').filter(function (r) { return r['시험'] === 'Y'; }).map(function (r) { return r['접수번호']; });
+    var onos = orders.map(function (o) { return o['주문번호']; });
+    var ids = cids.concat(rids, onos), n = 0;
+    function drop(name, test) {
+      var sh = sheet_(name);
+      rows_(name).filter(test).map(function (r) { return r._row; }).sort(function (a, b) { return b - a; })
+        .forEach(function (row) { sh.deleteRow(row); n++; });
+    }
+    drop('주문', function (o) { return o['시험'] === 'Y'; });
+    drop('접수', function (r) { return r['시험'] === 'Y'; });
+    ['동의', '취향', '관심'].forEach(function (s) { drop(s, function (r) { return cids.indexOf(r['고객']) >= 0; }); });
+    drop('연락', function (r) { return cids.indexOf(r['고객']) >= 0 || onos.indexOf(r['주문']) >= 0; });
+    drop('처리 기록', function (r) { return ids.indexOf(r['대상']) >= 0; });
+    var tels = rows_('고객').filter(function (c) { return c['시험'] === 'Y'; }).map(function (c) { return phone_(c['연락처']); });
+    drop('로그인', function (r) { return cids.indexOf(r['고객']) >= 0; });
+    drop('인증', function (r) { return tels.indexOf(phone_(r['번호'])) >= 0; });
+    drop('고객', function (c) { return c['시험'] === 'Y'; });
+    log_('시험 정리', '', n + '줄 지움');
+    return n;
+  });
 }
 
 // 지난 주문 불러오기 — 조합·회차·동의 여부·○호만(이름·주소·주문 내역은 주지 않는다). 번호마다 한 시간에 몇 번만.
@@ -744,16 +1297,33 @@ function doGet(e) {
   var q = (e && e.parameter) || {};
   var body;
   try {
-    body = q.action === 'switches' ? exportSwitches() : q.action === 'recall' ? recall(q.tel) : { ok: false, error: 'unknown action' };
+    body = q.action === 'switches' ? exportSwitches() : { ok: false, error: 'unknown action' };   // 번호가 든 요청은 주소에 싣지 않고 POST로만
   } catch (err) { log_('doGet', q.action || '', '실패', String(err)); body = { ok: false }; }
   return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(ContentService.MimeType.JSON);
 }
+function testMode_() { return PropertiesService.getScriptProperties().getProperty('TEST_MODE') === 'on'; }
 function doPost(e) {
   var body;
   try {
     var p = JSON.parse(e.postData.contents);
-    if (p.mode === 'order' && !on_('order')) p.mode = 'inquiry';   // 주문 스위치가 꺼져 있으면 문의로 받는다
-    body = intake(p);
+    if (p.test && !testMode_()) delete p.test;   // 시험 표시는 스크립트 속성 TEST_MODE=on 일 때만(가짜 결제 막기)
+    if (p.eventType === 'DEPOSIT_CALLBACK' || (p.secret && p.orderId && p.status && !p.kind)) body = depositCallback(p.data || p);
+    else if (p.kind === 'stock') body = stockCheck(p);
+    else if (p.kind === 'checkout') body = checkout(p);
+    else if (p.kind === 'pay-confirm') body = payConfirm(p);
+    else if (p.kind === 'pay-abort') body = payAbort(p);
+    else if (p.kind === 'code') body = sendCode(p);
+    else if (p.kind === 'verify') body = verifyCode(p);
+    else if (p.kind === 'join') body = join(p);
+    else if (p.kind === 'login') body = login(p);
+    else if (p.kind === 'reset') body = resetPw(p);
+    else if (p.kind === 'member') body = member(p);
+    else if (p.kind === 'recall') body = recall(p.tel);
+    else if (p.kind === 'lookup') body = lookup(p.tel, p.no);
+    else if (p.kind === 'cancel') body = cancelMine(p.tel, p.no);
+    else if (p.kind === 'pause') body = pauseMine(p.tel, p.no);
+    else if (p.kind === 'order' && !on_('order') && !p.test) body = { ok: false, closed: true };   // 판매 시작 전엔 시험 주문만
+    else body = intake(p);
   } catch (err) {
     log_('doPost', '', '실패', String(err));
     body = { ok: false };
@@ -764,7 +1334,7 @@ function doPost(e) {
 // ───────── 예약 작업 ─────────
 function runScheduled() {
   withLock_(function () {
-    [checkDeadlines, processWaitlist, detectLate, afterArrival, updateStages, refillAlert, consentCheck, flushWaiting].forEach(function (fn) {
+    [checkDeadlines, processWaitlist, detectLate, afterArrival, scheduleRegular, updateStages, refillAlert, consentCheck, flushWaiting].forEach(function (fn) {
       try { fn(); } catch (err) { log_(fn.name || '예약 작업', '', '실패', String(err)); }
     });
     var r = setting_('last_run');

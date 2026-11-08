@@ -2,7 +2,10 @@
 
 빌드 도구 없는 손 HTML. 글자의 정본은 `80_브랜드마케팅/홈페이지/홈페이지_문안.md`, 구성·디자인은 `홈페이지_기획.md`.
 
-- 페이지: `/` `/moaon/` `/doodoo/` `/contact/` `/notice/`. 위 메뉴는 HOME · ABOUT · DOODOO · CONTACT 넷, 공고는 바닥글 「NOTICE 공고」로 들어간다.
+- 페이지: `/` · SHOP `/doodoo/`(상품 `rice/` `soy/` · 장바구니 `cart/` · 주문서·결제·완료 `order/` · 비회원 주문조회 `my/`) · STORY `/moaon/` · CONTACT `/contact/` · 회원 `/member/`(`login/` `join/` `find/`) · `/notice/` · `/privacy/`. 위 메뉴는 SHOP · STORY · CONTACT 셋 + 사람·장바구니 아이콘(기획 11-5), 공고·개인정보처리방침은 바닥글.
+- 디자인 정본은 기획 11장(색·글자·여백 토큰은 `assets/style.css` 맨 위). 화면 동작은 `assets/shop.js` 하나, 값·스위치는 `assets/order-config.js`.
+- 페이지마다 머리·서랍·바닥글이 같다. 고칠 때는 모든 HTML의 같은 줄을 함께 고친다(빌드 도구 없음).
+- 도정일·주문 받기(order)·회원(member)·결제(pay_pg) 스위치는 장부가 정본 — 규칙 일꾼(`endpoint`)이 알려 준다. 토스 클라이언트 키는 `order-config.js` `pay.clientKey`(공개 키), 시크릿 키는 Apps Script 스크립트 속성에만.
 - 리디자인 기준: `MOAON_홈페이지_리디자인_실행지시서` (2026-11-03). 되돌릴 지점은 태그 `backup-before-redesign-20261103`.
 - 사진은 품질 우선(대표 결정 2026-11-03). 대표가 준 AI 생성 사진(`hero-field` `moaon-land` `summer` `harvest-rice` `farmer-story-no-face` `doodoo-grains`)과 직접 찍은 사진을 함께 쓴다. 채종포는 실제 사진만 쓴다. 워터마크 있는 사진, 얼굴이 보이는 사람 사진은 쓰지 않는다.
 - 공고 주소는 `https://moaonfarm.kr/notice/` 하나로 고정한다. 임시 주소를 공고 주소로 쓰지 않는다.

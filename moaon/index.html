@@ -2,84 +2,101 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>모아온 소개 | 정읍에서 농사를 짓습니다</title>
-<meta name="description" content="농업의 가치를 함께 모읍니다. 전북 정읍 태인면 매계리, 동진강 들녘. 벼·콩·밀·보리·조사료를 기르고, 다음 해 씨앗을 생산합니다.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STORY | 모아온 MOAON</title>
+<meta name="description" content="4대째, 정읍 들녘에서 벼농사를 짓습니다. 씨앗부터 도정까지, 모든 과정을 직접 합니다.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://moaonfarm.kr/moaon/">
-<meta property="og:title" content="모아온 소개 | 정읍에서 농사를 짓습니다">
-<meta property="og:description" content="농업의 가치를 함께 모읍니다.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:title" content="STORY | 모아온 MOAON">
+<meta property="og:description" content="4대째, 정읍 들녘에서 벼농사를 짓습니다. 씨앗부터 도정까지, 모든 과정을 직접 합니다.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/style.css">
 <script>document.documentElement.classList.add('js')</script>
-<script src="../assets/site.js" defer></script>
+<script src="/assets/site.js" defer></script>
+<script src="/assets/order-config.js" defer></script>
+<script src="/assets/shop.js" defer></script>
 </head>
 <body>
+<div class="notice-band" hidden></div>
 <header class="top"><div class="wrap">
-  <a class="brand" href="../" aria-label="모아온 MOAON 처음으로"><b>MOAON</b><span>모아온</span></a>
-  <button class="menu-btn" type="button" aria-label="메뉴" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  <nav class="menu"><a href="../">HOME</a><a href="./" aria-current="page">ABOUT</a><a href="../doodoo/">DOODOO</a><a href="../contact/">CONTACT</a></nav>
+  <a class="logo" href="/" aria-label="두두농장 처음으로"><img src="/assets/logo-dudu.svg" alt="두두농장" width="117" height="42"></a>
+  <nav class="menu" aria-label="주 메뉴"><a href="/doodoo/">SHOP</a><a href="/moaon/" aria-current="page">STORY</a><a href="/contact/">CONTACT</a></nav>
+  <div class="icons">
+    <a class="ib" data-person href="/doodoo/my/" aria-label="주문조회"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></a>
+    <a class="ib" data-cart-open href="/doodoo/cart/" aria-label="장바구니"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h2l2.2 11h11l2-8H6.4"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="dot num" hidden>0</span></a>
+    <button class="ib menu-btn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
 </div></header>
 
-<main>
-<section class="page-intro"><div class="wrap">
+<main id="main">
+<section class="sec"><div class="wrap split">
   <div class="lead">
-    <p class="label">ABOUT MOAON</p>
-    <h1>농업의 가치를 함께 모읍니다.</h1>
-    <dl class="who">
-      <div><dt>누가</dt><dd>부모님 논을 이어받아 농사짓습니다.</dd></div>
-      <div><dt>어디서</dt><dd>전북 정읍 태인면 매계리, 동진강 들녘.</dd></div>
-      <div><dt>무엇을</dt><dd>벼·콩·밀·보리·조사료를 기르고, 다음 해 씨앗을 생산합니다.</dd></div>
-    </dl>
-    <p class="name-line">모아는 ‘모으다’, 온(溫)은 그 결실을 따뜻하게 나누고 싶은 마음입니다.</p>
+    <span class="label">ABOUT MOAON</span>
+    <h1>4대째, 정읍 들녘에서 벼농사를 짓습니다.</h1>
+    <p>전북 정읍시 태인면, 동진강 들녘에서 벼·콩·밀·보리·조사료를 기릅니다.</p>
+    <p>씨앗부터 도정까지, <b class="em">모든 과정</b>을 직접 합니다 — 종자 · 재배 · 수확 · 건조 · 저장 · 도정 · 선별.</p>
+    <p>지켜온 땅과 경험을 바탕으로, 농업에 필요한 새로운 방법을 하나씩 더해갑니다.</p>
+    <p class="small">모아는 ‘모으다’, 온(溫)은 그 결실을 따뜻하게 나누고 싶은 마음입니다.</p>
   </div>
-  <figure class="wide cine rise" style="margin-top:48px"><img src="../assets/photos/summer.webp" alt="물이 찬 논에 줄지어 자라는 어린 벼와 맑은 하늘" fetchpriority="high"></figure>
+  <figure><img src="/assets/photos/farmer-story-no-face.webp" alt="익은 벼 이삭을 두 손으로 살피는 모습" fetchpriority="high"></figure>
 </div></section>
 
-<section class="section paper"><div class="wrap split">
-  <div class="lead">
-    <p class="label">OUR BEGINNING</p>
-    <h2>부모님이 일궈 온 논에서, 새로운 농업을 이어갑니다.</h2>
-    <p>지켜 온 땅과 경험 위에 지금 농업에 필요한 방법을 하나씩 더합니다.</p>
-    <p>어르신들의 경험을 존중하고, 농업을 시작하려는 청년과 귀농인에게 기회가 이어지기를 바랍니다.</p>
-  </div>
-  <figure class="rise"><img src="../assets/photos/farmer-story-no-face.webp" alt="익은 벼 이삭을 두 손으로 살피는 모습" loading="lazy"></figure>
+<section class="sec alt"><div class="wrap">
+  <h2>씨앗부터 도정까지, <span class="em">모든 과정</span>을 직접 합니다</h2>
+  <ol class="process" aria-label="생산 과정">
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><ellipse cx="12" cy="13" rx="4.5" ry="6.5"/><path d="M12 6.5v13"/></svg><b>1</b>종자</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21v-9M12 12c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2.5-5-6-5 0 3 2.5 5 6 5z"/><path d="M5 21h14"/></svg><b>2</b>재배</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 21V8M12 8c-2-1-3-3-3-5M12 8c2-1 3-3 3-5M12 12c-2-1-4-1-5 0M12 12c2-1 4-1 5 0M12 16c-2-1-4-1-5 0M12 16c2-1 4-1 5 0"/></svg><b>3</b>수확</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><b>4</b>건조</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 10l7-5 7 5v10H5z"/><path d="M9 20v-6h6v6"/></svg><b>5</b>저장</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 5v4.5M12 14.5V19M5 12h4.5M14.5 12H19"/></svg><b>6</b>도정</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 7h18l-3 8H6z"/><path d="M8 11h.01M12 11h.01M16 11h.01M9 19l3-4 3 4"/></svg><b>7</b>선별</li>
+  </ol>
 </div></section>
 
-<section class="section"><div class="wrap split flip">
+<section class="sec"><div class="wrap split flip">
   <div class="lead">
-    <p class="label">SEED FARMING</p>
+    <span class="label">SEED FARMING</span>
     <h2>다음 해의 씨앗을 기르는 일.</h2>
     <p>정읍 매계 채종단지를 10년 넘게 운영하며, 다른 농가가 쓸 정부 보급종 씨앗을 생산해 왔습니다.</p>
   </div>
-  <figure class="rise"><img src="../assets/photos/moaon-seed-field.webp" alt="정읍 매계 채종포의 벼논" loading="lazy"></figure>
+  <!-- 사진: 어린 벼 논 외부 사진(대표가 고른 뒤) — 실제 채종포 사진이 오면 바꿈. 오기 전엔 빈 칸 -->
+  <figure><span class="ph-box" style="display:block"></span></figure>
 </div></section>
 
-<section class="section paper"><div class="wrap">
-  <p class="label">FOUR SEASONS</p>
-  <h2>계절의 농사</h2>
-  <div class="seasons">
-    <article class="season rise"><img src="../assets/photos/season-spring.png" alt="해 뜨는 무논에 막 심은 어린 모" width="800" height="450" loading="lazy"><h3>봄</h3><p>논을 갈고, 볍씨를 틔워 모를 키우고, 콩을 심습니다.</p></article>
-    <article class="season rise"><img src="../assets/photos/moaon-land.webp" alt="햇살 아래 푸른 여름 벼논" loading="lazy"><h3>여름</h3><p>모내기를 하고, 풀과 거름을 살핍니다.</p></article>
-    <article class="season rise"><img src="../assets/photos/autumn-gold.webp" alt="금빛으로 익은 가을 벼논" loading="lazy"><h3>가을</h3><p>벼와 콩을 거두고, 말리고, 고릅니다.</p></article>
-    <article class="season rise"><img src="../assets/photos/winter-empty-field.webp" alt="벼를 거둔 뒤의 빈 논과 구름 낀 하늘" loading="lazy"><h3>겨울</h3><p>빈 논에 보리와 밀을 뿌려 다음 계절을 준비합니다.</p></article>
-  </div>
-  <p class="closing">한 해의 농사는 밥상으로 이어집니다.</p>
-  <p class="center"><a class="btn" href="../doodoo/">두두 곡식 보기 →</a></p>
+<section class="band"><div class="wrap">
+  <h2>우리가 기른 곡식은 두두로 전합니다.</h2>
+  <a class="btn" href="/doodoo/">두두 곡식 보기</a>
 </div></section>
 </main>
 
-<footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p></div>
-  <div>
-    <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
-    전북특별자치도 정읍시 태인면 매계리 25<br>
-    전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
-    대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
-  </div>
-  <div class="foot-last"><p><a href="../notice/">공고</a> · <a href="../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+<footer><div class="wrap">
+  <nav class="foot-links" aria-label="바닥글 메뉴"><a href="/terms/" data-need="terms" hidden>이용약관</a><a class="strong" href="/privacy/">개인정보처리방침</a><a href="/notice/">공고</a><a href="/doodoo/my/">비회원 주문조회</a></nav>
+  <p class="foot-info"><span>모아온(농업회사법인 설립 준비 중)</span><span>대표 최현철</span></p>
+  <p>전북특별자치도 정읍시 태인면 매계리 25</p>
+  <p class="foot-info"><span>전화 010-4689-8106</span><span>이메일 haree7777@gmail.com</span></p>
+  <p class="foot-info"><span class="foot-opt"></span><span class="foot-opt"></span></p>
+  <p class="foot-copy">Copyright © MOAON. All rights reserved.</p>
 </div></footer>
+
+<div class="scrim"></div>
+<aside class="drawer left" id="menu-drawer" aria-label="메뉴" aria-hidden="true">
+  <div class="pan-h"><b>메뉴</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="pan-b drawer-menu">
+    <nav aria-label="메뉴"><a href="/doodoo/">SHOP</a><a href="/moaon/">STORY</a><a href="/contact/">CONTACT</a></nav>
+    <div class="small"><a href="/member/login/" data-m="out" hidden>로그인</a><a href="/member/join/" data-m="out" hidden>회원가입</a><a href="/member/" data-m="in" hidden>마이페이지</a><a href="/doodoo/my/">주문조회</a></div>
+  </div>
+</aside>
+<aside class="drawer" id="cart-drawer" aria-label="장바구니" aria-hidden="true">
+  <div class="pan-h"><b>장바구니</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="pan-b"></div>
+  <div class="pan-f" hidden><div class="money"></div><button class="btn wide" type="button" data-buy>구매하기</button><button class="btn line wide" type="button" data-close>쇼핑 계속하기</button></div>
+</aside>
+<div class="sheet" id="buy-choice" aria-label="주문 방법" aria-hidden="true">
+  <div class="grab"></div>
+  <div class="pan-b"><button class="btn wide" type="button" data-login-order>로그인하고 주문하기</button><button class="btn line wide" type="button" data-guest-order>비회원으로 주문하기</button></div>
+</div>
 </body>
 </html>

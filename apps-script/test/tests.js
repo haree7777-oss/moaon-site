@@ -17,7 +17,7 @@ function web(name, tel, items, consent, mode) { tick(15); return intake({ kind: 
 
 // 1. 장부
 setup();
-ok('시트 14장', __book.getSheets().length === 14, __book.getSheets().map(function (s) { return s.name; }).join(','));
+ok('시트 16장', __book.getSheets().length === 16, __book.getSheets().map(function (s) { return s.name; }).join(','));
 ok('기본 시트1 지움', !__book.getSheetByName('시트1'));
 ok('설정·문자틀·연락 규칙 기본값', rows_('설정').length === DEFAULT_SETTINGS.length && rows_('문자틀').length === DEFAULT_TEMPLATES.length && rows_('연락 규칙').length === DEFAULT_RULES.length);
 setup();
@@ -77,7 +77,7 @@ ok('여러 곡식 한 주문', rows_('주문').filter(function (o) { return o['�
 ok('콩 재고 예약 5', stock('soy')['예약된 양(kg)'] === 5);
 ok('작업 달력엔 쌀만(10kg)', rows_('작업 달력').filter(function (d) { return ymd_(d['날짜']) === ymd_(o3['작업일']); })[0]['배정된 양(kg)'] >= 10);
 ok('금액 = 쌀 40,000 + 콩 30,000', o3['곡식 금액'] === 70000 && o3['청구액'] === 70000, o3['곡식 금액']);
-ok('문자 곡식 칸에 품목 전체', /두두쌀 찹쌀 10% 10kg, 선풍 콩 5kg/.test(msgs(cust('01000000003')['고객번호'], '확정')[0]['결과']));
+ok('문자 곡식 칸에 품목 전체', /두두쌀 찹쌀 10% 10kg, 두두콩 5kg/.test(msgs(cust('01000000003')['고객번호'], '확정')[0]['결과']));
 
 // 7. 재고 부족 → 대기 → 재고 넣으면 「대기확정」
 var r4 = web('시험사', '01000000004', [soy(10)], []);
@@ -184,18 +184,19 @@ ok('한 시간 5번 넘으면 막음', rc.limited === true);
 // 17. 웹 입구
 setVal('order', '끔');
 var before = rows_('주문').length;
-doPost({ postData: { contents: JSON.stringify({ kind: 'order', mode: 'order', '이름': '시험구', '연락처': '01000000009', items: [rice(10, 10)] }) } });
-ok('order 끔 → 주문 안 생기고 관심', rows_('주문').length === before && cust('01000000009')['단계'] === '관심');
+var closedRes = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'order', mode: 'order', '이름': '시험구', '연락처': '01000000009', items: [rice(10, 10)] }) } }).text);
+ok('order 끔 → 주문 받지 않음(closed)', closedRes.ok === false && closedRes.closed === true && rows_('주문').length === before && !cust('01000000009'));
 doPost({ postData: { contents: JSON.stringify({ kind: 'bulk', '경로': '상담', '이름': '시험식당', '연락처': '01000000011', '상호': '시험식당', '지역': '정읍시',
   '유형': '식당·가게', '곡식': '쌀, 콩', '찹쌀': '10%', '양': '20~100kg', '방식': '주기적으로 2주', '시작': '바로', '포장': '큰 포대', '요청사항': '', '동의': [] }) } });
 var cb = cust('01000000011');
 ok('상담 → 식당·가게 고객, 단계 식당·단체', cb['유형'] === '식당·가게' && cb['단계'] === '식당·단체');
 ok('상담 → 관심 한 줄·접수 메모', /식당·가게/.test(last('관심')['용도']) && last('접수')['경로'] === '상담' && /대표 직접 연락/.test(last('접수')['메모']));
-ok('상담 → 상담접수 안내 한 통만', msgs(cb['고객번호']).length === 1 && msgs(cb['고객번호'])[0]['문자틀'] === '상담접수' && /상담 신청을 받았습니다/.test(msgs(cb['고객번호'])[0]['결과']));
+ok('상담 → 상담접수 안내 한 통만', msgs(cb['고객번호']).length === 1 && msgs(cb['고객번호'])[0]['문자틀'] === '상담접수' && /문의를 받았습니다/.test(msgs(cb['고객번호'])[0]['결과']));
 var g = JSON.parse(doGet({ parameter: { action: 'switches' } }).text);
 ok('doGet 스위치 JSON', g.switches.order === false && g.switches.loyalty === true && g.seatsLeft === 0);
-var gr = JSON.parse(doGet({ parameter: { action: 'recall', tel: '01000000011' } }).text);
-ok('doGet 불러오기', gr.found === true && gr.combos && !gr['이름']);
+var gr = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'recall', tel: '01000000011' }) } }).text);
+ok('불러오기는 POST로(번호를 주소에 싣지 않음)', gr.found === true && gr.combos && !gr['이름']);
+ok('doGet 으로는 불러오기 안 됨', JSON.parse(doGet({ parameter: { action: 'recall', tel: '01000000011' } }).text).ok === false);
 doPost({ postData: { contents: '깨진 글' } });
 ok('깨진 요청 → 처리 기록 실패', last('처리 기록')['결과'] === '실패');
 
@@ -217,6 +218,175 @@ var cZ = cust('01000000002'); cZ['예상 소진일'] = day_(addDays_(clock, -61)
 updateStages();
 ok('쉬는 고객으로', cust('01000000002')['단계'] === '쉬는 고객');
 ok('동의 없으면 안부 광고 건너뜀', /^건너뜀: 광고 조건/.test(msgs(cZ['고객번호'], '안부')[0]['결과']));
+
+// 21. 문자틀 — 접수·확정에 주문번호, 도정일
+var cf = msgs(cust('01000000001')['고객번호'], '확정')[0]['결과'];
+ok('확정 문자에 주문번호·도정일', cf.indexOf('주문(' + r1['주문번호'] + ')이 확정됐습니다') >= 0 && /11월 12일에 도정해 보내 드립니다/.test(cf), cf);
+ok('접수 문자(일반 판)에 주문번호', DEFAULT_TEMPLATES[0][2].indexOf('주문번호 {주문번호}') >= 0);
+ok('확정 답에 도정일', r1['도정일'] === '2026-11-12', r1['도정일']);
+
+// 22. 도정일 — 자리 남은 가장 가까운 날, 다 차면 다음 날
+at(2026, 12, 1, 10);
+var md = exportSwitches().millDate;
+ok('내보내기 도정일 = 내일부터 자리 남은 첫날', md === '2026-12-02', md);
+var full = rows_('작업 달력').filter(function (d) { return ymd_(d['날짜']) === '2026-12-02'; })[0]; full['배정된 양(kg)'] = 25; save_('작업 달력', full);
+ok('자리가 10kg 안 남으면 다음 날', exportSwitches().millDate === '2026-12-03', exportSwitches().millDate);
+
+// 23. 내 주문 — 번호+주문번호 조회, 받는 분 가림, 틀림 막기
+setVal('order', '켬');
+var T = '01000000020';
+var mo = web('시험이십', T, [rice(20, 10, true, 14)], []);
+var v = lookup('010-0000-0020', mo['주문번호']);
+ok('조회: 진행 단계 확정', v.found && v.step === 1 && v.steps.join() === '접수,확정,입금 확인,도정,발송', JSON.stringify(v).slice(0, 200));
+ok('조회: 받는 분은 첫 글자·시·군까지', v.to.name.charAt(0) === '시' && v.to.name.indexOf('험') < 0 && v.to.region === '시험시', JSON.stringify(v.to));
+ok('조회: 정기·다음 예약 도정일', v.regular === true && /^2026-12-\d\d$/.test(v.nextDate), v.nextDate);
+ok('조회: 주소·연락처·이름 원문 없음', JSON.stringify(v).indexOf('시험로') < 0 && JSON.stringify(v).indexOf(T) < 0 && JSON.stringify(v).indexOf('시험이십') < 0);
+ok('다른 번호로는 안 보임', lookup('01000000001', mo['주문번호']).found === false);
+for (var q = 0; q < 6; q++) lookup('01000000021', 'D000000-000');
+ok('여러 번 틀리면 막음', lookup('01000000021', 'D000000-000').limited === true);
+var mo2 = web('시험이십', T, [soy(5)], []);
+ok('같은 번호 다른 주문 목록', lookup(T, mo2['주문번호']).others.some(function (x) { return x.no === mo['주문번호']; }));
+
+// 24. 정기 멈추기
+var pz = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'pause', tel: T, no: mo['주문번호'] }) } }).text);
+ok('정기 멈춤 → 장부 정기 칸 멈춤', pz.ok && order(mo['주문번호'])['정기'] === '멈춤' && pz.view.paused === true);
+
+// 25. 도정 전 취소 — 재고·작업 달력 복귀, 취소확인(입금 전이면 환불 문장 없음)
+var soyBefore = stock('soy')['예약된 양(kg)'];
+var cx = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'cancel', tel: T, no: mo2['주문번호'] }) } }).text);
+ok('취소 → 상태 취소·콩 예약 복귀', cx.ok && order(mo2['주문번호'])['상태'] === '취소' && stock('soy')['예약된 양(kg)'] === soyBefore - 5, stock('soy')['예약된 양(kg)']);
+var cm = msgs(cust(T)['고객번호'], '취소확인').pop()['결과'];
+ok('입금 전 취소확인 — 환불 문장 뺌', /두두콩 5kg 예약을 취소했습니다\./.test(cm) && cm.indexOf('환불') < 0, cm);
+setStatus(mo['주문번호'], '입금');
+var cx2 = cancelMine(T, mo['주문번호']);
+ok('입금 뒤 취소확인 — 전액 환불 문장', cx2.ok && /전액 환불해 드립니다/.test(msgs(cust(T)['고객번호'], '취소확인').pop()['결과']));
+var mo3 = web('시험이십', T, [rice(0, 10)], []); setStatus(mo3['주문번호'], '작업');
+var cx3 = cancelMine(T, mo3['주문번호']);
+ok('도정 뒤엔 취소 안 됨', cx3.ok === false && order(mo3['주문번호'])['상태'] === '작업' && cx3.view.canCancel === false);
+
+// 26. 정기 — 다음 도정일 3일 전에 같은 조합으로 다시 예약
+var rg = web('시험이십', T, [rice(10, 10, false, 14), soy(5)], []);
+setStatus(rg['주문번호'], '입금'); setStatus(rg['주문번호'], '작업');
+var wd = order(rg['주문번호'])['작업일'];
+clock = new Date(addDays_(wd, 10)); clock.setHours(10); scheduleRegular();
+ok('아직 이르면 안 만듦', order(rg['주문번호'])['정기'] === 'Y');
+clock = new Date(addDays_(wd, 11)); clock.setHours(10); scheduleRegular();
+var child = last('주문');
+ok('정기 → 쌀만 다음 예약·확정, 앞 주문은 이어짐', order(rg['주문번호'])['정기'] === '이어짐' && child['정기'] === 'Y' && child['곡식'] === '두두쌀 찹쌀 10% 10kg' && child['상태'] === '확정', child['곡식'] + ' ' + child['상태']);
+scheduleRegular();
+ok('다음 예약은 한 번만', rows_('접수').filter(function (r) { return r['원문'] === '정기 — ' + rg['주문번호'] + ' 다음 예약'; }).length === 1);
+
+// 27. 시범 운행 — 시험 표시 주문만 지움, 재고 되돌림
+setVal('order', '끔');
+var riceRes = stock('rice')['예약된 양(kg)'], ordersBefore = rows_('주문').length, custBefore = rows_('고객').length;
+var tp = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'order', mode: 'order', test: true, '경로': '홈페이지', '이름': '시험주문', '연락처': '01000000099', '주소': '시험시 시험로 9', items: [rice(10, 20)], '동의': ['소식', '환불확인'] }) } }).text);
+ok('주문 꺼져도 시험 주문은 받음·시험 표시', tp.ok && tp['상태'] === '확정' && order(tp['주문번호'])['시험'] === 'Y' && cust('01000000099')['시험'] === 'Y');
+ok('시험 주문도 재고 예약', stock('rice')['예약된 양(kg)'] === riceRes + 20);
+var gone = purgeTest();
+ok('purgeTest → 시험 줄만 지움', gone > 0 && rows_('주문').length === ordersBefore && rows_('고객').length === custBefore && !cust('01000000099') && !one_('주문', '주문번호', tp['주문번호']), gone);
+ok('purgeTest → 재고·작업 달력 되돌림', stock('rice')['예약된 양(kg)'] === riceRes, stock('rice')['예약된 양(kg)']);
+ok('purgeTest → 그 고객 연락·동의 없음', !rows_('연락').some(function (s) { return s['주문'] === tp['주문번호']; }) && !rows_('동의').some(function (a) { return a['경로'] === '홈페이지' && a['고객'] === tp['고객번호']; }));
+
+// 28. 머리줄 — 끝에 새 칸이 생긴 옛 장부도 setup 이 칸만 채움
+var oldHead = SCHEMA['주문'].slice(0, -9), sh = __book.getSheetByName('주문');
+sh.data[0] = oldHead.slice(); setup();
+ok('옛 머리줄 → 정기·시험·결제 칸 채움', sh.data[0].slice(-9).join() === '정기,시험,결제수단,결제 키,결제 상태,결제 시각,취소 금액,결제 비밀,가상계좌', sh.data[0].slice(-9).join());
+ok('설정 설명 — 할인 기준 구매금액(배송비 제외)', /구매금액\(주문 상품 금액, 배송비 제외\)/.test(setting_('loyalty_rate')['설명']));
+
+// 29. 결제 — 남은 양 확인 두 번, 자리 잡기, 수량, 금액은 규칙 일꾼이 정함
+function post(o) { return JSON.parse(doPost({ postData: { contents: JSON.stringify(o) } }).text); }
+at(2026, 12, 7, 10); setVal('order', '끔'); setVal('pay_pg', '끔');
+for (var cd = 0; cd < 60; cd++) append_('작업 달력', { '날짜': day_(addDays_(new Date(2026, 11, 21), cd)), '도정 가능': '가능', '하루 최대량(kg)': 30, '배정된 양(kg)': 0 });
+var buyer = { '이름': '시험결제', '연락처': '01000000030', '주소': '시험시 시험로 30', '동의': ['환불확인'] };
+function co(items, extra) { tick(5); return post(Object.assign({ kind: 'checkout', test: true, items: items }, buyer, extra || {})); }
+ok('주문서 진입 남은 양 확인', post({ kind: 'stock', items: [rice(10, 10)] }).ok === true && post({ kind: 'stock', items: [soy(500)] }).short === true);
+ok('판매 시작 전 · 시험 아님 → 결제 안 받음', post(Object.assign({ kind: 'checkout', items: [rice(10, 10)] }, buyer)).closed === true);
+__props.TEST_MODE = ''; ok('TEST_MODE 꺼지면 test 표시도 무시', post(Object.assign({ kind: 'checkout', test: true, items: [rice(10, 10)] }, buyer)).closed === true); __props.TEST_MODE = 'on';
+var riceRes0 = stock('rice')['예약된 양(kg)'];
+var k1 = co([Object.assign(rice(10, 10, true), { qty: 2 })]);
+var ko1 = order(k1['주문번호']);
+ok('체크아웃 → 결제대기·자리 잡음(10kg × 2)', k1.ok && ko1['상태'] === '결제대기' && stock('rice')['예약된 양(kg)'] === riceRes0 + 20, JSON.stringify(k1));
+ok('수량 금액: 40,000×2 + 소포장 1,000×2', ko1['곡식 금액'] === 80000 && ko1['소포장'] === 2000 && k1['청구액'] === Number(ko1['청구액']), ko1['곡식 금액'] + '/' + ko1['소포장']);
+ok('남은 양이 모자라면 결제 전에 막음', co([soy(500)]).short === true);
+ok('금액이 다르면 승인 안 함·자리 풀기', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_1', orderId: k1['주문번호'], amount: 1 }).code === 'AMOUNT' && order(k1['주문번호'])['상태'] === '취소' && stock('rice')['예약된 양(kg)'] === riceRes0);
+
+// 30. 카드 결제 → 입금(확정+입금 한 번에), 입금확인 문자
+var k2 = co([rice(10, 10)]);
+var p2 = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] });
+var o2 = order(k2['주문번호']);
+ok('카드 승인 → 상태 입금·결제 완료', p2.ok && o2['상태'] === '입금' && o2['결제 상태'] === '완료' && o2['결제수단'] === '카드', JSON.stringify(p2));
+ok('카드 → 입금확인 문자(도정일)', /입금 확인했습니다\. \d+월 \d+일에 도정해/.test(msgs(cust('01000000030')['고객번호'], '입금확인').pop()['결과']));
+ok('새로 고침해도 한 번만 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] }).ok && msgs(cust('01000000030')['고객번호'], '입금확인').length === 1);
+var kf = co([rice(0, 10)]);
+var pf = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_FAIL_x', orderId: kf['주문번호'], amount: kf['청구액'] });
+ok('승인 실패 → 자리 풀고 취소', pf.ok === false && order(kf['주문번호'])['상태'] === '취소');
+var kb = co([rice(0, 10)]);
+ok('결제창에서 취소로 돌아옴 → pay-abort 로 자리 풀기', post({ kind: 'pay-abort', orderId: kb['주문번호'], tel: '01000000030', code: 'PAY_PROCESS_CANCELED' }).ok && order(kb['주문번호'])['상태'] === '취소');
+
+// 31. 가상계좌 — 확정 + 계좌 안내 → 웹훅 입금 → 입금 / 기한 지나면 자동 취소
+var k3 = co([soy(5)]);
+var p3 = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_3', orderId: k3['주문번호'], amount: k3['청구액'] });
+var o3v = order(k3['주문번호']);
+ok('가상계좌 → 확정·입금 대기·계좌 돌려줌', p3.ok && o3v['상태'] === '확정' && o3v['결제 상태'] === '입금 대기' && p3['가상계좌'] && p3['가상계좌']['은행'] === '농협은행', JSON.stringify(p3['가상계좌']));
+ok('확정 문자에 가상계좌 번호', msgs(cust('01000000030')['고객번호'], '확정').pop()['결과'].indexOf('농협은행 ' + JSON.parse(o3v['가상계좌']).account) >= 0);
+ok('웹훅 secret 다르면 거절', post({ createdAt: 'x', secret: 'wrong', status: 'DONE', orderId: k3['주문번호'] }).ok === false && order(k3['주문번호'])['상태'] === '확정');
+ok('웹훅 입금 → 입금·결제 완료', post({ createdAt: 'x', secret: o3v['결제 비밀'], status: 'DONE', transactionKey: 't', orderId: k3['주문번호'] }).ok && order(k3['주문번호'])['상태'] === '입금' && order(k3['주문번호'])['결제 상태'] === '완료');
+var k4 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_4', orderId: k4['주문번호'], amount: k4['청구액'] });
+var soyRes = stock('soy')['예약된 양(kg)'];
+at(2026, 12, 11, 10); checkDeadlines();
+ok('가상계좌 기한 지나면 바로 자동 취소·재고 복귀', order(k4['주문번호'])['상태'] === '취소' && stock('soy')['예약된 양(kg)'] === soyRes - 5 && msgs(cust('01000000030')['고객번호'], '자동취소').length >= 1);
+var k5 = co([rice(10, 10)]); clock = new Date(clock.getTime() + 31 * 60000); checkDeadlines();
+ok('결제창에서 안 돌아오면 30분 뒤 자리 풀기(문자 없음)', order(k5['주문번호'])['상태'] === '취소' && order(k5['주문번호'])['결제 상태'] === '안 함');
+
+// 32. 결제 취소 — 도정 전 카드 = 자동 결제 취소 / 휴대폰 달 넘김 = 확인필요
+var k6 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_6', orderId: k6['주문번호'], amount: k6['청구액'] });
+var c6 = post({ kind: 'cancel', tel: '01000000030', no: k6['주문번호'] });
+ok('카드 결제 도정 전 취소 → 결제 취소·취소 금액', c6.ok && order(k6['주문번호'])['결제 상태'] === '취소' && order(k6['주문번호'])['취소 금액'] === order(k6['주문번호'])['청구액']);
+ok('결제한 주문 취소확인 — 전액 환불 문장', /전액 환불해 드립니다/.test(msgs(cust('01000000030')['고객번호'], '취소확인').pop()['결과']));
+at(2026, 12, 30, 10); var k7 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_PHONE_7', orderId: k7['주문번호'], amount: k7['청구액'] });
+at(2027, 1, 2, 10); var c7 = post({ kind: 'cancel', tel: '01000000030', no: k7['주문번호'] });
+ok('휴대폰 결제 달 넘긴 취소 → 확인필요(대표 직접 환불)', c7.ok === false && c7.reason === '확인필요' && order(k7['주문번호'])['상태'] === '확인필요' && c7.view.cancelAsked === true);
+
+// 33. 회원 — 인증(시험 모드 번호 보여 줌)·가입·로그인·잠금·마이페이지·회원 주문·비밀번호 찾기·탈퇴
+setVal('member', '끔');
+ok('member 끔·시험 아님 → 가입 막음', post({ kind: 'code', tel: '01000000040', purpose: 'join' }).closed === true);
+var sc = post({ kind: 'code', test: true, tel: '010-0000-0040', purpose: 'join' });
+ok('인증번호 — 시험 모드에서만 번호를 돌려줌', sc.ok && /^\d{6}$/.test(sc.devCode) && rows_('인증').pop()['인증번호'] !== sc.devCode);
+ok('틀린 인증번호', post({ kind: 'verify', test: true, tel: '01000000040', purpose: 'join', code: '000000' }).wrong === true);
+var vf = post({ kind: 'verify', test: true, tel: '01000000040', purpose: 'join', code: sc.devCode });
+ok('인증 확인 → 표', vf.ok && vf.verifyToken);
+ok('비밀번호 규칙(8자·영문·숫자)', post({ kind: 'join', test: true, tel: '01000000040', verifyToken: vf.verifyToken, password: 'short', '이름': '시험회원', '주소': '시험시 1' }).password === true);
+var jn = post({ kind: 'join', test: true, tel: '01000000040', verifyToken: vf.verifyToken, password: 'abcd1234', '이름': '시험회원', '주소': '시험시 시험로 40', '상세 주소': '101호', '우편번호': '00000', news: true });
+var cm4 = cust('01000000040');
+ok('가입 → 회원·토큰, 비밀번호 원문 없음', jn.ok && jn.token && cm4['회원'] === 'Y' && cm4['비밀번호'] !== 'abcd1234' && cm4['비밀번호'].length === 64 && JSON.stringify(rows_('고객')).indexOf('abcd1234') < 0);
+ok('가입 동의 넷(이용약관·개인정보·만14세·소식)', rows_('동의').filter(function (a) { return a['고객'] === cm4['고객번호']; }).map(function (a) { return a['종류']; }).join() === '이용약관,개인정보,만14세,소식');
+ok('인증 표는 한 번만', post({ kind: 'join', test: true, tel: '01000000040', verifyToken: vf.verifyToken, password: 'abcd1234', '이름': 'x', '주소': 'x' }).ok === false);
+ok('이미 가입한 번호로 인증 요청', post({ kind: 'code', test: true, tel: '01000000040', purpose: 'join' }).exists === true);
+for (var lf = 0; lf < 5; lf++) post({ kind: 'login', test: true, tel: '01000000040', password: 'wrong999' });
+ok('5번 틀리면 잠금', post({ kind: 'login', test: true, tel: '01000000040', password: 'abcd1234' }).locked === true);
+__cache['lock_01000000040'] = '0';
+var lg = post({ kind: 'login', test: true, tel: '01000000040', password: 'abcd1234', keep: true });
+ok('로그인 → 토큰·내 정보(주소)', lg.ok && lg.token && lg.me['주소'] === '시험시 시험로 40' && lg.me['상세주소'] === '101호');
+var mk = post(Object.assign({ kind: 'checkout', test: true, token: lg.token, items: [rice(10, 10, false, 14)], '받는 분': null, '주소': '시험시 시험로 40 101호', '동의': ['환불확인'] }));
+post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_EASY_m', orderId: mk['주문번호'], amount: mk['청구액'] });
+var me = post({ kind: 'member', test: true, token: lg.token, action: 'me' });
+ok('회원 주문 → 마이페이지 주문내역·○호 없음(자리 다 참)·회차', me.ok && me.me['주문'][0].no === mk['주문번호'] && me.me['횟수'] === 1 && me.me['주문'][0].pay === '간편결제', JSON.stringify(me.me).slice(0, 160));
+ok('마이페이지 정기 주기 바꾸기', post({ kind: 'member', test: true, token: lg.token, action: 'cycle', no: mk['주문번호'], days: 28 }).ok && items_(order(mk['주문번호']))[0].repeat === 28);
+ok('마이페이지 정기 멈춤', post({ kind: 'member', test: true, token: lg.token, action: 'pause', no: mk['주문번호'] }).ok && order(mk['주문번호'])['정기'] === '멈춤');
+var mc = post({ kind: 'member', test: true, token: lg.token, action: 'cancel', no: mk['주문번호'] });
+ok('마이페이지 취소 → 결제 취소까지', mc.ok && order(mk['주문번호'])['상태'] === '취소' && order(mk['주문번호'])['결제 상태'] === '취소');
+ok('남의 주문은 못 건드림', post({ kind: 'member', test: true, token: lg.token, action: 'cancel', no: k2['주문번호'] }).auth === true);
+ok('지난번과 같게(로그인)', post({ kind: 'member', test: true, token: lg.token, action: 'recall' }).combos.rice.glutinous === 10);
+ok('회원정보 수정 — 주소', post({ kind: 'member', test: true, token: lg.token, action: 'update', '이름': '시험회원', '주소': '새 주소 1', '상세 주소': '', '우편번호': '' }).me['주소'] === '새 주소 1');
+var rs = post({ kind: 'code', test: true, tel: '01000000040', purpose: 'reset' });
+var rv = post({ kind: 'verify', test: true, tel: '01000000040', purpose: 'reset', code: rs.devCode });
+ok('비밀번호 찾기 → 새 비밀번호, 옛 로그인 끊김', post({ kind: 'reset', test: true, tel: '01000000040', verifyToken: rv.verifyToken, password: 'newpass77' }).ok && post({ kind: 'member', test: true, token: lg.token, action: 'me' }).auth === true);
+var lg2 = post({ kind: 'login', test: true, tel: '01000000040', password: 'newpass77' });
+ok('새 비밀번호로 로그인', lg2.ok);
+ok('로그아웃 → 표 무효', post({ kind: 'member', test: true, token: lg2.token, action: 'logout' }).ok && post({ kind: 'member', test: true, token: lg2.token, action: 'me' }).auth === true);
+var lg3 = post({ kind: 'login', test: true, tel: '01000000040', password: 'newpass77' });
+ok('탈퇴 → 회원 정보·주소 지움, 주문 기록은 남음', post({ kind: 'member', test: true, token: lg3.token, action: 'leave' }).ok && cust('01000000040')['회원'] === '' && cust('01000000040')['주소'] === '' && !!order(mk['주문번호']));
+ok('비회원 주문했던 번호로 가입하면 그 고객 행에 이어짐', (function () { var s2 = post({ kind: 'code', test: true, tel: '01000000030', purpose: 'join' }); var v2 = post({ kind: 'verify', test: true, tel: '01000000030', purpose: 'join', code: s2.devCode }); var j2 = post({ kind: 'join', test: true, tel: '01000000030', verifyToken: v2.verifyToken, password: 'pass1234', '이름': '시험결제', '주소': '시험시' }); return j2.ok && j2.me['주문'].length >= 3 && rows_('고객').filter(function (c) { return phone_(c['연락처']) === '01000000030'; }).length === 1; })());
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

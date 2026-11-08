@@ -27,8 +27,11 @@ function selfTest() {
     ok('발송 → 재고 차감', one_('재고', '곡식', 'rice')['남은 양(kg)'] === 90);
     var g = JSON.parse(doGet({ parameter: { action: 'switches' } }).getContent());
     ok('스위치 내보내기', g.switches.order === true && g.seatsLeft === 99, JSON.stringify(g.switches));
-    var rc = JSON.parse(doGet({ parameter: { action: 'recall', tel: '01000000001' } }).getContent());
+    var rc = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'recall', tel: '01000000001' }) } }).getContent());
     ok('불러오기(조합만)', rc.found && rc.combos.rice.glutinous === 10 && !rc['이름'], JSON.stringify(rc));
+    var mine = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'lookup', tel: '01000000001', no: body['주문번호'] }) } }).getContent());
+    ok('내 주문 조회(도착 → 발송 단계)', mine.found && mine.step === 4 && mine.canCancel === false, JSON.stringify(mine).slice(0, 200));
+    ok('도정일 내보내기', 'millDate' in g, JSON.stringify(g).slice(0, 120));
     doPost({ postData: { contents: JSON.stringify({ kind: 'bulk', '경로': '상담', '이름': '시험식당', '연락처': '01000000002', '유형': '식당·가게', '곡식': '쌀', '동의': [] }) } });
     ok('상담 접수', rows_('연락').some(function (x) { return x['문자틀'] === '상담접수'; }));
     runScheduled();

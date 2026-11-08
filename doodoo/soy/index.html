@@ -2,138 +2,149 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>선풍 콩 | 두두 DOODOO</title>
-<meta name="description" content="된장·두부 담그는 노란 메주콩. 논에서 재배해 직접 말렸습니다.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>두두콩 | 두두 DOODOO</title>
+<meta name="description" content="된장·두부 담그는 노란 메주콩. 품종 선풍.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:url" content="https://moaonfarm.kr/doodoo/soy/">
-<meta property="og:title" content="선풍 콩 | 두두 DOODOO">
-<meta property="og:description" content="된장·두부 담그는 노란 메주콩">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/style.css">
+<meta property="og:title" content="두두콩 | 두두 DOODOO">
+<meta property="og:description" content="된장·두부 담그는 노란 메주콩. 품종 선풍.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/assets/style.css">
 <script>document.documentElement.classList.add('js')</script>
-<script src="../../assets/site.js" defer></script>
-<script src="../../assets/order-config.js" defer></script>
-<script src="../../assets/order.js" defer></script>
+<script src="/assets/site.js" defer></script>
+<script src="/assets/order-config.js" defer></script>
+<script src="/assets/shop.js" defer></script>
 </head>
 <body>
+<div class="notice-band" hidden></div>
 <header class="top"><div class="wrap">
-  <a class="brand" href="../../" aria-label="모아온 MOAON 처음으로"><b>MOAON</b><span>모아온</span></a>
-  <button class="menu-btn" type="button" aria-label="메뉴" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-  <nav class="menu"><a href="../../">HOME</a><a href="../../moaon/">ABOUT</a><a href="../" aria-current="page">DOODOO</a><a href="../../contact/">CONTACT</a></nav>
+  <a class="logo" href="/" aria-label="두두농장 처음으로"><img src="/assets/logo-dudu.svg" alt="두두농장" width="117" height="42"></a>
+  <nav class="menu" aria-label="주 메뉴"><a href="/doodoo/" aria-current="page">SHOP</a><a href="/moaon/">STORY</a><a href="/contact/">CONTACT</a></nav>
+  <div class="icons">
+    <a class="ib" data-person href="/doodoo/my/" aria-label="주문조회"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></a>
+    <a class="ib" data-cart-open href="/doodoo/cart/" aria-label="장바구니"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 4h2l2.2 11h11l2-8H6.4"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg><span class="dot num" hidden>0</span></a>
+    <button class="ib menu-btn" type="button" aria-label="메뉴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
 </div></header>
 
-<main class="prod">
-<!-- 01~03 구매 상자 (기획 3-1 — 두두쌀과 같은 틀) -->
-<section class="buy-sec"><div class="wrap buy">
-  <figure class="buy-photo"><picture>
-    <source media="(min-width:900px)" srcset="../../assets/photos/soy-hero-m.webp">
-    <img src="../../assets/photos/soy-hero.webp" alt="삼베 자루에서 쏟아진 노란 콩" fetchpriority="high">
-  </picture></figure>
-  <div class="buy-box" id="buy">
-    <p class="state"><span class="tag" data-state>곧 예약</span></p>
-    <h1>선풍 콩</h1>
-    <p class="one">된장·두부 담그는 노란 메주콩</p>
-    <p class="price" data-price>가격은 예약을 시작할 때 알려 드립니다.</p>
-    <dl class="facts">
+<main id="main">
+<div class="wrap pd">
+  <!-- 사진 세 칸(기획 11-8): soy-dish(대표) · soy-grain · soy-pack. 파일이 없으면 임시 사진·빈 칸 -->
+  <div class="gallery">
+    <div class="main"><img src="/assets/photos/soy-dish.webp" alt="삼베 자루에서 쏟아진 노란 콩" fetchpriority="high" onerror="this.onerror=null;this.src='/assets/photos/soy-hero.webp'"></div>
+    <div class="thumbs" aria-label="사진 고르기">
+      <button type="button" aria-current="true" aria-label="사진 1"><img src="/assets/photos/soy-dish.webp" alt="삼베 자루에서 쏟아진 노란 콩" onerror="this.onerror=null;this.src='/assets/photos/soy-hero.webp'"></button>
+      <button type="button" aria-label="사진 2"><img src="/assets/photos/soy-grain.webp" alt="노란 콩 낟알" onerror="this.onerror=null;this.src='/assets/photos/card-soy.webp'"></button>
+      <button type="button" aria-label="사진 3"><img src="/assets/photos/soy-pack.webp" alt="두두콩 포장" onerror="this.closest('button').hidden=true"></button>
+    </div>
+  </div>
+
+  <div class="buy">
+    <span class="tag soon" data-mill-tag>판매 예정</span>
+    <h1>두두콩 <small>품종 선풍</small></h1>
+    <p class="sub">된장·두부 담그는 노란 메주콩</p>
+    <p class="small ter">원산지 전북 정읍시 태인면</p>
+    <p class="price" data-need="sizes"><span data-price></span></p>
+    <p class="unit" data-unit data-need="sizes"></p>
+    <p class="price-wait" data-price-wait hidden>가격은 예약을 시작할 때 알려 드립니다.</p>
+    <dl class="info">
       <div><dt>품종</dt><dd>선풍(노란 콩)</dd></div>
-      <div><dt>산지</dt><dd>전북 정읍 태인면 매계리 논</dd></div>
-      <div><dt>건조</dt><dd>직접 말림</dd></div>
-      <div data-need="sizes"><dt>양</dt><dd data-sizes></dd></div>
+      <div><dt>배송</dt><dd>택배 · 주문 확정 후 순차 발송</dd></div>
+      <div data-need="shipping" hidden><dt>배송비</dt><dd></dd></div>
+      <div><dt>판매자</dt><dd>두두</dd></div>
       <div data-need="year" hidden><dt>생산연도</dt><dd></dd></div>
-      <div><dt>배송</dt><dd>택배<span data-ship></span></dd></div>
+      <div><dt>건조</dt><dd>직접 말림</dd></div>
     </dl>
 
-    <form class="pick" data-grain="soy" data-need="sizes" onsubmit="return false">
-      <p class="recall-open" data-recall-open hidden><button type="button" class="link">지난번과 같게 →</button></p>
-      <div id="recall" class="recall" hidden>
-        <p>휴대폰 번호를 넣으면 지난 양이 채워집니다(이름·주소는 안 보임).</p>
-        <div class="row"><input type="tel" inputmode="numeric" placeholder="휴대폰 번호" aria-label="휴대폰 번호"><button type="button" class="btn line">불러오기</button></div>
-        <p class="recall-msg" aria-live="polite"></p>
-      </div>
-      <fieldset><legend>1. 양</legend><div class="opts" data-opts="size"></div></fieldset>
-      <fieldset><legend>2. 받는 방법</legend><div class="opts" data-opts="repeat"></div>
-        <div class="cycle-box">
-          <div class="opts" data-opts="cycle"></div>
-          <p class="cycle-custom"><input type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="주기(주)"> 주마다</p>
-          <p class="hint">같은 조합으로 주기마다 예약하고, 보내기 전에 안내합니다. 답장으로 언제든 멈출 수 있습니다.</p>
-        </div></fieldset>
-      <div class="buy-cta">
-      <p class="amount" data-amount hidden><b></b> <small>할인은 주문서에서 확인</small></p>
-      <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
-      <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
-      </div>
+    <form class="opts-box" data-grain="soy" data-need="sizes" onsubmit="return false">
+      <p data-recall hidden><button type="button" class="link sub">지난번과 같게</button> <span class="hint" aria-live="polite"></span></p>
+      <fieldset><legend>용량</legend><div class="opts" data-opts="size"></div></fieldset>
+      <fieldset><legend>구매 방식</legend><div class="opts" data-opts="repeat"></div>
+        <div class="cycle-box"><p class="small">배송 주기</p><div class="opts" data-opts="cycle"></div>
+          <p class="cycle-custom"><input class="inp" style="width:88px" type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="배송 주기(주)"> 주마다</p>
+          <p class="hint">같은 조합으로 주기마다 예약하고, 보내기 전에 안내합니다. 내 주문에서 언제든 멈출 수 있습니다.</p></div></fieldset>
+      <fieldset><legend>수량</legend><div class="qty" role="group" aria-label="수량"><button type="button" data-q="-1" aria-label="수량 줄이기">−</button><output>1</output><button type="button" data-q="1" aria-label="수량 늘리기">+</button></div></fieldset>
+      <div class="tot"><span>총 상품금액</span><b data-total></b></div>
+      <p class="hint">할인은 주문서에서 확인</p>
+      <div class="acts"><button type="button" class="btn line" data-act="add">장바구니 담기</button><button type="button" class="btn" data-act="buy">바로 구매</button></div>
     </form>
-    <p class="bulk-link">대량 주문·식당 거래는 → <a href="../../contact/#bulk">대량 주문·협력업체 문의</a></p>
+    <p class="side-link small sub">대량 주문·식당 거래는 <a class="link" href="/contact/#bulk">대량 주문·협력업체 문의</a></p>
   </div>
-</div></section>
+</div>
 
-<!-- 04 품종 이야기 -->
-<section class="zone paper"><div class="wrap narrow">
-  <h2>품종 이야기</h2>
-  <details class="acc"><summary><span><b>선풍 콩</b> — 된장·두부용으로 육성한 노란 메주콩.</span><span class="acc-more">자세히</span></summary><div class="acc-body">
-    <p>농촌진흥청이 된장·두부용으로 육성한 품종입니다. 대원콩보다 알이 굵습니다.</p>
-    <p class="src">근거: 농촌진흥청 보급 기사(농축유통신문)</p>
-  </div></details>
-</div></section>
+<nav class="tabs" aria-label="상품 정보"><div class="wrap narrow"><a href="#desc" aria-current="true">상품설명</a><a href="#detail">상세정보</a><a href="#ship">배송/교환/반품</a></div></nav>
+<div class="wrap narrow">
+  <section id="desc" class="tab-sec">
+    <h2 class="sr">상품설명</h2>
+    <div class="kinds">
+      <article class="kind"><h3>선풍</h3><p>된장·두부용으로 육성한 노란 메주콩입니다. 알이 굵은 편입니다.</p><p class="goes small"><b>잘 어울리는 음식</b>메주·된장 · 두부 · 콩물·콩밥</p></article>
+    </div>
+    <h3>잘 어울리는 음식</h3>
+    <ul class="dishes">
+      <li><figure><img src="/assets/photos/soy-use-doenjang.webp" alt="옹기에 담은 된장" loading="lazy"><figcaption>메주·된장</figcaption></figure></li>
+      <li><figure><img src="/assets/photos/soy-use-tofu.webp" alt="접시에 올린 두부" loading="lazy"><figcaption>두부</figcaption></figure></li>
+    </ul>
+    <h3>두두콩을 고르는 이유</h3>
+    <ul class="reasons">
+      <li>직접 기르고, 직접 말립니다.</li>
+      <li>선별해서 보냅니다.</li>
+    </ul>
+  </section>
+  <section id="detail" class="tab-sec">
+    <h2>상세정보</h2>
+    <table class="table">
+      <tr><th scope="row">품목</th><td>콩(노란 콩)</td></tr>
+      <tr><th scope="row">품종</th><td>선풍</td></tr>
+      <tr data-need="year" hidden><th scope="row">생산연도</th><td></td></tr>
+      <tr><th scope="row">원산지</th><td>전북 정읍시 태인면</td></tr>
+      <tr><th scope="row">보관</th><td>서늘하고 건조한 곳에 밀폐 보관.</td></tr>
+      <tr><th scope="row">판매자</th><td>모아온(농업회사법인 설립 준비 중) · 두두</td></tr>
+    </table>
+  </section>
+  <section id="ship" class="tab-sec">
+    <h2>배송/교환/반품</h2>
+    <dl class="dl">
+      <div><dt>발송</dt><dd>주문 확정 후 순차 발송합니다. 보내면 송장 번호를 알려 드립니다.</dd></div>
+      <div data-need="shipping" hidden><dt>배송비</dt><dd></dd></div>
+      <div><dt>주문 확인</dt><dd><a class="link" href="/doodoo/my/">내 주문</a>에서 휴대폰 번호와 주문번호로 확인합니다.</dd></div>
+      <div><dt>보관</dt><dd>서늘하고 건조한 곳에 밀폐 보관.</dd></div>
+      <!-- 취소·환불: 문안 03-2 ★법인관리 확인 대기 — 확인 뒤 연다 -->
+    </dl>
+  </section>
+</div>
 
-<!-- 05 잘 어울리는 음식 -->
-<section class="zone"><div class="wrap narrow">
-  <h2>잘 어울리는 음식</h2>
-  <ul class="mini-cards">
-    <li><figure data-use="doenjang"><img src="../../assets/photos/soy-use-doenjang.webp" alt="옹기에 담은 된장" loading="lazy"><figcaption><b>메주·된장</b></figcaption></figure></li>
-    <li><figure data-use="tofu"><img src="../../assets/photos/soy-use-tofu.webp" alt="접시에 올린 두부" loading="lazy"><figcaption><b>두부</b></figcaption></figure></li>
-    <li><figure data-use="kongmul"><img src="../../assets/photos/soy-use-kongmul.webp" alt="유리컵에 담은 콩물" loading="lazy"><figcaption><b>콩물·콩밥</b></figcaption></figure></li>
-  </ul>
-</div></section>
-
-<!-- 06 고르는 이유 -->
-<section class="zone paper"><div class="wrap narrow">
-  <h2>선풍 콩을 고르는 이유</h2>
-  <ul class="reasons">
-    <li><b>논에서 기르고 직접 말렸습니다</b> — 정읍 태인면 매계리.</li>
-  </ul>
-</div></section>
-
-<!-- 07 배송·주문 안내 -->
-<section class="zone"><div class="wrap narrow">
-  <h2>배송·주문 안내</h2>
-  <dl class="guide">
-    <div><dt>받는 날</dt><dd>받으실 날은 확정 안내에 적어 드립니다.</dd></div>
-    <div data-need="shipping" hidden><dt>배송비</dt><dd></dd></div>
-    <div><dt>입금</dt><dd>확정 안내를 받으신 뒤 <span data-pay-days></span>일 안에 계좌로 보내 주세요. 입금자명이 달라도 됩니다.</dd></div>
-    <div><dt>보관</dt><dd>서늘하고 건조한 곳에 밀폐 보관.</dd></div>
-    <!-- 취소·환불: 문안 03-2 ★법인관리 확인 대기 — 확인 뒤 연다 -->
-  </dl>
-</div></section>
-
-<!-- 08 아래 주문 -->
-<section class="zone paper" data-need="sizes"><div class="wrap narrow end-order">
-  <p class="summary" data-summary></p>
-  <div class="acts" data-acts><button type="button" class="btn" data-act="buy">바로 주문하기</button><button type="button" class="btn line" data-act="add">장바구니 담기</button></div>
-  <p class="added" hidden>담았습니다. <a href="../cart/">장바구니 보기 →</a></p>
-</div></section>
-
-<section class="band-line photo"><img src="../../assets/photos/bulk-band.webp" alt="" loading="lazy"><div class="wrap">
-  <p><b>식당·가게처럼 꾸준히 많은 양이 필요하시거나 대량 주문이시면 조건을 맞춰 드립니다.</b></p>
-  <a class="more" href="../../contact/#bulk">대량 주문·협력업체 문의 →</a>
-</div></section>
-
-<!-- 폰 고정 바 -->
-<div class="fixbar" data-need="sizes"><span data-summary-short></span><button type="button" class="btn" data-act="buy" data-short="1">주문하기</button></div>
+<div class="fixbar" data-need="sizes"><button type="button" class="btn line" data-act="add">장바구니 담기</button><button type="button" class="btn" data-act="buy">바로 구매</button></div>
+<div class="sheet" id="opt-sheet" aria-label="옵션 선택" aria-hidden="true"><div class="grab"></div><div class="pan-h"><b>옵션 선택</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="pan-b"></div></div>
 </main>
 
-<footer><div class="wrap foot">
-  <div><p class="foot-wm">MOAON</p></div>
-  <div>
-    <strong>모아온(농업회사법인 설립 준비 중)</strong><br>
-    전북특별자치도 정읍시 태인면 매계리 25<br>
-    전화 010-4689-8106 / 이메일 haree7777@gmail.com<br>
-    대표 최현철<span class="foot-opt"></span><span class="foot-opt"></span>
-  </div>
-  <div class="foot-last"><p><a href="../../notice/">공고</a> · <a href="../../privacy/">개인정보 처리방침</a> · Copyright © MOAON. All rights reserved.</p><img class="foot-badge" src="../../assets/logo-doodoo.svg" alt="doodoo FARM 배지" width="120" height="67" loading="lazy"></div>
+<footer><div class="wrap">
+  <nav class="foot-links" aria-label="바닥글 메뉴"><a href="/terms/" data-need="terms" hidden>이용약관</a><a class="strong" href="/privacy/">개인정보처리방침</a><a href="/notice/">공고</a><a href="/doodoo/my/">비회원 주문조회</a></nav>
+  <p class="foot-info"><span>모아온(농업회사법인 설립 준비 중)</span><span>대표 최현철</span></p>
+  <p>전북특별자치도 정읍시 태인면 매계리 25</p>
+  <p class="foot-info"><span>전화 010-4689-8106</span><span>이메일 haree7777@gmail.com</span></p>
+  <p class="foot-info"><span class="foot-opt"></span><span class="foot-opt"></span></p>
+  <p class="foot-copy">Copyright © MOAON. All rights reserved.</p>
 </div></footer>
+
+<div class="scrim"></div>
+<aside class="drawer left" id="menu-drawer" aria-label="메뉴" aria-hidden="true">
+  <div class="pan-h"><b>메뉴</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="pan-b drawer-menu">
+    <nav aria-label="메뉴"><a href="/doodoo/">SHOP</a><a href="/moaon/">STORY</a><a href="/contact/">CONTACT</a></nav>
+    <div class="small"><a href="/member/login/" data-m="out" hidden>로그인</a><a href="/member/join/" data-m="out" hidden>회원가입</a><a href="/member/" data-m="in" hidden>마이페이지</a><a href="/doodoo/my/">주문조회</a></div>
+  </div>
+</aside>
+<aside class="drawer" id="cart-drawer" aria-label="장바구니" aria-hidden="true">
+  <div class="pan-h"><b>장바구니</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="pan-b"></div>
+  <div class="pan-f" hidden><div class="money"></div><button class="btn wide" type="button" data-buy>구매하기</button><button class="btn line wide" type="button" data-close>쇼핑 계속하기</button></div>
+</aside>
+<div class="sheet" id="buy-choice" aria-label="주문 방법" aria-hidden="true">
+  <div class="grab"></div>
+  <div class="pan-b"><button class="btn wide" type="button" data-login-order>로그인하고 주문하기</button><button class="btn line wide" type="button" data-guest-order>비회원으로 주문하기</button></div>
+</div>
 </body>
 </html>

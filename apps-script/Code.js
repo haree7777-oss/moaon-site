@@ -80,9 +80,12 @@ var DEFAULT_TEMPLATES = [
   ['대기', '확정', '{이름}님, 재고가 부족해 바로 확정하지 못했습니다. 준비되는 대로 순서대로 연락드리겠습니다.', '같음', '안내'],
   ['대기확정', '확정', '{이름}님, 기다려 주셔서 감사합니다. 예약이 확정됐습니다. 주문번호 {주문번호}. ' + CONFIRM_BODY, '같음', '안내'],
   ['입금확인', '확정', '{이름}님, {금액}원 입금 확인했습니다. {도정일}에 도정해 보내 드립니다.', '같음', '안내'],
+  ['결제확인', '확정', '{이름}님, {금액}원 결제를 확인했습니다. {도정일}에 도정해 보내 드립니다.', '같음', '안내'],
   ['입금독촉', '확정', '{이름}님, {곡식} 예약 입금이 아직 확인되지 않았습니다. {새 기한}까지 입금해 주세요. 이미 보내셨다면 답장 주세요.', '같음', '안내'],
   ['자동취소', '확정', '{이름}님, 입금 기한이 지나 {곡식} 예약을 취소했습니다. 다시 필요하시면 답장 주세요.', '같음', '안내'],
   ['취소확인', '확정', '{이름}님, {곡식} 예약을 취소했습니다. 입금하신 {금액}원은 {환불일}까지 전액 환불해 드립니다.', '같음', '안내'],
+  ['결제취소', '확정', '{이름}님, {곡식} 예약을 취소하고 {금액}원 결제도 취소했습니다. 카드사 등 결제하신 곳에 따라 돌려받기까지 영업일 3~7일 걸릴 수 있습니다.', '같음', '안내'],
+  ['취소접수', '확정', '{이름}님, {곡식} 예약 취소 요청을 받았습니다. 환불 방법을 확인해 연락드리겠습니다.', '같음', '안내'],
   ['찧은날', '확정', '{이름}님, 오늘 {이름}님 쌀을 찧었습니다. {조합}.', '같음', '안내'],
   ['발송', '확정', '{이름}님, {택배사} {송장번호}로 보냈습니다. {받을 날} 무렵 도착합니다.', '같음', '안내'],
   ['늦어짐', '확정', '{이름}님, 죄송합니다. 작업 일정이 밀려 {도정일} 도정이 어렵습니다. {새 도정일}에 도정해 보내 드려도 될까요? 취소를 원하시면 답장 주세요.', '같음', '안내'],
@@ -105,9 +108,9 @@ var DEFAULT_RULES = [
   ['접수', '접수(문자·전화·기록방)', '모두', '접수', '안내', '08~21시', '', '켬'],
   ['확정', '자동 확정', '모두(첫 주문이면 첫고객 한 줄)', '확정 · 첫고객', '안내', '08~21시', '', '켬'],
   ['대기', '재고 모자람 / 재고 들어옴', '해당 주문', '대기 / 대기확정', '안내', '08~21시', '', '켬'],
-  ['입금 확인', '입금 맞춤', '해당 주문', '입금확인', '안내', '08~21시', '', '켬'],
+  ['입금 확인', '입금 맞춤', '해당 주문', '입금확인 / 결제확인', '안내', '08~21시', '', '켬'],
   ['입금 기한', '입금 기한 1차 / 2차', '해당 주문', '입금독촉 / 자동취소', '안내', '09~20시', '', '켬'],
-  ['고객 취소', '고객 취소', '해당 주문', '취소확인', '안내', '08~21시', '', '켬'],
+  ['고객 취소', '고객 취소', '해당 주문', '취소확인 / 결제취소 / 취소접수', '안내', '08~21시', '', '켬'],
   ['작업 완료', '작업 완료', '해당 주문', '찧은날', '안내', '08~21시', '', '켬'],
   ['송장', '송장 입력', '해당 주문', '발송', '안내', '08~21시', '', '켬'],
   ['늦어짐', '도정일 위험', '해당 주문', '늦어짐', '안내', '08~21시', '', '켬'],
@@ -180,7 +183,7 @@ function nextId_(name, prefix, width) {
   while (s.length < width) s = '0' + s;
   return prefix + s;
 }
-function one_(name, key, v) { return rows_(name).filter(function (r) { return r[key] === v; })[0] || null; }
+function one_(name, key, v) { v = String(v); return rows_(name).filter(function (r) { return String(r[key]) === v; })[0] || null; }
 
 // ───────── 설정·처리 기록 ─────────
 function setting_(key) { return one_('설정', '이름', key); }
@@ -210,16 +213,24 @@ function setup() {
   syncTemplates_();
   syncSettingNotes_();
   seed_('연락 규칙', DEFAULT_RULES, '규칙');
+  syncRuleTemplates_();
   log_('setup', '', '끝');
 }
-// 문안 부록 1이 바뀌면 장부 「문자틀」 문구도 같게 맞춘다(상태 칸은 대표 것이라 그대로).
+// 장부 「문자틀」의 문구·짧은 판·상태는 대표가 고치는 정본이라 건드리지 않는다(새 코드만 seed_가 더한다).
+// 「종류」(안내/광고)만 설계대로 맞춘다 — 광고 표시·수신 동의 검사가 이 칸으로 정해지기 때문.
 function syncTemplates_() {
   var byCode = {};
   DEFAULT_TEMPLATES.forEach(function (t) { byCode[t[0]] = t; });
   rows_('문자틀').forEach(function (r) {
     var t = byCode[r['코드']]; if (!t) return;
-    if (r['문구'] !== t[2] || r['짧은 판'] !== t[3] || r['종류'] !== t[4]) { r['문구'] = t[2]; r['짧은 판'] = t[3]; r['종류'] = t[4]; save_('문자틀', r); }
+    if (r['종류'] !== t[4]) { r['종류'] = t[4]; save_('문자틀', r); }
   });
+}
+// 연락 규칙의 「문자틀」 칸도 설계와 같게(켬/끔은 대표 것이라 그대로).
+function syncRuleTemplates_() {
+  var byKey = {};
+  DEFAULT_RULES.forEach(function (r) { byKey[r[0]] = r; });
+  rows_('연락 규칙').forEach(function (r) { var d = byKey[r['규칙']]; if (d && r['문자틀'] !== d[3]) { r['문자틀'] = d[3]; save_('연락 규칙', r); } });
 }
 // 설정 시트의 「설명」 칸도 설계와 같게(켬/끔·값은 대표 것이라 그대로).
 function syncSettingNotes_() {
@@ -354,11 +365,13 @@ function saveTaste_(cid, it, t) {
                     '주기(일)': it.repeat && it.repeat !== 'once' ? Number(it.repeat) : '', '판': prev.length + 1, '확정일': t });
 }
 
-function orderNo_(t) {
-  var pre = 'D' + Utilities.formatDate(t, 'Asia/Seoul', 'yyMMdd') + '-';
-  var n = rows_('주문').filter(function (r) { return String(r['주문번호']).indexOf(pre) === 0; }).length + 1;
-  return pre + ('00' + n).slice(-3);
+function orderNo_() {   // 주문번호 — 짧은 숫자(1001부터 차례로). 토스에는 doodoo- 를 붙여 보낸다(토스 주문번호는 6자 이상)
+  var max = 1000;
+  rows_('주문').forEach(function (r) { var n = Number(r['주문번호']); if (n > max) max = n; });
+  return max + 1;
 }
+function tossId_(no) { return 'doodoo-' + no; }
+function noOf_(id) { return String(id || '').trim().replace(/^doodoo-/i, ''); }
 
 // ───────── 주문 품목 ─────────
 function items_(o) { try { var a = JSON.parse(o['조합']); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
@@ -875,7 +888,7 @@ function cancelMine(tel, no) {
 // 고객이 도정 전에 취소 — PG 결제면 결제도 취소. 휴대폰 결제 달 넘김·입금 끝난 가상계좌(환불 계좌 필요)는 대표 확인(확인필요).
 function customerCancel_(o, c, why) {
   if (CANCELABLE.indexOf(o['상태']) < 0) return { ok: false, reason: o['상태'] === '취소' ? '이미 취소' : '도정 뒤', view: mineView_(o, c) };
-  var paid = o['상태'] === '입금';
+  var paid = o['상태'] === '입금', pgRefund = false;
   if (o['결제 키'] && ['완료', '입금 대기'].indexOf(o['결제 상태']) >= 0) {
     var manual = '';
     if (o['결제수단'] === '휴대폰' && Utilities.formatDate(toDate_(o['결제 시각']), 'Asia/Seoul', 'yyMM') !== Utilities.formatDate(now_(), 'Asia/Seoul', 'yyMM')) manual = '휴대폰 결제 달 넘김 — 대표 직접 환불';
@@ -887,13 +900,16 @@ function customerCancel_(o, c, why) {
     if (manual) {
       o['상태'] = '확인필요'; o['메모'] = '취소 요청: ' + manual; o['상태 바뀐 시각'] = now_(); save_('주문', o);
       log_('취소 요청', o['주문번호'], '확인필요', manual);
+      send_('취소접수', c, o);
       return { ok: false, reason: '확인필요', view: mineView_(o, c) };
     }
+    pgRefund = o['결제 상태'] === '완료';   // 가상계좌 입금 전 취소는 돌려줄 돈이 없다
     o['결제 상태'] = '취소'; o['취소 금액'] = o['청구액'];
   }
   cancel_(o, why);
   if (o['정기'] === 'Y') { o['정기'] = '멈춤'; save_('주문', o); }
-  send_('취소확인', c, o, paid ? {} : { unpaid: true });
+  if (pgRefund) send_('결제취소', c, o);   // 카드·간편결제·휴대폰·계좌이체 — 토스에서 바로 취소
+  else send_('취소확인', c, o, paid ? {} : { unpaid: true });
   processWaitlist();
   return { ok: true, view: mineView_(one_('주문', '주문번호', o['주문번호']), c) };
 }
@@ -943,13 +959,13 @@ function checkout(p) {
     save_('주문', o);
     log_('결제 준비', o['주문번호'], '결제대기');
     var name = GRAIN_NAME[items[0].grain] + (items.length > 1 ? ' 외 ' + (items.length - 1) + '건' : '');
-    return { ok: true, 주문번호: o['주문번호'], 청구액: Number(o['청구액']), orderName: name, 도정일: mill > 0 ? ymd_(o['작업일']) : '',
+    return { ok: true, 주문번호: o['주문번호'], tossOrderId: tossId_(o['주문번호']), 청구액: Number(o['청구액']), orderName: name, 도정일: mill > 0 ? ymd_(o['작업일']) : '',
              할인: o['할인액'] ? { 사유: o['할인 사유'], 율: o['할인율'], 액: Number(o['할인액']) } : null };
   });
 }
 function payConfirm(p) {
   return withLock_(function () {
-    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    var o = one_('주문', '주문번호', noOf_(p.orderId));
     if (!o) return { ok: false, code: 'NO_ORDER' };
     var c = one_('고객', '고객번호', o['고객']);
     if (o['결제 키'] && o['결제 키'] === p.paymentKey) return payResult_(o);   // 새로 고침 — 이미 승인됨
@@ -973,7 +989,7 @@ function payConfirm(p) {
       o['결제 상태'] = '완료'; o['상태'] = '입금'; o['입금일'] = t;
       save_('주문', o);
       var firstEver = settle_(c, n, t);
-      send_('입금확인', c, o, { append: [firstEver && c['두두 호'] ? '첫고객' : ''] });
+      send_('결제확인', c, o, { append: [firstEver && c['두두 호'] ? '첫고객' : ''] });
     } else { abort_(o, 'PG 상태 ' + pay.status); return { ok: false, code: pay.status }; }
     log_('결제 승인', o['주문번호'], o['결제 상태'], o['결제수단']);
     return payResult_(one_('주문', '주문번호', o['주문번호']));
@@ -987,7 +1003,7 @@ function payResult_(o) {
 // 결제창에서 실패·취소로 돌아왔을 때 — 자리를 바로 푼다(주문한 번호가 맞아야)
 function payAbort(p) {
   return withLock_(function () {
-    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    var o = one_('주문', '주문번호', noOf_(p.orderId));
     var c = o ? one_('고객', '고객번호', o['고객']) : null;
     if (!o || !c || o['상태'] !== '결제대기') return { ok: true };
     if (phone_(p.tel) !== phone_(c['연락처']) && !(p.token && auth_(p.token) && auth_(p.token)['고객번호'] === c['고객번호'])) return { ok: false };
@@ -999,7 +1015,7 @@ function abort_(o, why) { o['결제 상태'] = '안 함'; cancel_(o, why); }
 // 가상계좌 입금 웹훅 — secret 이 승인 때 받은 값과 같아야 진짜
 function depositCallback(p) {
   return withLock_(function () {
-    var o = one_('주문', '주문번호', String(p.orderId || ''));
+    var o = one_('주문', '주문번호', noOf_(p.orderId));
     if (!o || !o['결제 비밀'] || o['결제 비밀'] !== p.secret) { log_('입금 알림', p.orderId || '', '거절', 'secret 다름'); return { ok: false }; }
     var c = one_('고객', '고객번호', o['고객']);
     if (p.status === 'DONE' && o['상태'] === '확정') {
@@ -1034,7 +1050,7 @@ function tossConfirm_(paymentKey, o, mock) {
     if (method === '가상계좌') body.virtualAccount = { bankCode: '11', accountNumber: '79000' + String(Math.floor(Math.random() * 1e8)), dueDate: Utilities.formatDate(addDays_(now_(), val_('pay_days', 3)), 'Asia/Seoul', "yyyy-MM-dd'T'23:59:59") };
     return { ok: true, body: body };
   }
-  try { return tossCall_('confirm', { paymentKey: paymentKey, orderId: o['주문번호'], amount: Number(o['청구액']) }); }
+  try { return tossCall_('confirm', { paymentKey: paymentKey, orderId: tossId_(o['주문번호']), amount: Number(o['청구액']) }); }
   catch (err) { return { ok: false, code: 'CALL', message: String(err) }; }
 }
 function tossCancel_(o, why) {

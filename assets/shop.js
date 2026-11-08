@@ -315,6 +315,11 @@
       post({ kind: 'pay-abort', orderId: q.get('orderId') || (get(sessionStorage, LAST, {}) || {}).no, tel: (get(sessionStorage, FORM, {}) || {}).phone, token: token(), code: q.get('code') }).catch(function () {});
       history.replaceState(null, '', location.pathname);
       showErr('결제가 완료되지 않았습니다. 다시 시도해 주세요.');
+      var goMethods = true;   // 위젯이 다 그려진 뒤 결제 수단으로 데려간다
+    }
+    function toMethods() {   // 결제 수단을 바꾸려면 위젯으로 — 결제창을 닫거나 실패한 뒤 바로 보이게
+      var m = $('#h-pay'); if (!m) return;
+      window.scrollTo(0, m.getBoundingClientRect().top + window.scrollY - 80);
     }
     if (!list.length) { $('#order-empty').hidden = false; form.hidden = true; $('#order-aside').hidden = true; return; }
     $('#order-lines').innerHTML = list.map(function (it) { return lineHTML(it, 'ro'); }).join('');
@@ -387,6 +392,7 @@
     money();
     // 결제 수단 — 토스 결제위젯(순서·기본 선택은 토스 결제 어드민: 무통장 입금(가상계좌) · 카드 · 간편결제 · 휴대폰)
     widget = payWidget($('#pay-methods'), $('#pay-agree'), amount || 0, me, function (m) { method = m; $('#va-note').hidden = m !== 'VA'; });
+    if (goMethods) ((widget && widget.ready) || Promise.resolve()).then(function () { setTimeout(toMethods, 400); });
     if (!C.endpoint || !S.open || !widget) btn.disabled = true;
 
     function check() {
@@ -416,9 +422,14 @@
         if (!r.ok) throw {};
         put(sessionStorage, FORM, o); put(sessionStorage, LAST, { no: r['주문번호'] });
         widget.setAmount(r['청구액']);
-        return widget.request({ orderId: r['주문번호'], orderName: r.orderName, amount: r['청구액'], customerName: o.name, customerMobilePhone: tel(o.phone),
+        return widget.request({ orderId: r.tossOrderId || r['주문번호'], orderName: r.orderName, amount: r['청구액'], customerName: o.name, customerMobilePhone: tel(o.phone),
                                 successUrl: location.origin + '/doodoo/order/?pay=success', failUrl: location.origin + '/doodoo/order/?pay=fail&orderId=' + encodeURIComponent(r['주문번호']) });
-      }).catch(function (e) { btn.disabled = false; showErr((e && e.msg) || '결제가 완료되지 않았습니다. 다시 시도해 주세요.'); });
+      }).catch(function (e) {   // 결제창을 닫았거나 실패 — 잡아 둔 자리를 바로 푼다
+        var last = get(sessionStorage, LAST, null);
+        if (last && last.no) post({ kind: 'pay-abort', orderId: last.no, tel: tel(o.phone), token: me ? token() : undefined, code: (e && e.code) || 'CLOSED' }).catch(function () {});
+        btn.disabled = false; showErr((e && e.msg) || '결제가 완료되지 않았습니다. 다시 시도해 주세요.');
+        if (!(e && e.msg)) toMethods();
+      });
     });
 
     function confirmPay(qp) {
@@ -463,14 +474,15 @@
         var tp = window.TossPayments(C.pay.clientKey);
         w = tp.widgets({ customerKey: me ? custKey() : window.TossPayments.ANONYMOUS });
         return w.setAmount({ currency: 'KRW', value: amount }).then(function () {
-          return Promise.all([w.renderPaymentMethods({ selector: '#' + methodsBox.id, variantKey: 'DEFAULT' }), w.renderAgreement({ selector: '#' + agreeBox.id, variantKey: 'AGREEMENT' })]);
+          return Promise.all([w.renderPaymentMethods({ selector: '#' + methodsBox.id, variantKey: 'DEFAULT' }), w.renderAgreement({ selector: '#' + agreeBox.id })]);
         }).then(function (r) {
           r[0].on('paymentMethodSelect', function (m) { onMethod(m && m.code === 'VIRTUAL_ACCOUNT' ? 'VA' : 'X'); });
         });
       });
       return {
+        ready: ready,
         setAmount: function (v) { ready.then(function () { w.setAmount({ currency: 'KRW', value: v }); }); },
-        request: function (p) { return ready.then(function () { return w.requestPayment({ orderId: p.orderId, orderName: p.orderName, successUrl: p.successUrl, failUrl: p.failUrl, customerName: p.customerName, customerMobilePhone: p.customerMobilePhone }); }); }
+        request: function (p) { return ready.then(function () { return w.requestPayment({ orderId: p.orderId, orderName: p.orderName, successUrl: p.successUrl, failUrl: p.failUrl, customerName: p.customerName, customerMobilePhone: p.customerMobilePhone, windowTarget: 'self' /* PC도 겹친 창 대신 페이지 이동(닫기 X가 두 개 겹치지 않게) */ }); }); }
       };
     }
     if (C.pay.mock) {   // 미리보기 전용 — 실제 결제 아님
@@ -495,8 +507,19 @@
   }
   function custKey() { var k = get(localStorage, 'doodoo-ck', null); if (!k) { k = 'dd-' + (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2)); put(localStorage, 'doodoo-ck', k); } return k; }
   function loadScript(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
-  function addrSearch(cb) {   // 카카오(다음) 우편번호 서비스 — 눌렀을 때만 불러온다
-    var go = function () { new window.daum.Postcode({ oncomplete: function (d) { cb({ zip: d.zonecode, addr: d.roadAddress || d.jibunAddress }); } }).open(); };
+  function addrSearch(cb) {   // 카카오(다음) 우편번호 서비스 — 눌렀을 때만 불러오고, 팝업이 막히지 않게 화면 안 창에 넣는다
+    var go = function () {
+      var sh = $('#addr-sheet');
+      if (!sh) {
+        sh = document.createElement('div'); sh.className = 'sheet'; sh.id = 'addr-sheet'; sh.setAttribute('aria-label', '주소 검색'); sh.setAttribute('aria-hidden', 'true');
+        sh.innerHTML = '<div class="grab"></div><div class="pan-h"><b>주소 검색</b><button class="ib" type="button" data-close aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div class="addr-box"></div>';
+        document.body.appendChild(sh);
+        $('[data-close]', sh).addEventListener('click', closePanels);
+      }
+      var box = $('.addr-box', sh); box.innerHTML = '';
+      new window.daum.Postcode({ width: '100%', height: '100%', oncomplete: function (d) { closePanels(); cb({ zip: d.zonecode, addr: d.roadAddress || d.jibunAddress }); } }).embed(box);
+      openPanel(sh);
+    };
     if (window.daum && window.daum.Postcode) go(); else loadScript('https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js').then(go).catch(function () { toast('주소 검색을 열지 못했습니다. 주소를 직접 적어 주세요.'); });
   }
 

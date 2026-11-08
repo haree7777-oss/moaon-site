@@ -315,8 +315,9 @@ var k2 = co([rice(10, 10)]);
 var p2 = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] });
 var o2 = order(k2['주문번호']);
 ok('카드 승인 → 상태 입금·결제 완료', p2.ok && o2['상태'] === '입금' && o2['결제 상태'] === '완료' && o2['결제수단'] === '카드', JSON.stringify(p2));
-ok('카드 → 입금확인 문자(도정일)', /입금 확인했습니다\. \d+월 \d+일에 도정해/.test(msgs(cust('01000000030')['고객번호'], '입금확인').pop()['결과']));
-ok('새로 고침해도 한 번만 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] }).ok && msgs(cust('01000000030')['고객번호'], '입금확인').length === 1);
+ok('카드 → 결제확인 문자(도정일)', /결제를 확인했습니다\. \d+월 \d+일에 도정해/.test(msgs(cust('01000000030')['고객번호'], '결제확인').pop()['결과']));
+ok('카드 결제엔 「입금」 문자 안 감', msgs(cust('01000000030')['고객번호'], '입금확인').length === 0);
+ok('새로 고침해도 한 번만 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] }).ok && msgs(cust('01000000030')['고객번호'], '결제확인').length === 1);
 var kf = co([rice(0, 10)]);
 var pf = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_FAIL_x', orderId: kf['주문번호'], amount: kf['청구액'] });
 ok('승인 실패 → 자리 풀고 취소', pf.ok === false && order(kf['주문번호'])['상태'] === '취소');
@@ -342,10 +343,17 @@ ok('결제창에서 안 돌아오면 30분 뒤 자리 풀기(문자 없음)', or
 var k6 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_6', orderId: k6['주문번호'], amount: k6['청구액'] });
 var c6 = post({ kind: 'cancel', tel: '01000000030', no: k6['주문번호'] });
 ok('카드 결제 도정 전 취소 → 결제 취소·취소 금액', c6.ok && order(k6['주문번호'])['결제 상태'] === '취소' && order(k6['주문번호'])['취소 금액'] === order(k6['주문번호'])['청구액']);
-ok('결제한 주문 취소확인 — 전액 환불 문장', /전액 환불해 드립니다/.test(msgs(cust('01000000030')['고객번호'], '취소확인').pop()['결과']));
+ok('카드 취소 → 결제취소 문자(영업일 3~7일)', /결제도 취소했습니다. .*영업일 3~7일/.test(msgs(cust('01000000030')['고객번호'], '결제취소').pop()['결과']));
 at(2026, 12, 30, 10); var k7 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_PHONE_7', orderId: k7['주문번호'], amount: k7['청구액'] });
 at(2027, 1, 2, 10); var c7 = post({ kind: 'cancel', tel: '01000000030', no: k7['주문번호'] });
 ok('휴대폰 결제 달 넘긴 취소 → 확인필요(대표 직접 환불)', c7.ok === false && c7.reason === '확인필요' && order(k7['주문번호'])['상태'] === '확인필요' && c7.view.cancelAsked === true);
+ok('확인필요 취소 → 취소접수 문자', /취소 요청을 받았습니다/.test((msgs(cust('01000000030')['고객번호'], '취소접수').pop() || {})['결과']));
+var k8 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_8', orderId: k8['주문번호'], amount: k8['청구액'] });
+var c8 = post({ kind: 'cancel', tel: '01000000030', no: k8['주문번호'] }); var m8 = msgs(cust('01000000030')['고객번호'], '취소확인').pop()['결과'];
+ok('가상계좌 입금 전 취소 → 취소확인(환불 문장 없음)', c8.ok && m8.indexOf('환불') < 0 && msgs(cust('01000000030')['고객번호'], '결제취소').length === 1, m8);
+var k9 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_9', orderId: k9['주문번호'], amount: k9['청구액'] });
+var m9 = msgs(cust('01000000030')['고객번호'], '결제확인').pop()['결과'];
+ok('콩만 카드 결제 → 결제확인 문자 보냄(빈 칸 없음)', /^보류/.test(m9), m9);
 
 // 33. 회원 — 인증(시험 모드 번호 보여 줌)·가입·로그인·잠금·마이페이지·회원 주문·비밀번호 찾기·탈퇴
 setVal('member', '끔');
@@ -387,6 +395,13 @@ ok('로그아웃 → 표 무효', post({ kind: 'member', test: true, token: lg2.
 var lg3 = post({ kind: 'login', test: true, tel: '01000000040', password: 'newpass77' });
 ok('탈퇴 → 회원 정보·주소 지움, 주문 기록은 남음', post({ kind: 'member', test: true, token: lg3.token, action: 'leave' }).ok && cust('01000000040')['회원'] === '' && cust('01000000040')['주소'] === '' && !!order(mk['주문번호']));
 ok('비회원 주문했던 번호로 가입하면 그 고객 행에 이어짐', (function () { var s2 = post({ kind: 'code', test: true, tel: '01000000030', purpose: 'join' }); var v2 = post({ kind: 'verify', test: true, tel: '01000000030', purpose: 'join', code: s2.devCode }); var j2 = post({ kind: 'join', test: true, tel: '01000000030', verifyToken: v2.verifyToken, password: 'pass1234', '이름': '시험결제', '주소': '시험시' }); return j2.ok && j2.me['주문'].length >= 3 && rows_('고객').filter(function (c) { return phone_(c['연락처']) === '01000000030'; }).length === 1; })());
+
+// 34. 주문번호 — 짧은 숫자, 토스에는 doodoo- 를 붙여 보내고 돌아오면 떼어 낸다
+var nos = rows_('주문').map(function (o) { return Number(o['주문번호']); });
+ok('주문번호는 1001부터 차례로(숫자만)', nos[0] === 1001 && nos.every(function (n, i) { return n === 1001 + i; }), nos.slice(0, 5).join());
+var kz = co([rice(10, 10)]);
+ok('토스 주문번호 doodoo-<번호>', kz.tossOrderId === 'doodoo-' + kz['주문번호']);
+ok('토스 번호로 돌아와도 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_z', orderId: kz.tossOrderId, amount: kz['청구액'] }).ok && order(kz['주문번호'])['상태'] === '입금');
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

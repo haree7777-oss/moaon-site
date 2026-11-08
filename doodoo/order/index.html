@@ -39,7 +39,6 @@
   <div class="page-grid" id="order-top">
     <form id="order-form" class="form" novalidate onsubmit="return false">
       <h1>주문서</h1>
-      <p class="err" id="pay-err" role="alert" hidden></p>
       <section aria-labelledby="h-items">
         <h2 id="h-items">주문 상품</h2>
         <ul class="lines" id="order-lines"></ul>
@@ -133,6 +132,7 @@
     </form>
     <aside id="order-aside">
       <div class="money" id="order-money" hidden></div>
+      <p class="err" id="pay-err" role="alert" hidden style="margin-top:12px"></p>
       <button type="button" class="btn wide" id="pay-btn" style="margin-top:12px">결제하기</button>
     </aside>
   </div>

@@ -65,8 +65,9 @@ setVal('ho_seats', null, 1);   // 이후 고객은 ○호 없음 — 3번째 주
 var r2 = intake({ '경로': '문자', '원문': '쌀 20키로 보내주세요 시험이', '이름': '시험이', '연락처': '010-0000-0002', mode: 'order', items: [rice(0, 20, false)] });
 var c2 = cust('01000000002'), m2 = msgs(c2['고객번호']);
 ok('문자 경로 → 짧은 판 고객', c2['문자 판'] === '짧은 판');
-ok('접수 짧은 판', m2[0]['문자틀'] === '접수' && /예약 받았습니다\. 확정되면 문자 드리겠습니다/.test(m2[0]['결과']), m2[0]['결과']);
-ok('확정 + 환불 확인', m2[1]['문자틀'] === '확정' && /입금하시면 이 내용에 동의하신 것으로 봅니다/.test(m2[1]['결과']), m2[1] && m2[1]['결과']);
+ok('문자 주문 접수 안내는 안 감(규칙 끔)', m2[0]['문자틀'] === '접수' && /^건너뜀: 규칙 끔/.test(m2[0]['결과']), m2[0]['결과']);
+ok('확정 한 통 + 쌀 환불 확인', m2[1]['문자틀'] === '확정' && /도정 후에는 단순 변심 반품이 어렵습니다/.test(m2[1]['결과']) && m2.filter(function (s) { return !/^건너뜀/.test(s['결과']); }).length === 1, m2[1] && m2[1]['결과']);
+ok('확정 = 「주문 접수 · 입금 안내」 틀(계좌·기한·도정일)', /\[두두농장\] 주문 접수 · 입금 안내\n\n안녕하세요, 시험이님\.\n주문이 접수되었습니다\. 아래 계좌로 입금해 주세요\./.test(m2[1]['결과']) && /■ 입금계좌 : 시험은행 000-0000-0000/.test(m2[1]['결과']) && /■ 도정일 : 11월 12일/.test(m2[1]['결과']) && !/입금자명|1시간/.test(m2[1]['결과']), m2[1]['결과']);
 ok('○호 자리 다 차면 번호 없음·할인 없음', !c2['두두 호'] && order(r2['주문번호'])['할인율'] === 0);
 ok('하루 최대량 안이면 같은 날(10+20=30kg)', ymd_(order(r2['주문번호'])['작업일']) === '2026-11-12', ymd_(order(r2['주문번호'])['작업일']));
 
@@ -79,7 +80,8 @@ ok('작업 달력엔 쌀만(10kg)', rows_('작업 달력').filter(function (d) {
 ok('금액 = 쌀 40,000 + 콩 30,000', o3['곡식 금액'] === 70000 && o3['청구액'] === 70000, o3['곡식 금액']);
 ok('문자 곡식 칸에 품목 전체', /두두쌀 찹쌀 10% 10kg, 두두콩 5kg/.test(msgs(cust('01000000003')['고객번호'], '확정')[0]['결과']));
 
-// 7. 재고 부족 → 대기 → 재고 넣으면 「대기확정」
+// 7. 재고 부족 → 대기 → 재고 넣으면 「대기확정」 (대기 줄은 2026-11-08 끔 — 스위치 waitlist·규칙 「대기」를 켰을 때)
+setVal('waitlist', '켬'); var wr = one_('연락 규칙', '규칙', '대기'); wr['켬/끔'] = '켬'; save_('연락 규칙', wr);
 var r4 = web('시험사', '01000000004', [soy(10)], []);
 ok('콩 모자라 대기', r4['상태'] === '대기' && /남은 양 부족/.test(order(r4['주문번호'])['메모']));
 ok('대기 문자', last('연락')['문자틀'] === '대기');
@@ -91,6 +93,7 @@ ok('재고 칸 고치면 바로 대기확정(10분 안 기다림)', order(r4['�
 tick(10); runScheduled();
 ok('last_run 기록', setting_('last_run')['값'] instanceof Date);
 ok('대기확정 문자는 한 번만', msgs(cust('01000000004')['고객번호'], '대기확정').length === 1);
+setVal('waitlist', '끔'); wr['켬/끔'] = '끔'; save_('연락 규칙', wr);
 
 // 8. 입금 기한 — 독촉 1회 → 자동 취소·재고 복귀
 at(2026, 11, 14, 11); runScheduled();
@@ -127,8 +130,8 @@ ok('입금자명 기억', /시험삼가족/.test(cust(A)['입금자명들']));
 setStatus(no, '작업');
 setStatus(no, '발송', { '택배사': '시험택배', '송장': '1234-5678' });
 var sentShip = msgs(cust(A)['고객번호'], '발송').pop()['결과'];
-ok('발송 문자에 택배사·송장', /시험택배 1234-5678로 보냈습니다/.test(sentShip), sentShip);
-ok('찧은날 문자', /쌀을 찧었습니다\. 찹쌀 10%\./.test(msgs(cust(A)['고객번호'], '찧은날').pop()['결과']));
+ok('발송 문자에 택배사·송장', /■ 운송장정보 : 시험택배 \/ 1234-5678\n■ 도착예정 : \d+월 \d+일/.test(sentShip), sentShip);
+ok('작업 완료엔 문자 없음(찧은날 규칙 끔)', /^건너뜀: 규칙 끔/.test(msgs(cust(A)['고객번호'], '찧은날').pop()['결과']));
 setStatus(no, '도착');
 ok('도착 → 예상 소진일', !!cust(A)['예상 소진일']);
 at(2026, 11, 21, 10); runScheduled();
@@ -191,7 +194,7 @@ doPost({ postData: { contents: JSON.stringify({ kind: 'bulk', '경로': '상담'
 var cb = cust('01000000011');
 ok('상담 → 식당·가게 고객, 단계 식당·단체', cb['유형'] === '식당·가게' && cb['단계'] === '식당·단체');
 ok('상담 → 관심 한 줄·접수 메모', /식당·가게/.test(last('관심')['용도']) && last('접수')['경로'] === '상담' && /대표 직접 연락/.test(last('접수')['메모']));
-ok('상담 → 상담접수 안내 한 통만', msgs(cb['고객번호']).length === 1 && msgs(cb['고객번호'])[0]['문자틀'] === '상담접수' && /문의를 받았습니다/.test(msgs(cb['고객번호'])[0]['결과']));
+ok('상담 → 상담접수 안내 한 통만', msgs(cb['고객번호']).length === 1 && msgs(cb['고객번호'])[0]['문자틀'] === '상담접수' && /문의가 접수되었습니다/.test(msgs(cb['고객번호'])[0]['결과']));
 var g = JSON.parse(doGet({ parameter: { action: 'switches' } }).text);
 ok('doGet 스위치 JSON', g.switches.order === false && g.switches.loyalty === true && g.seatsLeft === 0);
 var gr = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'recall', tel: '01000000011' }) } }).text);
@@ -221,8 +224,9 @@ ok('동의 없으면 안부 광고 건너뜀', /^건너뜀: 광고 조건/.test(
 
 // 21. 문자틀 — 접수·확정에 주문번호, 도정일
 var cf = msgs(cust('01000000001')['고객번호'], '확정')[0]['결과'];
-ok('확정 문자에 주문번호·도정일', cf.indexOf('주문(' + r1['주문번호'] + ')이 확정됐습니다') >= 0 && /11월 12일에 도정해 보내 드립니다/.test(cf), cf);
-ok('접수 문자(일반 판)에 주문번호', DEFAULT_TEMPLATES[0][2].indexOf('주문번호 {주문번호}') >= 0);
+ok('확정 문자에 주문번호·도정일', cf.indexOf('■ 주문번호 : ' + r1['주문번호']) >= 0 && /■ 도정일 : 11월 12일/.test(cf), cf);
+ok('짧은 판은 밥맛·다음조합만, 나머지 같음', DEFAULT_TEMPLATES.every(function (t) { return ['밥맛', '다음조합'].indexOf(t[0]) >= 0 ? t[3] !== '같음' : t[3] === '같음'; }));
+ok('틀 모양: 제목 → 인사 → ■ 항목 → 감사', /^결제 완료 안내\n\n안녕하세요, \{이름\}님\.\n.+\n\n■ 주문번호 : \{주문번호\}\n[\s\S]*이용해 주셔서 감사합니다\.$/.test(one_('문자틀', '코드', '결제완료')['문구']));
 ok('확정 답에 도정일', r1['도정일'] === '2026-11-12', r1['도정일']);
 
 // 22. 도정일 — 자리 남은 가장 가까운 날, 다 차면 다음 날
@@ -256,10 +260,10 @@ var soyBefore = stock('soy')['예약된 양(kg)'];
 var cx = JSON.parse(doPost({ postData: { contents: JSON.stringify({ kind: 'cancel', tel: T, no: mo2['주문번호'] }) } }).text);
 ok('취소 → 상태 취소·콩 예약 복귀', cx.ok && order(mo2['주문번호'])['상태'] === '취소' && stock('soy')['예약된 양(kg)'] === soyBefore - 5, stock('soy')['예약된 양(kg)']);
 var cm = msgs(cust(T)['고객번호'], '취소확인').pop()['결과'];
-ok('입금 전 취소확인 — 환불 문장 뺌', /두두콩 5kg 예약을 취소했습니다\./.test(cm) && cm.indexOf('환불') < 0, cm);
+ok('입금 전 취소확인 — 환불 줄 뺌', /요청하신 주문이 취소되었습니다\.\n\n■ 주문번호 : \d+\n\n두두농장/.test(cm) && cm.indexOf('환불') < 0, cm);
 setStatus(mo['주문번호'], '입금');
 var cx2 = cancelMine(T, mo['주문번호']);
-ok('입금 뒤 취소확인 — 전액 환불 문장', cx2.ok && /전액 환불해 드립니다/.test(msgs(cust(T)['고객번호'], '취소확인').pop()['결과']));
+ok('입금 뒤 취소확인 — 환불금액·환불예정일', cx2.ok && /■ 환불금액 : [\d,]+원\n■ 환불예정일 : \d+월 \d+일/.test(msgs(cust(T)['고객번호'], '취소확인').pop()['결과']));
 var mo3 = web('시험이십', T, [rice(0, 10)], []); setStatus(mo3['주문번호'], '작업');
 var cx3 = cancelMine(T, mo3['주문번호']);
 ok('도정 뒤엔 취소 안 됨', cx3.ok === false && order(mo3['주문번호'])['상태'] === '작업' && cx3.view.canCancel === false);
@@ -288,9 +292,9 @@ ok('purgeTest → 재고·작업 달력 되돌림', stock('rice')['예약된 양
 ok('purgeTest → 그 고객 연락·동의 없음', !rows_('연락').some(function (s) { return s['주문'] === tp['주문번호']; }) && !rows_('동의').some(function (a) { return a['경로'] === '홈페이지' && a['고객'] === tp['고객번호']; }));
 
 // 28. 머리줄 — 끝에 새 칸이 생긴 옛 장부도 setup 이 칸만 채움
-var oldHead = SCHEMA['주문'].slice(0, -9), sh = __book.getSheetByName('주문');
+var oldHead = SCHEMA['주문'].slice(0, -10), sh = __book.getSheetByName('주문');
 sh.data[0] = oldHead.slice(); setup();
-ok('옛 머리줄 → 정기·시험·결제 칸 채움', sh.data[0].slice(-9).join() === '정기,시험,결제수단,결제 키,결제 상태,결제 시각,취소 금액,결제 비밀,가상계좌', sh.data[0].slice(-9).join());
+ok('옛 머리줄 → 정기·시험·결제·경로 칸 채움', sh.data[0].slice(-10).join() === '정기,시험,결제수단,결제 키,결제 상태,결제 시각,취소 금액,결제 비밀,가상계좌,경로', sh.data[0].slice(-10).join());
 ok('설정 설명 — 할인 기준 구매금액(배송비 제외)', /구매금액\(주문 상품 금액, 배송비 제외\)/.test(setting_('loyalty_rate')['설명']));
 
 // 29. 결제 — 남은 양 확인 두 번, 자리 잡기, 수량, 금액은 규칙 일꾼이 정함
@@ -310,28 +314,35 @@ ok('수량 금액: 40,000×2 + 소포장 1,000×2', ko1['곡식 금액'] === 800
 ok('남은 양이 모자라면 결제 전에 막음', co([soy(500)]).short === true);
 ok('금액이 다르면 승인 안 함·자리 풀기', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_1', orderId: k1['주문번호'], amount: 1 }).code === 'AMOUNT' && order(k1['주문번호'])['상태'] === '취소' && stock('rice')['예약된 양(kg)'] === riceRes0);
 
-// 30. 카드 결제 → 입금(확정+입금 한 번에), 입금확인 문자
+// 30. 카드 결제 → 입금(확정+입금 한 번에), 「결제완료」 한 통
 var k2 = co([rice(10, 10)]);
 var p2 = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] });
 var o2 = order(k2['주문번호']);
 ok('카드 승인 → 상태 입금·결제 완료', p2.ok && o2['상태'] === '입금' && o2['결제 상태'] === '완료' && o2['결제수단'] === '카드', JSON.stringify(p2));
-ok('카드 → 결제확인 문자(도정일)', /결제를 확인했습니다\. \d+월 \d+일에 도정해/.test(msgs(cust('01000000030')['고객번호'], '결제확인').pop()['결과']));
+var pm2 = msgs(cust('01000000030')['고객번호'], '결제완료').pop()['결과'];
+ok('카드 → 결제완료 문자(결제금액·도정일)', /\[두두농장\] 결제 완료 안내/.test(pm2) && /■ 결제금액 : [\d,]+원/.test(pm2) && /■ 도정일 : \d+월 \d+일/.test(pm2) && /상품이 발송되면 다시 안내드리겠습니다/.test(pm2), pm2);
 ok('카드 결제엔 「입금」 문자 안 감', msgs(cust('01000000030')['고객번호'], '입금확인').length === 0);
-ok('새로 고침해도 한 번만 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] }).ok && msgs(cust('01000000030')['고객번호'], '결제확인').length === 1);
+ok('새로 고침해도 한 번만 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_2', orderId: k2['주문번호'], amount: k2['청구액'] }).ok && msgs(cust('01000000030')['고객번호'], '결제완료').length === 1);
 var kf = co([rice(0, 10)]);
 var pf = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_FAIL_x', orderId: kf['주문번호'], amount: kf['청구액'] });
 ok('승인 실패 → 자리 풀고 취소', pf.ok === false && order(kf['주문번호'])['상태'] === '취소');
 var kb = co([rice(0, 10)]);
 ok('결제창에서 취소로 돌아옴 → pay-abort 로 자리 풀기', post({ kind: 'pay-abort', orderId: kb['주문번호'], tel: '01000000030', code: 'PAY_PROCESS_CANCELED' }).ok && order(kb['주문번호'])['상태'] === '취소');
+at(2026, 12, 7, 23); var kn = co([rice(0, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_n', orderId: kn['주문번호'], amount: kn['청구액'] });
+ok('밤 11시 결제도 결제완료는 바로(시간대 「바로」)', /^보류/.test(msgs(cust('01000000030')['고객번호'], '결제완료').pop()['결과']));
+at(2026, 12, 7, 10);
 
-// 31. 가상계좌 — 확정 + 계좌 안내 → 웹훅 입금 → 입금 / 기한 지나면 자동 취소
+// 31. 가상계좌 — 「입금안내」(주문마다 계좌) → 웹훅 입금 → 「입금확인」 / 기한 지나면 자동 취소
 var k3 = co([soy(5)]);
 var p3 = post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_3', orderId: k3['주문번호'], amount: k3['청구액'] });
 var o3v = order(k3['주문번호']);
 ok('가상계좌 → 확정·입금 대기·계좌 돌려줌', p3.ok && o3v['상태'] === '확정' && o3v['결제 상태'] === '입금 대기' && p3['가상계좌'] && p3['가상계좌']['은행'] === '농협은행', JSON.stringify(p3['가상계좌']));
-ok('확정 문자에 가상계좌 번호', msgs(cust('01000000030')['고객번호'], '확정').pop()['결과'].indexOf('농협은행 ' + JSON.parse(o3v['가상계좌']).account) >= 0);
+var va3 = msgs(cust('01000000030')['고객번호'], '입금안내').pop()['결과'];
+ok('입금안내 문자에 가상계좌·기한, 콩만이라 도정일 줄 없음', va3.indexOf('■ 입금계좌 : 농협은행 ' + JSON.parse(o3v['가상계좌']).account) >= 0 && /■ 입금기한 : \d+월 \d+일/.test(va3) && va3.indexOf('도정일') < 0 && msgs(cust('01000000030')['고객번호'], '확정').length === 0, va3);
 ok('웹훅 secret 다르면 거절', post({ createdAt: 'x', secret: 'wrong', status: 'DONE', orderId: k3['주문번호'] }).ok === false && order(k3['주문번호'])['상태'] === '확정');
 ok('웹훅 입금 → 입금·결제 완료', post({ createdAt: 'x', secret: o3v['결제 비밀'], status: 'DONE', transactionKey: 't', orderId: k3['주문번호'] }).ok && order(k3['주문번호'])['상태'] === '입금' && order(k3['주문번호'])['결제 상태'] === '완료');
+var ic3 = msgs(cust('01000000030')['고객번호'], '입금확인').pop()['결과'];
+ok('가상계좌 입금 → 입금확인(콩만 — 도정일 줄 없음)', /입금이 확인되었습니다/.test(ic3) && ic3.indexOf('도정일') < 0, ic3);
 var k4 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_4', orderId: k4['주문번호'], amount: k4['청구액'] });
 var soyRes = stock('soy')['예약된 양(kg)'];
 at(2026, 12, 11, 10); checkDeadlines();
@@ -343,17 +354,16 @@ ok('결제창에서 안 돌아오면 30분 뒤 자리 풀기(문자 없음)', or
 var k6 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_6', orderId: k6['주문번호'], amount: k6['청구액'] });
 var c6 = post({ kind: 'cancel', tel: '01000000030', no: k6['주문번호'] });
 ok('카드 결제 도정 전 취소 → 결제 취소·취소 금액', c6.ok && order(k6['주문번호'])['결제 상태'] === '취소' && order(k6['주문번호'])['취소 금액'] === order(k6['주문번호'])['청구액']);
-ok('카드 취소 → 결제취소 문자(영업일 3~7일)', /결제도 취소했습니다. .*영업일 3~7일/.test(msgs(cust('01000000030')['고객번호'], '결제취소').pop()['결과']));
+ok('카드 취소 → 취소확인(환불예정일 = 결제하신 곳에 따라 영업일 3~7일)', /■ 환불예정일 : 결제하신 곳에 따라 영업일 3~7일/.test(msgs(cust('01000000030')['고객번호'], '취소확인').pop()['결과']));
 at(2026, 12, 30, 10); var k7 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_PHONE_7', orderId: k7['주문번호'], amount: k7['청구액'] });
 at(2027, 1, 2, 10); var c7 = post({ kind: 'cancel', tel: '01000000030', no: k7['주문번호'] });
 ok('휴대폰 결제 달 넘긴 취소 → 확인필요(대표 직접 환불)', c7.ok === false && c7.reason === '확인필요' && order(k7['주문번호'])['상태'] === '확인필요' && c7.view.cancelAsked === true);
-ok('확인필요 취소 → 취소접수 문자', /취소 요청을 받았습니다/.test((msgs(cust('01000000030')['고객번호'], '취소접수').pop() || {})['결과']));
 var k8 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_8', orderId: k8['주문번호'], amount: k8['청구액'] });
 var c8 = post({ kind: 'cancel', tel: '01000000030', no: k8['주문번호'] }); var m8 = msgs(cust('01000000030')['고객번호'], '취소확인').pop()['결과'];
-ok('가상계좌 입금 전 취소 → 취소확인(환불 문장 없음)', c8.ok && m8.indexOf('환불') < 0 && msgs(cust('01000000030')['고객번호'], '결제취소').length === 1, m8);
+ok('가상계좌 입금 전 취소 → 취소확인(환불 줄 없음)', c8.ok && m8.indexOf('환불') < 0, m8);
 var k9 = co([soy(5)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_9', orderId: k9['주문번호'], amount: k9['청구액'] });
-var m9 = msgs(cust('01000000030')['고객번호'], '결제확인').pop()['결과'];
-ok('콩만 카드 결제 → 결제확인 문자 보냄(빈 칸 없음)', /^보류/.test(m9), m9);
+var m9 = msgs(cust('01000000030')['고객번호'], '결제완료').pop()['결과'];
+ok('콩만 카드 결제 → 결제완료(도정일 줄 빠짐)', /^보류/.test(m9) && m9.indexOf('도정일') < 0 && /상품이 발송되면/.test(m9), m9);
 
 // 33. 회원 — 인증(시험 모드 번호 보여 줌)·가입·로그인·잠금·마이페이지·회원 주문·비밀번호 찾기·탈퇴
 setVal('member', '끔');
@@ -402,6 +412,81 @@ ok('주문번호는 1001부터 차례로(숫자만)', nos[0] === 1001 && nos.eve
 var kz = co([rice(10, 10)]);
 ok('토스 주문번호 doodoo-<번호>', kz.tossOrderId === 'doodoo-' + kz['주문번호']);
 ok('토스 번호로 돌아와도 승인', post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_z', orderId: kz.tossOrderId, amount: kz['청구액'] }).ok && order(kz['주문번호'])['상태'] === '입금');
+
+// 35. 문자·알림 갱신(2026-11-08) — 경로마다 한 주문을 끝까지(주문 → 입금 → 작업 → 송장 입력) 돌려 나간 문자를 센다
+at(2027, 1, 4, 10);
+var sr = stock('rice'); sr['남은 양(kg)'] = Number(sr['남은 양(kg)']) + 200; save_('재고', sr);
+var ss = stock('soy'); ss['남은 양(kg)'] = Number(ss['예약된 양(kg)']) + 20; save_('재고', ss);   // 콩은 20kg만 남김
+function editInvoice(o, text) {   // 대표가 장부 「주문」 송장 칸에 입력한 것처럼
+  o = order(o['주문번호']); o['송장'] = text; save_('주문', o);
+  var col = SCHEMA['주문'].indexOf('송장') + 1, row = o._row;
+  onBookEdit({ range: { getSheet: function () { return { getName: function () { return '주문'; } }; }, getColumn: function () { return col; }, getLastColumn: function () { return col; }, getRow: function () { return row; }, getLastRow: function () { return row; } } });
+}
+function life(no, invoice) { if (order(no)['상태'] === '확정') setStatus(no, '입금'); if (order(no)['상태'] === '입금') setStatus(no, '작업'); if (order(no)['상태'] === '작업') editInvoice(order(no), invoice); }
+function sent(tel) { var c = cust(tel); return c ? msgs(c['고객번호']).map(function (s) { return { code: s['문자틀'], result: s['결과'] }; }) : []; }
+function real(tel) { return sent(tel).filter(function (s) { return !/^건너뜀/.test(s.result); }); }
+var SC = [];
+// ① 홈페이지 카드
+buyer = { '이름': '시험카드', '연락처': '01000000051', '주소': '시험시 1', '동의': ['환불확인'] };
+var h1 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_h1', orderId: h1['주문번호'], amount: h1['청구액'] }); life(h1['주문번호'], '시험택배 111-1111');
+SC.push({ name: '홈페이지 · 카드(쌀)', tel: '01000000051' });
+ok('홈페이지 카드 → 결제완료 → 발송(운송장)', real('01000000051').map(function (s) { return s.code; }).join() === '결제완료,발송' && /■ 운송장정보 : 시험택배 \/ 111-1111/.test(real('01000000051')[1].result), JSON.stringify(sent('01000000051').map(function (s) { return s.code; })));
+// ② 홈페이지 가상계좌
+buyer = { '이름': '시험계좌', '연락처': '01000000052', '주소': '시험시 2', '동의': ['환불확인'] };
+var h2 = co([rice(10, 10)]); post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_VA_h2', orderId: h2['주문번호'], amount: h2['청구액'] });
+post({ createdAt: 'x', secret: order(h2['주문번호'])['결제 비밀'], status: 'DONE', transactionKey: 't2', orderId: h2['주문번호'] }); life(h2['주문번호'], '시험택배 222-2222');
+SC.push({ name: '홈페이지 · 무통장(가상계좌, 쌀)', tel: '01000000052' });
+ok('홈페이지 가상계좌 → 입금안내 → 입금확인 → 발송', real('01000000052').map(function (s) { return s.code; }).join() === '입금안내,입금확인,발송', JSON.stringify(sent('01000000052').map(function (s) { return s.code; })));
+// ③ 문자 주문 — 재고 있음
+var t3 = intake({ '경로': '문자', '원문': '쌀 10키로 찹쌀 조금 시험셋', '이름': '시험문자', '연락처': '01000000053', mode: 'order', items: [rice(10, 10)] });
+life(t3['주문번호'], '시험택배 333-3333');
+SC.push({ name: '문자 주문 · 재고 있음(쌀)', tel: '01000000053' });
+ok('문자 주문 재고 있음 → 확정(쌀 환불 확인) → 입금확인 → 발송', t3['상태'] === '확정' && real('01000000053').map(function (s) { return s.code; }).join() === '확정,입금확인,발송', JSON.stringify(sent('01000000053').map(function (s) { return s.code; })));
+// ④ 전화 주문 — 재고 없음
+var t4 = intake({ '경로': '전화', '원문': '콩 30키로 시험넷', '이름': '시험품절', '연락처': '01000000054', mode: 'order', items: [soy(30)] });
+SC.push({ name: '전화 주문 · 재고 없음(콩 30kg)', tel: '01000000054' });
+var pm4 = sent('01000000054').filter(function (s) { return s.code === '품절'; })[0];
+ok('재고 없음 → 주문 바로 취소 + 품절 한 통(대기 줄 없음)', t4['상태'] === '품절' && order(t4['주문번호'])['상태'] === '취소' && pm4 && /준비된 양이 모두 소진되어 주문이 취소되었습니다/.test(pm4.result) && real('01000000054').length === 1, JSON.stringify(sent('01000000054')));
+// ⑤ 콩만 담은 카톡 주문
+var t5 = intake({ '경로': '카톡', '원문': '콩 5키로 시험다섯', '이름': '시험콩', '연락처': '01000000055', mode: 'order', items: [soy(5)] });
+life(t5['주문번호'], '시험택배 555-5555');
+SC.push({ name: '카톡 주문 · 콩만(5kg)', tel: '01000000055' });
+var cf5 = sent('01000000055').filter(function (s) { return s.code === '확정'; })[0].result;
+ok('콩만 → 확정에 도정일 줄 없음·콩 환불 확인(환불확인콩)', cf5.indexOf('도정일') < 0 && /※ 보내기 전에는 전액 환불됩니다/.test(cf5) && cf5.indexOf('도정 후에는') < 0, cf5);
+ok('콩만 → 입금확인에도 도정일 줄 없음', sent('01000000055').filter(function (s) { return s.code === '입금확인'; })[0].result.indexOf('도정일') < 0);
+// ⑥ 지인 주문
+var f0 = intake({ '경로': '지인', '원문': '지인 주문 시험지인 010-0000-0056 쌀 20kg 찹쌀10% 주소 시험시 금액 70,000원', '이름': '시험지인', '연락처': '01000000056', '주소': '시험시 6', mode: 'order', items: [rice(10, 20)], '금액': '70,000원' });
+var of6 = order(f0['주문번호']);
+ok('지인 주문 — 금액은 대표 값 그대로·할인 없음·확정·재고 잡음', f0['상태'] === '확정' && of6['청구액'] === 70000 && of6['할인액'] === 0 && of6['경로'] === '지인' && cust('01000000056')['유형'] === '지인' && !cust('01000000056')['두두 호'], JSON.stringify([f0['상태'], of6['청구액'], of6['할인액'], of6['경로']]));
+ok('지인 주문은 회차에 안 셈', liveCount_(cust('01000000056')['고객번호']) === 0);
+at(2027, 1, 20, 10); checkDeadlines();
+ok('지인 주문은 입금 기한·자동 취소 없음', order(f0['주문번호'])['상태'] === '확정');
+life(f0['주문번호'], 'CJ대한통운 666-6666');
+SC.push({ name: '지인 주문(쌀 20kg, 70,000원)', tel: '01000000056' });
+var fs = real('01000000056');
+ok('지인 → 「지인발송」 한 통뿐, 머리·꼬리 없음', fs.length === 1 && fs[0].code === '지인발송' && /— 두두쌀 찹쌀 10% 20kg 오늘 CJ대한통운으로 출발했습니다\. 감사합니다\.\n송장번호 666-6666\n— 최현철$/.test(fs[0].result) && fs[0].result.indexOf('[두두농장]') < 0, JSON.stringify(sent('01000000056')));
+at(2027, 1, 22, 10); setStatus(f0['주문번호'], '도착'); at(2027, 1, 30, 10); runScheduled();
+ok('지인 → 도착 뒤 안내·밥맛도 거름', real('01000000056').length === 1);
+var f2 = intake({ '경로': '지인', '원문': '지인 콩 100kg', '이름': '시험지인둘', '연락처': '01000000057', mode: 'order', items: [soy(100)], '금액': 500000 });
+ok('지인 주문 재고 모자람 → 확인필요(문자 없음)', f2['상태'] === '확인필요' && /지인 주문 — 남은 양 부족/.test(order(f2['주문번호'])['메모']) && sent('01000000057').length === 0);
+// 송장 칸 — 이미 발송한 주문은 다시 안 보냄
+editInvoice(order(t3['주문번호']), '시험택배 333-3334');
+ok('송장 고쳐도 발송 문자는 한 번', sent('01000000053').filter(function (s) { return s.code === '발송'; }).length === 1);
+// 판매 통장 하나 — 확정 계좌는 설정 account 한 곳
+setVal('account', null, '시험농협 111-2222-3333 모아온');
+var t6 = intake({ '경로': '문자', '원문': '쌀 10 시험여섯', '이름': '시험통장', '연락처': '01000000058', mode: 'order', items: [rice(0, 10)] });
+ok('판매 통장 바꾸면 확정 계좌도 그 한 곳으로', /■ 입금계좌 : 시험농협 111-2222-3333 모아온/.test(sent('01000000058').filter(function (s) { return s.code === '확정'; })[0].result));
+setVal('account', null, '시험은행 000-0000-0000');
+// 문자틀·연락 규칙 판 — 옛 장부 규칙이 켜져 있으면 setup 이 한 번 끄고, 그 뒤 대표가 고친 것은 지킴
+var rj = one_('연락 규칙', '규칙', '접수'); rj['켬/끔'] = '켬'; save_('연락 규칙', rj); setVal('rules_ver', null, 1);
+var tj = one_('문자틀', '코드', '안부'); tj['문구'] = '옛 문구'; save_('문자틀', tj); setVal('tpl_ver', null, 1);
+setup();
+ok('판 오르면 setup 이 연락 규칙 켬/끔·문자틀 문구를 한 번 맞춤', one_('연락 규칙', '규칙', '접수')['켬/끔'] === '끔' && one_('문자틀', '코드', '안부')['문구'] === DEFAULT_TEMPLATES.filter(function (t) { return t[0] === '안부'; })[0][2]);
+tj = one_('문자틀', '코드', '안부'); tj['문구'] = '대표가 고친 문구 {이름}'; save_('문자틀', tj); rj = one_('연락 규칙', '규칙', '접수'); rj['켬/끔'] = '켬'; save_('연락 규칙', rj);
+setup();
+ok('같은 판이면 대표가 고친 문구·켬/끔 그대로', one_('문자틀', '코드', '안부')['문구'] === '대표가 고친 문구 {이름}' && one_('연락 규칙', '규칙', '접수')['켬/끔'] === '켬');
+rj = one_('연락 규칙', '규칙', '접수'); rj['켬/끔'] = '끔'; save_('연락 규칙', rj);
+window.__scenarios = SC.map(function (s) { return { name: s.name, msgs: sent(s.tel) }; });
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

@@ -4,7 +4,7 @@
 (function () {
   var C = window.DOODOO_CONFIG; if (!C) return;
   var CART = 'doodoo-cart', BUY = 'doodoo-buy', FORM = 'doodoo-form', TOKEN = 'doodoo-token', LAST = 'doodoo-last', SW = 'doodoo-sw';
-  var S = { open: false, member: false, millDate: '', seatsLeft: null, info: null, me: null };
+  var S = { open: false, member: false, millDate: '', seatsLeft: null, info: null, me: null, sold: {} };
 
   // ───── 작은 도구 ─────
   function $(s, r) { return (r || document).querySelector(s); }
@@ -59,7 +59,7 @@
     var rows = [['상품 금액', won(t.goods)]];
     if (t.sub) rows.push(['소포장', won(t.sub)]);
     if (t.ship !== null) rows.push(['배송비', shipText(t.ship)]);
-    if (cut) rows.push([cut.why, '−' + won(cut.v), 'disc']);
+    if (cut) { rows.push(['적용 혜택', '', 'perk-h']); rows.push([cut.why, '−' + won(cut.v), 'disc']); }
     rows.push(['결제 예정 금액', won(t.goods + t.sub + (t.ship || 0) - (cut ? cut.v : 0)), 'total']);
     return '<dl>' + rows.map(function (r) { return '<div' + (r[2] ? ' class="' + r[2] + '"' : '') + '><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl>';
   }
@@ -148,16 +148,22 @@
     $$('[data-pay-days]').forEach(function (x) { x.textContent = C.payDays; });
   }
 
+  // ───── 판매 딱지(문안 03 · 기획 11-6) — 홈·두두 목록·상품 상세 같은 규칙 ─────
+  // 쌀: 「11/20 도정」+「판매중」 나란히 · 재고 0 → 「품절」 하나 · 도정일 없음(또는 판매 전) → 「판매 예정」 하나
+  // 콩: 「판매중」 / 「품절」 / 판매 전 「판매 예정」
+  function saleTags(grain, priced) {
+    var t = function (txt, cls) { return '<span class="tag ' + cls + '">' + txt + '</span>'; };
+    if (!(S.open && priced)) return t('판매 예정', 'soon');
+    if (S.sold[grain]) return t('품절', 'out');
+    if (grain === 'rice') return S.millDate ? t(mdShort(S.millDate) + ' 도정', 'mill') + t('판매중', 'on') : t('판매 예정', 'soon');
+    return t('판매중', 'on');
+  }
   // ───── 상품 카드(11-6) ─────
   function cards() {
     $$('[data-card]').forEach(function (card) {
       var g = C[card.dataset.card]; if (!g) return;
-      var b = $('.badge', card), s = g.sizes[0], p = s !== undefined ? unitPrice(card.dataset.card, s) : null;
-      if (b) {
-        var live = S.open && p !== null;
-        var txt = card.dataset.card === 'rice' ? (live && S.millDate ? mdShort(S.millDate) + ' 도정' : '판매 예정') : (live ? '주문 받는 중' : '판매 예정');
-        b.textContent = txt; b.classList.toggle('soon', txt === '판매 예정');
-      }
+      var b = $('.badge, .tags', card), s = g.sizes[0], p = s !== undefined ? unitPrice(card.dataset.card, s) : null;
+      if (b) { b.className = 'tags'; b.innerHTML = saleTags(card.dataset.card, p !== null); }
       var pr = $('[data-card-price]', card), un = $('[data-card-unit]', card);
       if (pr) { pr.hidden = p === null; if (p !== null) pr.textContent = s + 'kg ' + won(p) + (card.dataset.card === 'rice' && g.sizes.length > 1 ? '부터' : ''); }
       if (un) { un.hidden = p === null; if (p !== null) un.textContent = per100(card.dataset.card, s); }
@@ -177,10 +183,8 @@
     var edit = new URLSearchParams(location.search).get('edit');
     var cur = cart().filter(function (x) { return x.id === edit; })[0] || null;
     var d = md(S.millDate), live = S.open;
-    $$('[data-mill-tag]').forEach(function (x) {
-      var t = grain === 'rice' ? (live && d ? d + ' 도정' : '판매 예정') : (live && g.sizes.length ? '주문 받는 중' : '판매 예정');
-      x.textContent = t; x.classList.toggle('soon', t === '판매 예정');
-    });
+    var pricedAll = g.sizes.length > 0 && g.sizes.every(function (s) { return unitPrice(grain, s) !== null; });
+    $$('[data-mill-tag]').forEach(function (x) { x.className = 'tags'; x.innerHTML = saleTags(grain, pricedAll); });
     $$('[data-mill-ship]').forEach(function (x) { x.textContent = '택배 · ' + (d ? d + ' 도정 후 발송' : '도정 후 발송'); });
     $$('[data-mill-line]').forEach(function (x) { x.textContent = d; x.closest('[data-mill-row]') && (x.closest('[data-mill-row]').hidden = !d); });
     $$('[data-mill-guide]').forEach(function (x) { x.textContent = (d ? d + '에 ' : '') + '도정해 순차 발송합니다. 보내면 송장 번호를 알려 드립니다.'; });
@@ -217,8 +221,6 @@
       $('.cycle-custom', form).hidden = !(reg && val(form, 'cycle') === 'custom');
       qo.textContent = q;
       var it = picked(), a = lineAmt(it);
-      var so = $('[data-subpack-out]', form);
-      if (so) { so.hidden = !it.subpack; so.textContent = it.subpack ? g.subpack.unit + 'kg × ' + Math.round(it.size / g.subpack.unit) + '봉 · +' + won(g.subpack.fee[it.size]) : ''; }
       var fl = $('[data-feel]', form); if (fl) { var t = g.feel && g.feel[it.glutinous]; fl.textContent = t || ''; fl.hidden = !t; }
       $$('[data-price]').forEach(function (x) { x.textContent = won(unitPrice(grain, it.size)); });
       $$('[data-unit]').forEach(function (x) { x.textContent = per100(grain, it.size); });
@@ -243,8 +245,8 @@
     if (co && box) {
       co.addEventListener('click', function () { box.hidden = !box.hidden; co.setAttribute('aria-expanded', String(!box.hidden)); });
       var run = function () {
-        var n = Number($('[name="people"]', box).value), f = C.rice.mealFactor[$('[name="meals"]', box).value];
-        var month = n * C.rice.perCapitaDailyG * 30 * f / 1000;
+        var n = Number($('[name="people"]', box).value), f = C.rice.meals[$('[name="meals"]', box).value];
+        var month = n * f * C.rice.mealG * 30 / 1000;   // 식구 × 하루 끼니 수 × 1끼 쌀(g) × 30일
         $('.calc-out', box).textContent = '한 달 약 ' + month.toFixed(1) + 'kg · 10kg이 약 ' + Math.round(10 / (month / 30 * 7)) + '주 분량입니다.';
       };
       box.addEventListener('change', run); run();
@@ -368,14 +370,18 @@
       if (newsOn() && n % d.every === 0) return { v: Math.round(base * d.rate / 100), why: n + '번째 주문 ' + d.rate + '% 할인' };
       return null;
     }
+    // 혜택 상자(문안 03-2b 5) — 휴대폰 번호를 넣은 뒤 이 고객에게 해당하는 것만. 해당이 없으면 상자째 숨김
+    //  · ○호 자리가 남은 첫 구매이거나 이미 ○호 → 「두두 ○호 고객」 · 이미 소식 받기에 동의한 번호(○호 아님) → 「소식 알림 동의 혜택」
     function perks() {
-      var ho = $('[data-perk="ho"]'), d = C.discount; ho.hidden = S.seatsLeft === 0;
-      var seats = $('.seats', ho); seats.hidden = !has(S.seatsLeft); if (!seats.hidden) $('b', seats).textContent = S.seatsLeft;
-      var line = $('[data-perk="line"]'), i = S.info;
-      if (!i) { line.hidden = true; return; }
+      var boxEl = $('[data-perk-box]'), ho = $('[data-perk="ho"]'), news = $('[data-perk="news"]'), line = $('[data-perk="line"]'), d = C.discount, i = S.info;
+      var showHo = !!(i && (i.ho || firstHo())), showNews = !!(i && !showHo && (i.consent || i.newsEver));
+      boxEl.hidden = !(showHo || showNews);
+      ho.hidden = !showHo; news.hidden = !showNews;
+      var seats = $('.seats', ho); seats.hidden = !(showHo && !i.ho && has(S.seatsLeft)); if (!seats.hidden) $('b', seats).textContent = S.seatsLeft;
+      if (boxEl.hidden) return;
       var n = (i.count || 0) + 1;
-      line.textContent = i.ho ? '두두 ' + i.ho + '호 고객 ' + d.hoRate + '% 할인' : firstHo() ? '두두 ○호 고객 ' + d.hoRate + '% 할인'
-        : newsOn() && n % d.every === 0 ? '이번 주문 ' + d.rate + '% 할인' : '이번이 ' + n + '번째 주문 · 다음 할인까지 ' + (d.every - n % d.every) + '번';
+      line.textContent = i.ho ? '두두 ' + i.ho + '호 고객 ' + d.hoRate + '% 할인' : showHo ? '두두 ○호 고객 ' + d.hoRate + '% 할인'
+        : n % d.every === 0 ? '이번 주문 ' + d.rate + '% 할인' : '이번이 ' + n + '번째 주문 · 다음 할인까지 ' + (d.every - n % d.every) + '번';
       line.hidden = false;
     }
     var amount = null;
@@ -747,7 +753,10 @@
     var b = $('#bulk-form'); if (b) bulk(b);
   }
   // 스위치·도정일은 규칙 일꾼에게 묻는다(5분 기억). 답이 없으면 전부 끔.
-  function apply(d) { S.open = !!(C.test || (d.switches && d.switches.order && (d.switches.pay_pg || C.pay.mock))); S.member = !!(C.test || (d.switches && d.switches.member)); S.millDate = d.millDate || ''; S.seatsLeft = has(d.seatsLeft) ? d.seatsLeft : null; }
+  function apply(d) {
+    S.open = !!(C.test || (d.switches && d.switches.order && (d.switches.pay_pg || C.pay.mock))); S.member = !!(C.test || (d.switches && d.switches.member)); S.millDate = d.millDate || ''; S.seatsLeft = has(d.seatsLeft) ? d.seatsLeft : null;
+    S.sold = {}; (d.grains || []).forEach(function (g) { S.sold[g['코드']] = !!g['품절']; });   // 재고 0 → 「품절」 딱지
+  }
   var cached = get(sessionStorage, SW, null);
   if (!C.endpoint) start();
   else if (cached && Date.now() - cached.at < 300000) { apply(cached.d); start(); }

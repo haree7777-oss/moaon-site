@@ -52,7 +52,7 @@ var DEFAULT_SETTINGS = [
   ['login_days', '', 30, '로그인 상태 유지(일)', ''],
   ['code_per_day', '', 5, '인증번호 — 번호 하나당 하루 횟수', ''],
   ['login_fail_max', '', 5, '비밀번호 틀림 — 이만큼이면 10분 잠금', ''],
-  ['subpack_fee', '', '10:1000,20:2000', '소포장 추가 금액(포장 kg:원)', ''],
+  ['subpack_fee', '', '10:1000,20:1000', '소포장 추가 금액(포장 kg:원) — 10kg·20kg 모두 1,000원(문안 03-1, 2026-11-09)', ''],
   ['shipping_fee', '', '', '배송비(원) 【대표】 — 0이면 무료 배송', ''],
   ['account', '', '', '판매 통장 【대표】 — 하나만: 문자·전화·카톡·지인 주문 입금 + 토스 정산 계좌. 등기 뒤 법인 통장으로 바꿀 땐 여기 한 곳(+ 토스 정산 계좌·자동 전달 앱)', ''],
   ['waitlist', '끔', '', '재고가 모자란 문자·전화·카톡 주문을 대기 줄에 둠(끄면 바로 품절 취소 — 2026-11-08 대표 결정)', ''],
@@ -926,10 +926,11 @@ function exportSwitches() {
   var grains = rows_('곡식').filter(function (g) { return g['공개'] === 'Y' && g['상태'] !== '숨김'; }).map(function (g) {
     var out = {};
     ['코드', '제품', '상태', '부르는 이름', '한 줄', '맛', '요리', '보관', '수확', '단위(kg)', '가격(원/kg)', '사진'].forEach(function (k) { out[k] = g[k]; });
-    if (sw.live_stock) {
-      var s = one_('재고', '곡식', g['코드']);
-      out['남은 양(kg)'] = s ? Math.max(0, Number(s['남은 양(kg)']) - Number(s['예약된 양(kg)'] || 0)) : 0;
-    }
+    var s = one_('재고', '곡식', g['코드']);
+    var left = s ? Math.max(0, Number(s['남은 양(kg)'] || 0) - Number(s['예약된 양(kg)'] || 0)) : 0;
+    var units = String(g['단위(kg)'] || '').split(',').map(Number).filter(function (n) { return n > 0; });
+    out['품절'] = left < (units.length ? Math.min.apply(null, units) : 1);   // 가장 작은 단위도 못 팔면 품절(딱지 「품절」 — 문안 03)
+    if (sw.live_stock) out['남은 양(kg)'] = left;
     return out;
   });
   return { switches: sw, grains: grains, seatsLeft: seatsLeft_(), millDate: millDate_() || '', at: now_().toISOString() };

@@ -605,6 +605,15 @@ ok('동시 결제 — ○호는 서로 다르고 할인 사유도 각자 번호'
    JSON.stringify([h1, h2, order(q1['주문번호'])['할인 사유'], order(q2['주문번호'])['할인 사유']]));
 setVal('ho_seats', null, seatsWas);
 
+// 41. 판매 딱지용 품절 — 가장 작은 단위도 못 팔면 품절
+var sv = stock('soy'), svl = sv['남은 양(kg)'], svh = sv['예약된 양(kg)'];
+sv['남은 양(kg)'] = Number(svh || 0) + 1; save_('재고', sv);
+var gx = exportSwitches().grains.filter(function (g) { return g['코드'] === 'soy'; })[0];
+ok('콩 남은 양 1kg(단위 5kg) → 품절', gx['품절'] === true && gx['남은 양(kg)'] === undefined, JSON.stringify(gx));
+sv = stock('soy'); sv['남은 양(kg)'] = Number(svh || 0) + 50; save_('재고', sv);
+ok('콩 남은 양 50kg → 판매중', exportSwitches().grains.filter(function (g) { return g['코드'] === 'soy'; })[0]['품절'] === false);
+sv = stock('soy'); sv['남은 양(kg)'] = svl; save_('재고', sv);
+
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost' && x['무엇'] !== '시험 실패'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

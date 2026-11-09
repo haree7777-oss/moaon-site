@@ -17,10 +17,10 @@ window.DOODOO_CONFIG = {
     year: '',                        // 생산연도 【대표: 2026년산 확인】
     sizes: [10, 20],                 // kg
     price: { 10: null, 20: null },   // 원 【대표】
-    subpack: { unit: 2.5, fee: { 10: 1000, 20: 2000 } },
+    subpack: { unit: 2.5, fee: { 10: 1000, 20: 1000 } },   // 소포장비 10kg·20kg 모두 1,000원(장부 설정 subpack_fee 와 같게)
     cycles: [14, 28],
-    perCapitaDailyG: 147.7,
-    mealFactor: { '하루 1끼': 1 / 3, '하루 2끼': 2 / 3, '하루 3끼': 1, '주말만': 2 / 7 },
+    mealG: 100,                      // 1끼 쌀(g) — 필요량 계산: 식구 × 하루 끼니 수 × 1끼 쌀 × 30일
+    meals: { '하루 1끼': 1, '하루 2끼': 2, '하루 3끼': 3, '주말만': 4 / 7 },   // 주말만 = 주 2일 × 2끼
     photo: ['rice-cooked', 'rice-hero']   // 대표 사진(지은 밥) — 파일이 없으면 둘째 이름(임시)
   },
   soy: {

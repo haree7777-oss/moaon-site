@@ -70,9 +70,9 @@
             <label class="field">집밥 <select class="inp" name="meals"><option>하루 1끼</option><option selected>하루 2끼</option><option>하루 3끼</option><option>주말만</option></select></label>
           </div>
           <p class="calc-out" aria-live="polite"></p>
-          <p class="hint">1인 하루 쌀 소비량 147.7g(2025 양곡소비량조사) 기준.</p>
+          <p class="hint">밥 한 공기 = 쌀 100g 기준.</p>
         </div></fieldset>
-      <fieldset><legend>소포장</legend><label class="check"><input type="checkbox" name="subpack" value="yes">2.5kg 소포장으로 받기</label><p class="hint" data-subpack-out hidden></p></fieldset>
+      <fieldset><legend>소포장</legend><label class="check sub-line"><input type="checkbox" name="subpack" value="yes"><span>2.5kg 소포장으로 받기(+1,000원) <span class="em-note">여러 집과 나누어 먹을 때 좋아요!</span></span></label></fieldset>
       <fieldset><legend>구매 방식</legend><div class="opts" data-opts="repeat"></div>
         <div class="cycle-box"><p class="small">배송 주기</p><div class="opts" data-opts="cycle"></div>
           <p class="cycle-custom"><input class="inp" style="width:88px" type="number" name="cycleWeeks" min="1" max="26" value="3" aria-label="배송 주기(주)"> 주마다</p>

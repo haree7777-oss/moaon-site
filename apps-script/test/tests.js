@@ -525,6 +525,22 @@ var bn = bad.res['주문번호'];
 ok('확인필요 주문 → 상태 바꾸기(문자 없음)', order(bn)['상태'] === '확인필요' && adminAct(bn, '상태', { to: '취소', memo: '대표 정리' }).ok && order(bn)['상태'] === '취소' && order(bn)['메모'] === '대표 정리' && sent('01000000065').length === 0);
 ok('메모 저장', adminAct(af.res['주문번호'], '메모', { memo: '문 앞에' }).ok && order(af.res['주문번호'])['메모'] === '문 앞에');
 ok('새 주문 경로 틀리면 거절', adminOrder({ route: '홈페이지', name: 'x', tel: '01000000066', items: [{ grain: 'soy', size: 5 }] }).ok === false);
+var sb = Number(stock('soy')['남은 양(kg)']);
+ok('재고 넣기 → 남은 양에 더함(덮어쓰기 아님)', adminStock('soy', 12.5, '시험 입고').ok && Number(stock('soy')['남은 양(kg)']) === sb + 12.5);
+ok('재고 넣기 — 이상한 값 거절', adminStock('soy', -3).ok === false && adminStock('barley', 5).ok === false && adminStock('rice', 0).ok === false);
+setVal('last_run', null, addDays_(now_(), -1));
+var L2 = adminLoad();
+ok('자동 처리 멈춤 → n시간째 없음', L2.staleHours >= 23, String(L2.staleHours));
+setVal('last_run', null, now_());
+ok('자동 처리 방금 → 경보 없음', adminLoad().staleHours === 0);
+log_('시험 실패', 'x', '실패', '일부러 낸 실패');
+ok('처리 실패(7일) 끌어옴', adminLoad().fails.some(function (f) { return f.what === '시험 실패' && /일부러/.test(f.why); }));
+var dn = adminOrder({ route: '문자', name: '시험임박', tel: '01000000067', addr: '시험시 67', items: [{ grain: 'rice', glutinous: 0, size: 10 }] }).res['주문번호'];
+var od = order(dn); od['입금 기한'] = addDays_(now_(), 0.5); save_('주문', od);
+ok('입금 기한 24시간 안 → 임박 표시', adminLoad().orders.filter(function (o) { return o.no === String(dn); })[0].dueSoon === true);
+od = order(dn); od['작업일'] = now_(); save_('주문', od); adminAct(dn, '입금');
+ok('작업일이 오늘인 입금 주문 → 오늘 작업', adminLoad().orders.filter(function (o) { return o.no === String(dn); })[0].workToday === true);
 
-ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost'; }).length === 0,
+
+ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost' && x['무엇'] !== '시험 실패'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

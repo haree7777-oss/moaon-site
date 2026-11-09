@@ -47,6 +47,12 @@
   .seg label { margin:0; display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; color:var(--ink); font-size:14px; }
   .item { border:1px dashed var(--line); border-radius:10px; padding:8px 10px; margin-top:8px; }
   .item .inline select, .item .inline input { flex:1 1 90px; }
+  .urgent { padding:8px 16px 0; max-width:720px; margin:0 auto; }
+  .urgent button.u { display:flex; width:100%; justify-content:space-between; align-items:center; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:10px; padding:10px 12px; margin:6px 0; font:inherit; font-size:15px; color:var(--ink); cursor:pointer; }
+  .urgent button.u b { font-size:16px; }
+  .urgent .u.red { border-color:var(--warn); background:#fbe6de; color:var(--warn); font-weight:600; }
+  .urgent .ok { color:var(--sub); font-size:14px; padding:8px 2px; }
+  .urgent .fails { font-size:13px; }
   #toast { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; display:none; max-width:calc(100% - 32px); }
 </style>
 </head>
@@ -56,12 +62,13 @@
   <h1>두두 주문 관리</h1>
   <div class="meta"><span id="when">불러오는 중…</span><button id="reload" type="button">새로 고침</button><a id="book" href="#" target="_blank" rel="noopener">장부 열기</a></div>
 </header>
+<section id="urgent" class="urgent" aria-label="급한 것"></section>
 <nav id="tabs"></nav>
 <main id="main"></main>
 <div id="toast"></div>
 <script>
 var TABS = [
-  { key: 'check', name: '확인필요', has: function (o) { return o.status === '확인필요'; }, hot: true },
+  { key: 'check', name: '확인필요', has: function (o) { return o.status === '확인필요' || o.status === '대기'; }, hot: true },
   { key: 'pay', name: '입금 대기', has: function (o) { return o.status === '확정' || o.status === '결제대기'; } },
   { key: 'work', name: '작업할 것', has: function (o) { return o.status === '입금'; } },
   { key: 'ship', name: '보낼 것', has: function (o) { return o.status === '작업'; } },
@@ -89,9 +96,33 @@ function load() {
     $('when').textContent = '지금 ' + d.now + ' · 자동 처리 ' + (d.lastRun || '아직');
     $('book').href = d.book;
     if (cur === 'check' && !count(TABS[0])) cur = firstWith() || 'pay';
+    drawUrgent();
     draw();
   });
 }
+// 맨 위 급한 것 — 날짜 기준만(건수 문턱 없음). 누르면 그 탭으로.
+function drawUrgent() {
+  var o = D.orders, n = function (f) { return o.filter(f).length; }, rows = [];
+  if (D.noRun) rows.push(['red', '자동 처리가 아직 한 번도 돌지 않았습니다', '', '']);
+  else if (D.staleHours) rows.push(['red', '자동 처리 ' + D.staleHours + '시간째 없음 — 예약 작업 확인', '', '']);
+  if (D.fails.length) rows.push(['red', '처리 실패 (7일)', D.fails.length + '건', 'fails']);
+  var c1 = n(function (x) { return x.status === '확인필요'; }), c2 = n(function (x) { return x.status === '대기'; });
+  var c3 = n(function (x) { return x.workToday && x.status === '입금'; }), c4 = n(function (x) { return x.status === '작업'; }), c5 = n(function (x) { return x.dueSoon; });
+  if (c1) rows.push(['red', '확인필요', c1 + '건', 'check']);
+  if (c2) rows.push(['', '재고 부족 대기', c2 + '건', 'check']);
+  if (c3) rows.push(['', '오늘 작업', c3 + '건', 'work']);
+  if (c4) rows.push(['', '오늘 보낼 것', c4 + '건', 'ship']);
+  if (c5) rows.push(['', '입금 기한 임박', c5 + '건', 'pay']);
+  $('urgent').innerHTML = rows.length ? rows.map(function (r) {
+    return '<button type="button" class="u ' + r[0] + '" data-go="' + r[3] + '"><span>' + esc(r[1]) + '</span><b>' + esc(r[2]) + '</b></button>';
+  }).join('') + '<div id="failbox"></div>' : '<p class="ok">급한 것 없음</p>';
+}
+$('urgent').addEventListener('click', function (ev) {
+  var b = ev.target.closest('button[data-go]'); if (!b) return;
+  var go = b.getAttribute('data-go');
+  if (go === 'fails') { var box = $('failbox'); box.innerHTML = box.innerHTML ? '' : D.fails.map(function (f) { return '<div class="memo fails"><b>' + esc(f.what) + '</b> · ' + esc(f.at) + '\n' + esc(f.why) + '</div>'; }).join(''); return; }
+  if (go) { cur = go; draw(); }
+});
 function count(t) { return t.has ? D.orders.filter(t.has).length : 0; }
 function firstWith() { for (var i = 0; i < 5; i++) if (count(TABS[i])) return TABS[i].key; return null; }
 function draw() {
@@ -162,8 +193,19 @@ $('reload').addEventListener('click', load);
 
 function drawStock() {
   $('main').innerHTML = '<div class="card"><table><tr><th>곡식</th><th>남은 양</th><th>예약된 양</th><th>팔 수 있는 양</th></tr>' +
-    D.stock.map(function (s) { var free = Number(s.left || 0) - Number(s.held || 0); return '<tr><td>' + esc(s.grain) + '</td><td>' + esc(s.left) + 'kg</td><td>' + esc(s.held || 0) + 'kg</td><td>' + free + 'kg</td></tr>'; }).join('') +
-    '</table><p class="facts">남은 양은 입고 때만 더하고(재배 창 「두두쌀 입고해줘」), 발송 때 저절로 깎입니다.</p></div>';
+    D.stock.map(function (s) { var free = Number(s.left || 0) - Number(s.held || 0); return '<tr><td>' + esc(({ rice: '두두쌀', soy: '두두콩' })[s.grain] || s.grain) + (s.at ? '<br><small>' + esc(s.at) + ' 기준</small>' : '') + '</td><td>' + esc(s.left) + 'kg</td><td>' + esc(s.held || 0) + 'kg</td><td>' + free + 'kg</td></tr>'; }).join('') +
+    '</table><p class="facts">남은 양은 발송 때 저절로 깎입니다. 쌀은 재배 창 「두두쌀 입고해줘」로도 더해집니다.</p></div>' +
+    '<form class="card" id="sf"><b>재고 넣기(입고)</b><p class="facts">남은 양에 더합니다(덮어쓰지 않음).</p>' +
+    '<div class="inline"><select name="grain"><option value="rice">두두쌀</option><option value="soy">두두콩</option></select><input name="kg" type="number" inputmode="decimal" min="1" placeholder="더할 양(kg)"></div>' +
+    '<div class="inline"><input name="memo" placeholder="메모(예: 11/9 도정분)"><button class="btn" type="submit">더하기</button></div></form>';
+  $('sf').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target, g = f.elements.namedItem('grain').value, kg = Number(f.elements.namedItem('kg').value);
+    if (!(kg > 0)) return toast('양(kg)을 적어 주세요');
+    if (!confirm((g === 'rice' ? '두두쌀' : '두두콩') + ' ' + kg + 'kg을 남은 양에 더할까요?')) return;
+    f.querySelector('button').disabled = true;
+    call('adminStock', [g, kg, f.elements.namedItem('memo').value], function (r) { toast(r.ok ? '더했습니다.' : r.msg); load(); });
+  });
 }
 function itemHtml() {
   return '<div class="item"><div class="inline"><select data-f="grain"><option value="rice">두두쌀</option><option value="soy">두두콩</option></select>' +

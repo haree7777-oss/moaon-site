@@ -15,7 +15,7 @@
       withSuccessHandler: function (f) { return runner(f, fail); },
       withFailureHandler: function (f) { return runner(ok, f); }
     };
-    ['adminLoad', 'adminAct', 'adminOrder'].forEach(function (name) {
+    ['adminLoad', 'adminAct', 'adminOrder', 'adminStock'].forEach(function (name) {
       r[name] = function () {
         var args = arguments;
         setTimeout(function () {

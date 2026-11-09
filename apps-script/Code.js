@@ -1419,7 +1419,7 @@ function mdhm_(v) { var x = v ? toDate_(v) : null; return x ? md2_(x) + " " + ("
 function adminLoad() {
   ownerOnly_();
   var cs = {}; rows_('고객').forEach(function (c) { cs[c['고객번호']] = c; });
-  var since = addDays_(now_(), -14), msgs = {};
+  var since = addDays_(now_(), -14), msgs = {}, today = ymd_(now_());
   rows_('연락').forEach(function (m) {   // 주문마다 나간(또는 보류·건너뜀) 문자 — 결과 칸에 문구 전체가 있다
     var k = String(m['주문'] || ''); if (!k) return;
     (msgs[k] = msgs[k] || []).push({ at: mdhm_(m['시각']), code: m['문자틀'], result: String(m['결과'] || '') });
@@ -1432,10 +1432,34 @@ function adminLoad() {
              amount: o['청구액'] === '' ? '' : Number(o['청구액']), route: o['경로'] || '', pay: o['결제수단'] || '', work: md2_(o['작업일']),
              arrive: md2_(o['받을 날']), due: mdhm_(o['입금 기한']), invoice: String(o['송장'] || ''), memo: String(o['메모'] || ''),
              changed: mdhm_(o['상태 바뀐 시각']), test: o['시험'] === 'Y', friend: isFriend_(o), regular: o['정기'] === 'Y',
-             overdue: o['상태'] === '확정' && o['입금 기한'] && toDate_(o['입금 기한']) < now_(), msgs: msgs[String(o['주문번호'])] || [] };
+             overdue: o['상태'] === '확정' && o['입금 기한'] && toDate_(o['입금 기한']) < now_(),
+             dueSoon: o['상태'] === '확정' && o['입금 기한'] && toDate_(o['입금 기한']) < addDays_(now_(), 1),   // 24시간 안(지난 것 포함)
+             workToday: ['확정', '입금'].indexOf(o['상태']) >= 0 && o['작업일'] && ymd_(o['작업일']) <= today,    // 오늘(또는 지난) 작업일
+             msgs: msgs[String(o['주문번호'])] || [] };
   });
-  var stock = rows_('재고').map(function (s) { return { grain: s['곡식'], left: s['남은 양(kg)'], held: s['예약된 양(kg)'] }; });
-  return { orders: orders, stock: stock, lastRun: mdhm_(val_('last_run', '')), test: testMode_(), book: book_().getUrl(), now: mdhm_(now_()) };
+  var stock = rows_('재고').map(function (s) { return { grain: s['곡식'], left: s['남은 양(kg)'], held: s['예약된 양(kg)'], at: md2_(s['기준일']) }; });
+  // 규칙 일꾼이 멈췄는지(10분마다 도는데 1시간 넘게 처리 없음) · 최근 7일 처리 실패
+  var last = val_('last_run', ''), stale = last ? Math.floor((now_() - toDate_(last)) / 3600000) : null;
+  var weekAgo = addDays_(now_(), -7);
+  var fails = rows_('처리 기록').filter(function (r) { return r['결과'] === '실패' && r['시각'] && toDate_(r['시각']) > weekAgo; })
+    .slice(-10).reverse().map(function (r) { return { at: mdhm_(r['시각']), what: String(r['무엇'] || ''), why: String(r['실패 이유'] || '').slice(0, 120) }; });
+  return { orders: orders, stock: stock, lastRun: mdhm_(last), staleHours: stale !== null && stale >= 1 ? stale : 0, noRun: !last,
+           fails: fails, test: testMode_(), book: book_().getUrl(), now: mdhm_(now_()) };
+}
+// 재고 넣기(입고) — 「입고 때만 더하기」(진행표 8단계): 남은 양에 더하고 기준일을 오늘로. 덮어쓰지 않는다.
+function adminStock(grain, kg, memo) {
+  ownerOnly_();
+  kg = Number(kg);
+  if (['rice', 'soy'].indexOf(grain) < 0) return { ok: false, msg: '곡식을 고르세요' };
+  if (!(kg > 0 && kg <= 20000)) return { ok: false, msg: '양(kg)을 확인하세요' };
+  return withLock_(function () {
+    var s = one_('재고', '곡식', grain);
+    if (!s) { append_('재고', { '곡식': grain, '남은 양(kg)': kg, '예약된 양(kg)': 0, '기준일': now_() }); }
+    else { s['남은 양(kg)'] = Number(s['남은 양(kg)'] || 0) + kg; s['기준일'] = now_(); save_('재고', s); }
+    log_('재고 넣기', grain, '+' + kg + 'kg', memo ? String(memo).slice(0, 60) : '');
+    if (on_('waitlist')) processWaitlist();   // 대기 줄을 켰을 때만
+    return { ok: true, msg: '' };
+  });
 }
 // 단추 하나 = 장부에 손으로 넣는 일 하나. 문자는 연락 규칙대로 나간다(수동 상태 바꾸기만 문자 없음).
 function adminAct(no, action, data) {

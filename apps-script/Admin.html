@@ -6,7 +6,7 @@
 <style>
   :root { --bg:#f6f4ef; --card:#fff; --ink:#22201c; --sub:#6b665d; --line:#e2ddd2; --brand:#3f5f2f; --warn:#b4471f; --test:#8a5a00; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
   header { position:sticky; top:0; z-index:5; background:var(--bg); padding:12px 16px 8px; border-bottom:1px solid var(--line); }
   h1 { font-size:18px; margin:0; display:flex; gap:8px; align-items:center; }
   .testbar { background:#fff3d6; color:var(--test); font-size:13px; padding:6px 16px; font-weight:600; }
@@ -18,20 +18,20 @@
   nav .n { font-weight:700; margin-left:4px; }
   nav button.hot:not(.on) { border-color:var(--warn); color:var(--warn); }
   main { padding:4px 16px 80px; max-width:720px; margin:0 auto; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin:10px 0; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 12px; margin:8px 0; }
   .card.late { border-color:var(--warn); }
   .row1 { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
   .no { font-weight:700; }
   .who { font-weight:600; }
   .who a { color:inherit; }
   .what { margin-top:2px; }
-  .facts { color:var(--sub); font-size:13px; margin-top:4px; display:flex; flex-wrap:wrap; gap:4px 12px; }
+  .facts { color:var(--sub); font-size:12px; margin-top:3px; display:flex; flex-wrap:wrap; gap:4px 12px; }
   .memo { margin-top:6px; font-size:13px; background:#faf3e8; border-radius:8px; padding:6px 8px; white-space:pre-wrap; }
   .badge { font-size:11px; border-radius:6px; padding:1px 6px; margin-left:4px; background:#eef2ea; color:var(--brand); font-weight:600; }
   .badge.t { background:#fff3d6; color:var(--test); }
   .badge.w { background:#fbe6de; color:var(--warn); }
-  .acts { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-  .acts button, .btn { border:1px solid var(--brand); background:var(--brand); color:#fff; border-radius:8px; padding:8px 12px; font:inherit; font-size:14px; cursor:pointer; }
+  .acts { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+  .acts button, .btn { border:1px solid var(--brand); background:var(--brand); color:#fff; border-radius:8px; padding:6px 10px; font:inherit; font-size:13px; cursor:pointer; }
   .acts button.ghost, .btn.ghost { background:#fff; color:var(--brand); }
   .acts button.danger { background:#fff; color:var(--warn); border-color:var(--warn); }
   button:disabled { opacity:.5; }
@@ -51,14 +51,18 @@
   .sumhead { display:flex; justify-content:space-between; gap:8px; font-weight:600; }
   .sumhead b { color:var(--brand); text-align:right; }
   .sumrow { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:var(--sub); padding-top:4px; }
+  .sumsub { font-size:13px; font-weight:600; margin-top:8px; padding-top:6px; border-top:1px dashed var(--line); }
+  .sumrow.strong { color:var(--ink); font-weight:600; }
+  .morebtn { width:100%; margin:4px 0 12px; }
   .bulk { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 6px; }
   .pick { width:22px; height:22px; margin:0 8px 0 0; vertical-align:-5px; accent-color:var(--brand); }
   .bno { flex:0 0 auto; align-self:center; font-size:14px; min-width:110px; }
   a.btn { display:inline-block; text-decoration:none; }
   img.plan { width:100%; margin-top:10px; border:1px solid var(--line); border-radius:8px; }
-  .urgent { padding:8px 16px 0; max-width:720px; margin:0 auto; }
-  .urgent button.u { display:flex; width:100%; justify-content:space-between; align-items:center; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:10px; padding:10px 12px; margin:6px 0; font:inherit; font-size:15px; color:var(--ink); cursor:pointer; }
-  .urgent button.u b { font-size:16px; }
+  .urgent { padding:8px 16px 0; max-width:720px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .urgent .wide, .urgent .ok, .urgent #failbox { grid-column:1 / -1; }
+  .urgent button.u { display:flex; width:100%; justify-content:space-between; align-items:center; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:10px; padding:7px 10px; margin:0; font:inherit; font-size:13px; color:var(--ink); cursor:pointer; }
+  .urgent button.u b { font-size:14px; }
   .urgent .u.red { border-color:var(--warn); background:#fbe6de; color:var(--warn); font-weight:600; }
   .urgent .ok { color:var(--sub); font-size:14px; padding:8px 2px; }
   .urgent .fails { font-size:13px; }
@@ -112,8 +116,8 @@ function load() {
 // 맨 위 급한 것 — 날짜 기준만(건수 문턱 없음). 누르면 그 탭으로.
 function drawUrgent() {
   var o = D.orders, n = function (f) { return o.filter(f).length; }, rows = [];
-  if (D.noRun) rows.push(['red', '자동 처리가 아직 한 번도 돌지 않았습니다', '', '']);
-  else if (D.staleHours) rows.push(['red', '자동 처리 ' + D.staleHours + '시간째 없음 — 예약 작업 확인', '', '']);
+  if (D.noRun) rows.push(['red wide', '자동 처리가 아직 한 번도 돌지 않았습니다', '', '']);
+  else if (D.staleHours) rows.push(['red wide', '자동 처리 ' + D.staleHours + '시간째 없음 — 예약 작업 확인', '', '']);
   if (D.fails.length) rows.push(['red', '처리 실패 (7일)', D.fails.length + '건', 'fails']);
   var c1 = n(function (x) { return x.status === '확인필요'; }), c2 = n(function (x) { return x.status === '대기'; });
   var c3 = n(function (x) { return x.workToday && x.status === '입금'; }), c4 = n(function (x) { return x.status === '작업'; }), c5 = n(function (x) { return x.dueSoon; });
@@ -149,9 +153,18 @@ function draw() {
   var bk = BULK[t.key];
   $('main').innerHTML = summary(t.key, list) +
     (bk ? '<div class="bulk"><button type="button" class="btn ghost" data-bulk="all">모두 선택</button><button type="button" class="btn" data-bulk="go" disabled>' + bk.label + '</button>' +
-          (t.key === 'work' || t.key === 'ship' ? '<button type="button" class="btn ghost" data-bulk="plan">배송 개요</button>' : '') + '</div><div id="bulkbox"></div>' : '') +
-    list.map(function (o) { return card(o, !!bk); }).join('');
-  SEL = {}; pickCount();
+          (t.key === 'ship' ? '<button type="button" class="btn ghost" data-bulk="plan">배송 개요</button>' : '') + '</div><div id="bulkbox"></div>' : '') +
+    '<div id="cards"></div><div id="more"></div>';
+  SEL = {}; SHOWN = 0; moreCards(); pickCount();
+}
+// 주문이 많으면 20건씩 — 「더 보기」로 이어서. 요약·모두 선택은 탭 전체 기준.
+var PAGE = 20, SHOWN = 0;
+function moreCards() {
+  var bk = !!BULK[cur], next = LIST.slice(SHOWN, SHOWN + PAGE);
+  $('cards').insertAdjacentHTML('beforeend', next.map(function (o) { return card(o, bk); }).join(''));
+  SHOWN += next.length;
+  var left = LIST.length - SHOWN;
+  $('more').innerHTML = left > 0 ? '<button type="button" class="btn ghost morebtn" data-bulk="more">더 보기 (' + left + '건 남음)</button>' : '';
 }
 // ───── 탭 위 요약 ─────
 var GN = { rice: '두두쌀', soy: '두두콩' };
@@ -165,17 +178,24 @@ function summary(key, list) {
       Object.keys(by).map(function (m) { return '<div class="sumrow"><span>' + esc(m) + '</span><span>' + won(by[m]) + '</span></div>'; }).join('') + '</div>';
   }
   if (key === 'work' || key === 'ship') {
-    var rows = {}, kg = {}, sub = 0;
+    var rows = {}, kg = {}, sub = 0, mep = 0, chal = 0;
     list.forEach(function (o) { (o.items || []).forEach(function (it) {
       var k = itemKey(it) + (it.sub ? ' (소포장)' : ''); rows[k] = (rows[k] || 0) + it.qty;
       kg[it.grain] = (kg[it.grain] || 0) + it.size * it.qty;
+      if (it.grain === 'rice') { chal += it.size * it.qty * (Number(it.gl) || 0) / 100; mep += it.size * it.qty * (100 - (Number(it.gl) || 0)) / 100; }
       if (it.sub) sub += Math.round(it.size / 2.5) * it.qty;   // 소포장 2.5kg 봉지
     }); });
-    var keys = Object.keys(rows).sort();
+    var keys = Object.keys(rows).sort(), y = (D.millYield || 70) / 100;
+    var r1 = function (n) { return Math.round(n * 10) / 10; };
+    // 두두쌀 = 신동진(멥쌀) + 동진찰(찹쌀)을 비율대로 섞음 → 품종별 쌀 무게, 작업할 것에선 도정 전 벼 무게(벼 = 쌀 ÷ 도정률)
+    var rice = kg.rice ? '<div class="sumsub">두두쌀 품종별' + (key === 'work' ? ' · 벼 무게(도정률 ' + Math.round(y * 100) + '%)' : '') + '</div>' +
+      [['신동진(멥쌀)', mep], ['동진찰(찹쌀)', chal]].filter(function (x) { return x[1] > 0; }).map(function (x) {
+        return '<div class="sumrow"><span>' + x[0] + '</span><span>쌀 ' + r1(x[1]) + 'kg' + (key === 'work' ? ' → 벼 ' + r1(x[1] / y) + 'kg' : '') + '</span></div>';
+      }).join('') + (key === 'work' ? '<div class="sumrow strong"><span>벼 합계</span><span>' + r1(kg.rice / y) + 'kg</span></div>' : '') : '';
     return '<div class="sum"><div class="sumhead"><span>' + (key === 'work' ? '작업할 것 ' : '보낼 것 ') + list.length + '건</span><b>' +
-      Object.keys(kg).map(function (g) { return (GN[g] || g) + ' ' + kg[g] + 'kg'; }).join(' · ') + '</b></div>' +
+      Object.keys(kg).map(function (g) { return (GN[g] || g) + ' ' + r1(kg[g]) + 'kg'; }).join(' · ') + '</b></div>' +
       keys.map(function (k) { return '<div class="sumrow"><span>' + esc(k) + '</span><span>' + rows[k] + '개</span></div>'; }).join('') +
-      (sub ? '<div class="sumrow"><span>소포장 봉지(2.5kg)</span><span>' + sub + '봉지</span></div>' : '') + '</div>';
+      (sub ? '<div class="sumrow"><span>소포장 봉지(2.5kg)</span><span>' + sub + '봉지</span></div>' : '') + rice + '</div>';
   }
   if (key === 'road') return '<div class="sum"><div class="sumhead"><span>배송 중 ' + list.length + '건</span><b></b></div></div>';
   return '';
@@ -192,7 +212,7 @@ function picked() { return LIST.filter(function (o) { return SEL[o.no]; }); }
 function pickCount() {
   var n = picked().length, go = document.querySelector('[data-bulk=go]'), all = document.querySelector('[data-bulk=all]');
   if (go) { go.disabled = !n; go.textContent = BULK[cur].label + (n ? ' ' + n + '건' : ''); }
-  if (all) all.textContent = n && n === LIST.length ? '선택 풀기' : '모두 선택';
+  if (all) all.textContent = n && n === LIST.length ? '선택 풀기' : '모두 선택 (' + LIST.length + '건)';
 }
 function runBulk(list, done) {
   busy(true);
@@ -209,6 +229,7 @@ $('main').addEventListener('change', function (ev) {
 $('main').addEventListener('click', function (ev) {
   var b = ev.target.closest('button[data-bulk]'); if (!b) return;
   var k = b.getAttribute('data-bulk'), bk = BULK[cur];
+  if (k === 'more') return moreCards();
   if (k === 'all') {
     var on = picked().length !== LIST.length;
     LIST.forEach(function (o) { SEL[o.no] = on; });
@@ -250,12 +271,15 @@ function shipGroups(list) {
   });
   return order.map(function (k) { return g[k]; });
 }
-function shipPlan(list) {
-  var groups = shipGroups(list), W = 720, pad = 32, lh = 40, x = pad;
+// 받는 곳이 많으면 한 장에 8곳씩 여러 장(글자 크기는 그대로 — 폰에서 읽히게)
+var PLAN_PER = 8;
+function planImage(groups, start, page, pages, total, orders) {
+  var W = 720, pad = 32, lh = 40, x = pad;
   var lines = [];   // [글, 크기, 굵게, 색]
-  lines.push(['두두 배송 개요 · ' + D.now, 44, true, '#22201c'], ['받는 곳 ' + groups.length + '곳 · 주문 ' + list.length + '건' + (D.test ? ' · 시험판' : ''), 30, false, '#6b665d'], ['', 20]);
+  lines.push(['두두 배송 개요 · ' + D.now, 44, true, '#22201c'],
+             ['받는 곳 ' + total + '곳 · 주문 ' + orders + '건' + (pages > 1 ? ' · ' + page + '/' + pages + '장' : '') + (D.test ? ' · 시험판' : ''), 30, false, '#6b665d'], ['', 20]);
   groups.forEach(function (gr, i) {
-    lines.push([(i + 1) + '. ' + gr.ship.name + '  ' + telf(gr.ship.tel), 36, true, '#22201c']);
+    lines.push([(start + i + 1) + '. ' + gr.ship.name + '  ' + telf(gr.ship.tel), 36, true, '#22201c']);
     wrap(gr.ship.addr || '(주소 없음)', 21).forEach(function (l) { lines.push([l, 30, false, '#22201c']); });
     Object.keys(gr.items).forEach(function (k) { lines.push(['· ' + k + '  × ' + gr.items[k], 32, true, '#3f5f2f']); });
     gr.notes.forEach(function (n) { wrap('요청: ' + n, 22).forEach(function (l) { lines.push([l, 28, false, '#b4471f']); }); });
@@ -273,15 +297,19 @@ function shipPlan(list) {
     }
     y += l[1] + 14;
   });
-  var png = cv.toDataURL('image/png');
+  return cv.toDataURL('image/png');
+}
+function shipPlan(list) {
+  var groups = shipGroups(list), pages = Math.max(1, Math.ceil(groups.length / PLAN_PER)), imgs = [];
+  for (var p = 0; p < pages; p++) imgs.push(planImage(groups.slice(p * PLAN_PER, (p + 1) * PLAN_PER), p * PLAN_PER, p + 1, pages, groups.length, list.length));
   var csv = '﻿' + [['받는 분', '전화', '주소', '품목', '요청사항', '주문번호']].concat(groups.map(function (gr) {
     return [gr.ship.name, telf(gr.ship.tel), gr.ship.addr, Object.keys(gr.items).map(function (k) { return k + ' x' + gr.items[k]; }).join(' / '), gr.notes.join(' / '), gr.nos.join(' ')];
   })).map(function (r) { return r.map(function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
   var name = '두두배송_' + D.now.replace(/[\/ :]/g, '');
-  $('bulkbox').innerHTML = '<div class="card"><b>배송 개요</b><p class="facts">폰: 사진을 길게 눌러 「이미지 저장」. 택배 파일은 택배사 사이트에 올리는 용도입니다.</p>' +
-    '<div class="acts"><a class="btn" download="' + name + '.png" href="' + png + '">이미지 내려받기</a>' +
+  $('bulkbox').innerHTML = '<div class="card"><b>배송 개요' + (pages > 1 ? ' (' + pages + '장)' : '') + '</b><p class="facts">폰: 사진을 길게 눌러 「이미지 저장」. 택배 파일은 택배사 사이트에 올리는 용도입니다.</p>' +
+    '<div class="acts">' + imgs.map(function (src, i) { return '<a class="btn" download="' + name + (pages > 1 ? '_' + (i + 1) : '') + '.png" href="' + src + '">이미지' + (pages > 1 ? ' ' + (i + 1) : '') + ' 내려받기</a>'; }).join('') +
     '<a class="btn ghost" download="' + name + '.csv" href="data:text/csv;charset=utf-8,' + encodeURIComponent(csv) + '">택배 파일(CSV)</a></div>' +
-    '<img class="plan" alt="배송 개요" src="' + png + '"></div>';
+    imgs.map(function (src, i) { return '<img class="plan" alt="배송 개요 ' + (i + 1) + '" src="' + src + '">'; }).join('') + '</div>';
   $('bulkbox').scrollIntoView({ behavior: 'smooth' });
 }
 function wrap(t, n) { var out = []; t = String(t || ''); while (t.length > n) { out.push(t.slice(0, n)); t = t.slice(n); } out.push(t); return out; }
@@ -300,7 +328,7 @@ function card(o, pick) {
   a.push(btn('메모열기', '메모', 'ghost'));
   if (o.msgs && o.msgs.length) a.push(btn('문자열기', '문자 ' + o.msgs.length, 'ghost'));
   return '<div class="card' + (o.overdue ? ' late' : '') + '" data-no="' + esc(o.no) + '">' +
-    '<div class="row1"><span>' + (pick ? '<input type="checkbox" class="pick" data-pick="' + esc(o.no) + '" aria-label="고르기">' : '') + '<span class="no">' + esc(o.no) + '</span>' + b + '</span><span>' + esc(o.status) + '</span></div>' +
+    '<div class="row1"><span>' + (pick ? '<input type="checkbox" class="pick" data-pick="' + esc(o.no) + '"' + (SEL[o.no] ? ' checked' : '') + ' aria-label="고르기">' : '') + '<span class="no">' + esc(o.no) + '</span>' + b + '</span><span>' + esc(o.status) + '</span></div>' +
     (o.ship && o.ship.addr && ['입금', '작업', '발송'].indexOf(o.status) >= 0 ? '<div class="facts"><span>받는 분 ' + esc(o.ship.name) + ' · ' + esc(o.ship.addr) + '</span></div>' : '') +
     '<div class="who">' + esc(o.name) + ' <a href="tel:' + esc(o.tel) + '">' + esc(telf(o.tel)) + '</a></div>' +
     '<div class="what">' + esc(o.grain) + ' · ' + won(o.amount) + '</div>' +

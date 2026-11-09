@@ -584,12 +584,26 @@ at(2027, 2, 4, 10);
 var b1 = adminOrder({ route: '전화', name: '시험묶음일', tel: '01000000091', addr: '시험시 묶음로 1', items: [{ grain: 'rice', glutinous: 10, size: 20, subpack: true }, { grain: 'soy', size: 5 }] }).res['주문번호'];
 var b2 = adminOrder({ route: '문자', name: '시험묶음이', tel: '01000000092', addr: '시험시 묶음로 2', items: [{ grain: 'rice', glutinous: 0, size: 10 }] }).res['주문번호'];
 var BL = adminLoad().orders.filter(function (o) { return o.no === String(b1); })[0];
+ok('도정률 설정(기본 70%)이 주문 관리로', adminLoad().millYield === 70);
 ok('주문 관리에 품목(조합·양·소포장)과 배송지', BL.items.length === 2 && BL.items[0].gl === 10 && BL.items[0].size === 20 && BL.items[0].sub === true && BL.ship.addr === '시험시 묶음로 1' && BL.ship.name === '시험묶음일', JSON.stringify(BL.items) + JSON.stringify(BL.ship));
 var bb = adminBulk([{ no: b1, action: '입금' }, { no: b2, action: '입금' }, { no: b2, action: '취소' }]);
 ok('한꺼번에 입금 확인 — 둘 다 입금·문자 각각, 취소는 한꺼번에 안 됨', bb.done === 2 && bb.failed.length === 1 && order(b1)['상태'] === '입금' && order(b2)['상태'] === '입금' && sent('01000000091').filter(function (s) { return s.code === '입금확인'; }).length === 1, JSON.stringify(bb));
 var bw = adminBulk([{ no: b1, action: '작업' }, { no: b2, action: '작업' }]);
 var bs = adminBulk([{ no: b1, action: '송장', data: { text: 'CJ대한통운 111' } }, { no: b2, action: '송장', data: { text: 'CJ대한통운 222' } }]);
 ok('한꺼번에 작업 완료 → 송장 → 발송 문자 각각', bw.done === 2 && bs.done === 2 && order(b2)['상태'] === '발송' && /222/.test(order(b2)['송장']) && sent('01000000092').filter(function (s) { return s.code === '발송'; }).length === 1);
+
+// 40. 결제창이 동시에 둘 열려도 ○호 할인 사유는 실제 번호로
+var seatsWas = val_('ho_seats', 100); setVal('ho_seats', null, 999);
+buyer = { '이름': '시험동시일', '연락처': '01000000095', '주소': '시험시 95', '동의': ['환불확인'] };
+var q1 = co([rice(10, 10)]);
+buyer = { '이름': '시험동시이', '연락처': '01000000096', '주소': '시험시 96', '동의': ['환불확인'] };
+var q2 = co([rice(10, 10)]);
+post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_q1', orderId: q1['주문번호'], amount: q1['청구액'] });
+post({ kind: 'pay-confirm', test: true, paymentKey: 'mock_CARD_q2', orderId: q2['주문번호'], amount: q2['청구액'] });
+var h1 = cust('01000000095')['두두 호'], h2 = cust('01000000096')['두두 호'];
+ok('동시 결제 — ○호는 서로 다르고 할인 사유도 각자 번호', h1 && h2 && h1 !== h2 && order(q1['주문번호'])['할인 사유'] === '두두 ' + h1 + '호 고객' && order(q2['주문번호'])['할인 사유'] === '두두 ' + h2 + '호 고객',
+   JSON.stringify([h1, h2, order(q1['주문번호'])['할인 사유'], order(q2['주문번호'])['할인 사유']]));
+setVal('ho_seats', null, seatsWas);
 
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost' && x['무엇'] !== '시험 실패'; }).length === 0,

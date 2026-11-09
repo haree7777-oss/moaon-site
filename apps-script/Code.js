@@ -68,6 +68,7 @@ var DEFAULT_SETTINGS = [
   ['recall_per_hour', '', 5, '지난 주문 불러오기 — 번호 하나당 한 시간 횟수', ''],
   ['lookup_fail_per_hour', '', 5, '내 주문 조회 — 번호 하나당 한 시간에 틀릴 수 있는 횟수', ''],
   ['min_mill_kg', '', 10, '홈페이지 도정일: 이만큼 자리가 남은 가장 가까운 도정일', ''],
+  ['mill_yield', '', 70, '도정률(%) — 주문 관리 「작업할 것」에서 쌀 무게를 벼 무게로 바꿀 때(벼 = 쌀 ÷ 도정률)', ''],
   ['regular_ahead_days', '', 3, '정기 주문: 다음 도정일 며칠 전에 다음 예약을 만듦', ''],
   ['last_run', '', '', '규칙 일꾼이 마지막으로 돈 시각(자동)', '']
 ];
@@ -520,7 +521,7 @@ function confirm_(o, c) {
   o['입금 기한'] = addDays_(t, val_('pay_days', 3)); o['입금 안내 횟수'] = 0;
   o['상태'] = '확정'; o['상태 바뀐 시각'] = t; o['메모'] = '';
   save_('주문', o);
-  var firstEver = settle_(c, r.n, t);
+  var firstEver = settle_(c, r.n, t, o);
   var route = o['경로'] || (one_('접수', '접수번호', o['접수번호']) || {})['경로'];
   var refund = TEXT_ROUTES.indexOf(route) >= 0 ? (mill > 0 ? '확정·환불확인' : '환불확인콩') : '';   // 쌀이 들면 쌀 기준
   send_(fromWait ? '대기확정' : '확정', c, o, { append: [refund, firstEver && c['두두 호'] ? '첫고객' : ''] });
@@ -585,13 +586,17 @@ function price_(o, c, grains) {
   return { n: n, why: d.why };
 }
 // 주문이 맺어진 때 고객 칸(○호·첫 주문일·회차)
-function settle_(c, n, t) {
+// o 를 주면 할인 사유의 ○호를 실제 번호로 고친다 — 결제창이 동시에 여럿 열리면 금액을 정할 때 미리 본 번호가 겹칠 수 있다(문자에 틀린 번호가 나가지 않게).
+function settle_(c, n, t, o) {
   var firstEver = !c['두두 호'] && liveCount_(c['고객번호']) <= 1 && !c['첫 주문일'];
   if (firstEver && seatsLeft_() > 0) c['두두 호'] = nextHo_();
   if (firstEver) c['첫 주문일'] = t;
   c['마지막 주문일'] = t;
   c['단골 회차'] = n;
   save_('고객', c);
+  if (o && c['두두 호'] && /^두두 \d+호 고객$/.test(String(o['할인 사유'])) && o['할인 사유'] !== '두두 ' + c['두두 호'] + '호 고객') {
+    o['할인 사유'] = '두두 ' + c['두두 호'] + '호 고객'; save_('주문', o);
+  }
   return firstEver;
 }
 
@@ -1093,12 +1098,12 @@ function payConfirm(p) {
       o['가상계좌'] = JSON.stringify({ bank: va.bankCode, account: va.accountNumber, due: va.dueDate });
       o['입금 기한'] = va.dueDate ? new Date(String(va.dueDate)) : addDays_(t, val_('pay_days', 3));
       save_('주문', o);
-      var first = settle_(c, n, t);
+      var first = settle_(c, n, t, o);
       send_('입금안내', c, o, { '은행': bankName_(va.bankCode), '계좌번호': va.accountNumber, append: [first && c['두두 호'] ? '첫고객' : ''] });
     } else if (pay.status === 'DONE') {
       o['결제 상태'] = '완료'; o['상태'] = '입금'; o['입금일'] = t;
       save_('주문', o);
-      var firstEver = settle_(c, n, t);
+      var firstEver = settle_(c, n, t, o);
       send_('결제완료', c, o, { append: [firstEver && c['두두 호'] ? '첫고객' : ''] });
     } else { abort_(o, 'PG 상태 ' + pay.status); return { ok: false, code: pay.status }; }
     log_('결제 승인', o['주문번호'], o['결제 상태'], o['결제수단']);
@@ -1472,7 +1477,8 @@ function adminLoad() {
   var fails = rows_('처리 기록').filter(function (r) { return r['결과'] === '실패' && r['시각'] && toDate_(r['시각']) > weekAgo; })
     .slice(-10).reverse().map(function (r) { return { at: mdhm_(r['시각']), what: String(r['무엇'] || ''), why: String(r['실패 이유'] || '').slice(0, 120) }; });
   return { orders: orders, stock: stock, lastRun: mdhm_(last), staleHours: stale !== null && stale >= 1 ? stale : 0, noRun: !last,
-           fails: fails, test: testMode_(), book: book_().getUrl(), now: mdhm_(now_()) };
+           fails: fails, test: testMode_(), book: book_().getUrl(), now: mdhm_(now_()),
+           millYield: Number(val_('mill_yield', 70)) || 70 };
 }
 // 재고 넣기(입고) — 「입고 때만 더하기」(진행표 8단계): 남은 양에 더하고 기준일을 오늘로. 덮어쓰지 않는다.
 function adminStock(grain, kg, memo) {

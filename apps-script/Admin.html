@@ -47,6 +47,15 @@
   .seg label { margin:0; display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; color:var(--ink); font-size:14px; }
   .item { border:1px dashed var(--line); border-radius:10px; padding:8px 10px; margin-top:8px; }
   .item .inline select, .item .inline input { flex:1 1 90px; }
+  .sum { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin:10px 0; }
+  .sumhead { display:flex; justify-content:space-between; gap:8px; font-weight:600; }
+  .sumhead b { color:var(--brand); text-align:right; }
+  .sumrow { display:flex; justify-content:space-between; gap:8px; font-size:14px; color:var(--sub); padding-top:4px; }
+  .bulk { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 6px; }
+  .pick { width:22px; height:22px; margin:0 8px 0 0; vertical-align:-5px; accent-color:var(--brand); }
+  .bno { flex:0 0 auto; align-self:center; font-size:14px; min-width:110px; }
+  a.btn { display:inline-block; text-decoration:none; }
+  img.plan { width:100%; margin-top:10px; border:1px solid var(--line); border-radius:8px; }
   .urgent { padding:8px 16px 0; max-width:720px; margin:0 auto; }
   .urgent button.u { display:flex; width:100%; justify-content:space-between; align-items:center; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:10px; padding:10px 12px; margin:6px 0; font:inherit; font-size:15px; color:var(--ink); cursor:pointer; }
   .urgent button.u b { font-size:16px; }
@@ -135,15 +144,154 @@ function draw() {
   if (t.key === 'stock') return drawStock();
   var list = D.orders.filter(t.has);
   if (t.key === 'pay') list.sort(function (a, b) { return (b.overdue ? 1 : 0) - (a.overdue ? 1 : 0); });
-  $('main').innerHTML = list.length ? list.map(card).join('') : '<p class="empty">없습니다.</p>';
+  LIST = list;
+  if (!list.length) { $('main').innerHTML = '<p class="empty">없습니다.</p>'; return; }
+  var bk = BULK[t.key];
+  $('main').innerHTML = summary(t.key, list) +
+    (bk ? '<div class="bulk"><button type="button" class="btn ghost" data-bulk="all">모두 선택</button><button type="button" class="btn" data-bulk="go" disabled>' + bk.label + '</button>' +
+          (t.key === 'work' || t.key === 'ship' ? '<button type="button" class="btn ghost" data-bulk="plan">배송 개요</button>' : '') + '</div><div id="bulkbox"></div>' : '') +
+    list.map(function (o) { return card(o, !!bk); }).join('');
+  SEL = {}; pickCount();
 }
-function card(o) {
+// ───── 탭 위 요약 ─────
+var GN = { rice: '두두쌀', soy: '두두콩' };
+function glName(g) { return Number(g) ? '찹쌀 ' + g + '%' : '멥쌀만'; }
+function itemKey(it) { return it.grain === 'rice' ? GN.rice + ' ' + glName(it.gl) + ' ' + it.size + 'kg' : (GN[it.grain] || it.grain) + ' ' + it.size + 'kg'; }
+function summary(key, list) {
+  if (key === 'pay') {
+    var total = 0, by = {};
+    list.forEach(function (o) { var a = Number(o.amount) || 0, m = o.pay || (o.route === '홈페이지' ? '미정' : '통장(' + o.route + ')'); total += a; by[m] = (by[m] || 0) + a; });
+    return '<div class="sum"><div class="sumhead"><span>입금 대기 ' + list.length + '건</span><b>' + won(total) + '</b></div>' +
+      Object.keys(by).map(function (m) { return '<div class="sumrow"><span>' + esc(m) + '</span><span>' + won(by[m]) + '</span></div>'; }).join('') + '</div>';
+  }
+  if (key === 'work' || key === 'ship') {
+    var rows = {}, kg = {}, sub = 0;
+    list.forEach(function (o) { (o.items || []).forEach(function (it) {
+      var k = itemKey(it) + (it.sub ? ' (소포장)' : ''); rows[k] = (rows[k] || 0) + it.qty;
+      kg[it.grain] = (kg[it.grain] || 0) + it.size * it.qty;
+      if (it.sub) sub += Math.round(it.size / 2.5) * it.qty;   // 소포장 2.5kg 봉지
+    }); });
+    var keys = Object.keys(rows).sort();
+    return '<div class="sum"><div class="sumhead"><span>' + (key === 'work' ? '작업할 것 ' : '보낼 것 ') + list.length + '건</span><b>' +
+      Object.keys(kg).map(function (g) { return (GN[g] || g) + ' ' + kg[g] + 'kg'; }).join(' · ') + '</b></div>' +
+      keys.map(function (k) { return '<div class="sumrow"><span>' + esc(k) + '</span><span>' + rows[k] + '개</span></div>'; }).join('') +
+      (sub ? '<div class="sumrow"><span>소포장 봉지(2.5kg)</span><span>' + sub + '봉지</span></div>' : '') + '</div>';
+  }
+  if (key === 'road') return '<div class="sum"><div class="sumhead"><span>배송 중 ' + list.length + '건</span><b></b></div></div>';
+  return '';
+}
+// ───── 한꺼번에 처리 ─────
+var BULK = {
+  pay: { action: '입금', label: '선택 입금 확인', ask: '건 입금 확인 문자가 나갑니다. 통장·결제에서 입금을 확인한 주문만 고르셨나요?' },
+  work: { action: '작업', label: '선택 작업 완료', ask: '건을 작업 완료로 옮깁니다.' },
+  ship: { action: '송장', label: '선택 송장 입력' },
+  road: { action: '도착', label: '선택 도착', ask: '건을 도착으로 옮깁니다. 도착 다음 날 안내·밥맛 문자가 예약됩니다.' }
+};
+var LIST = [], SEL = {};
+function picked() { return LIST.filter(function (o) { return SEL[o.no]; }); }
+function pickCount() {
+  var n = picked().length, go = document.querySelector('[data-bulk=go]'), all = document.querySelector('[data-bulk=all]');
+  if (go) { go.disabled = !n; go.textContent = BULK[cur].label + (n ? ' ' + n + '건' : ''); }
+  if (all) all.textContent = n && n === LIST.length ? '선택 풀기' : '모두 선택';
+}
+function runBulk(list, done) {
+  busy(true);
+  call('adminBulk', [list], function (r) {
+    busy(false);
+    toast(r.done + '건 처리' + (r.failed.length ? ' · 못 한 것 ' + r.failed.length + '건: ' + r.failed.map(function (f) { return f.no + ' ' + f.msg; }).join(', ') : ''));
+    if (done) done(); load();
+  });
+}
+$('main').addEventListener('change', function (ev) {
+  var p = ev.target.getAttribute && ev.target.getAttribute('data-pick'); if (!p) return;
+  SEL[p] = ev.target.checked; pickCount();
+});
+$('main').addEventListener('click', function (ev) {
+  var b = ev.target.closest('button[data-bulk]'); if (!b) return;
+  var k = b.getAttribute('data-bulk'), bk = BULK[cur];
+  if (k === 'all') {
+    var on = picked().length !== LIST.length;
+    LIST.forEach(function (o) { SEL[o.no] = on; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-pick]'), function (c) { c.checked = on; });
+    return pickCount();
+  }
+  if (k === 'plan') return shipPlan(picked().length ? picked() : LIST);
+  if (k === 'go') {
+    var sel = picked(); if (!sel.length) return;
+    if (bk.action !== '송장') {
+      if (!confirm(sel.length + bk.ask)) return;
+      return runBulk(sel.map(function (o) { return { no: o.no, action: bk.action }; }));
+    }
+    var c = lastCourier();   // 송장: 고른 주문마다 한 줄씩 — 택배사는 한 번만
+    $('bulkbox').innerHTML = '<div class="card"><b>송장 한꺼번에 입력</b><p class="facts">택배사는 한 번만 적고, 주문마다 송장번호를 넣으세요. 비운 줄은 건너뜁니다.</p>' +
+      '<div class="inline"><input id="bcourier" placeholder="택배사 (예: CJ대한통운)" value="' + esc(c) + '"></div>' +
+      sel.map(function (o) { return '<div class="inline"><span class="bno">' + esc(o.no) + ' ' + esc(o.ship ? o.ship.name : o.name) + '</span><input data-inv="' + esc(o.no) + '" inputmode="numeric" placeholder="송장번호"></div>'; }).join('') +
+      '<div class="acts"><button type="button" class="btn" data-bulk="ship">모두 보내기</button></div></div>';
+    return;
+  }
+  if (k === 'ship') {
+    var courier = $('bcourier').value.trim();
+    if (!courier) return toast('택배사를 적어 주세요');
+    var rows = Array.prototype.map.call(document.querySelectorAll('[data-inv]'), function (i) { return { no: i.getAttribute('data-inv'), v: i.value.trim().replace(/\s+/g, '') }; }).filter(function (x) { return x.v; });
+    if (!rows.length) return toast('송장번호를 넣어 주세요');
+    if (!confirm(rows.length + '건에 발송 문자가 나갑니다.')) return;
+    keepCourier(courier + ' x');
+    return runBulk(rows.map(function (x) { return { no: x.no, action: '송장', data: { text: courier + ' ' + x.v } }; }));
+  }
+});
+// ───── 배송 개요(받는 분별 물량) — 이미지(길게 눌러 사진에 저장) + 택배 파일(CSV) ─────
+function shipGroups(list) {
+  var g = {}, order = [];
+  list.forEach(function (o) {
+    var s = o.ship || { name: o.name, tel: o.tel, addr: '', note: '' }, key = [s.name, s.tel, s.addr].join('|');
+    if (!g[key]) { g[key] = { ship: s, items: {}, nos: [], notes: [] }; order.push(key); }
+    (o.items || []).forEach(function (it) { var k = itemKey(it) + (it.sub ? ' 소포장' : ''); g[key].items[k] = (g[key].items[k] || 0) + it.qty; });
+    g[key].nos.push(o.no); if (s.note) g[key].notes.push(s.note);
+  });
+  return order.map(function (k) { return g[k]; });
+}
+function shipPlan(list) {
+  var groups = shipGroups(list), W = 720, pad = 32, lh = 40, x = pad;
+  var lines = [];   // [글, 크기, 굵게, 색]
+  lines.push(['두두 배송 개요 · ' + D.now, 44, true, '#22201c'], ['받는 곳 ' + groups.length + '곳 · 주문 ' + list.length + '건' + (D.test ? ' · 시험판' : ''), 30, false, '#6b665d'], ['', 20]);
+  groups.forEach(function (gr, i) {
+    lines.push([(i + 1) + '. ' + gr.ship.name + '  ' + telf(gr.ship.tel), 36, true, '#22201c']);
+    wrap(gr.ship.addr || '(주소 없음)', 21).forEach(function (l) { lines.push([l, 30, false, '#22201c']); });
+    Object.keys(gr.items).forEach(function (k) { lines.push(['· ' + k + '  × ' + gr.items[k], 32, true, '#3f5f2f']); });
+    gr.notes.forEach(function (n) { wrap('요청: ' + n, 22).forEach(function (l) { lines.push([l, 28, false, '#b4471f']); }); });
+    lines.push(['주문 ' + gr.nos.join(', '), 26, false, '#6b665d'], ['', 22]);
+  });
+  var cv = document.createElement('canvas'), H = pad * 2 + lines.reduce(function (s, l) { return s + (l[1] ? l[1] + 14 : lh); }, 0);
+  cv.width = W; cv.height = H;
+  var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, W, H);
+  var y = pad; cx.textBaseline = 'top';
+  lines.forEach(function (l) {
+    if (l[0]) {   // 줄이 넓으면 글자를 줄여 한 줄에 맞춘다
+      var px = l[1];
+      do { cx.font = (l[2] ? '700 ' : '400 ') + px + 'px -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif'; px -= 2; } while (px > 18 && cx.measureText(l[0]).width > W - pad * 2);
+      cx.fillStyle = l[3] || '#22201c'; cx.fillText(l[0], x, y);
+    }
+    y += l[1] + 14;
+  });
+  var png = cv.toDataURL('image/png');
+  var csv = '﻿' + [['받는 분', '전화', '주소', '품목', '요청사항', '주문번호']].concat(groups.map(function (gr) {
+    return [gr.ship.name, telf(gr.ship.tel), gr.ship.addr, Object.keys(gr.items).map(function (k) { return k + ' x' + gr.items[k]; }).join(' / '), gr.notes.join(' / '), gr.nos.join(' ')];
+  })).map(function (r) { return r.map(function (v) { return '"' + String(v || '').replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+  var name = '두두배송_' + D.now.replace(/[\/ :]/g, '');
+  $('bulkbox').innerHTML = '<div class="card"><b>배송 개요</b><p class="facts">폰: 사진을 길게 눌러 「이미지 저장」. 택배 파일은 택배사 사이트에 올리는 용도입니다.</p>' +
+    '<div class="acts"><a class="btn" download="' + name + '.png" href="' + png + '">이미지 내려받기</a>' +
+    '<a class="btn ghost" download="' + name + '.csv" href="data:text/csv;charset=utf-8,' + encodeURIComponent(csv) + '">택배 파일(CSV)</a></div>' +
+    '<img class="plan" alt="배송 개요" src="' + png + '"></div>';
+  $('bulkbox').scrollIntoView({ behavior: 'smooth' });
+}
+function wrap(t, n) { var out = []; t = String(t || ''); while (t.length > n) { out.push(t.slice(0, n)); t = t.slice(n); } out.push(t); return out; }
+function card(o, pick) {
   var b = (o.test ? '<span class="badge t">시험</span>' : '') + (o.friend ? '<span class="badge">지인</span>' : '') + (o.regular ? '<span class="badge">정기</span>' : '') + (o.overdue ? '<span class="badge w">기한 지남</span>' : '');
   var facts = [o.route && o.route + (o.pay ? '·' + o.pay : ''), o.due && o.status === '확정' && '입금 기한 ' + o.due, o.work && '작업일 ' + o.work, o.arrive && '받을 날 ' + o.arrive, o.invoice && '송장 ' + o.invoice, o.changed && '바뀜 ' + o.changed].filter(Boolean);
   var a = [];
   if (o.status === '확정') a.push(btn('입금', '입금 확인'));
   if (o.status === '입금') a.push(btn('작업', '작업 완료'));
-  if (['확정', '입금', '작업'].indexOf(o.status) >= 0) a.push(btn('송장열기', '송장 입력', 'ghost'));
+  if (o.status === '작업') a.push(btn('송장열기', '송장 입력'));   // 보낼 것(작업 끝난 주문)에서만
   if (o.status === '발송') a.push(btn('도착', '도착'));
   var refundAsk = o.status === '확인필요' && /^취소 요청/.test(o.memo);   // 대표가 직접 돌려줘야 하는 취소
   if (refundAsk) a.push(btn('환불끝', '환불 끝'));
@@ -152,7 +300,8 @@ function card(o) {
   a.push(btn('메모열기', '메모', 'ghost'));
   if (o.msgs && o.msgs.length) a.push(btn('문자열기', '문자 ' + o.msgs.length, 'ghost'));
   return '<div class="card' + (o.overdue ? ' late' : '') + '" data-no="' + esc(o.no) + '">' +
-    '<div class="row1"><span><span class="no">' + esc(o.no) + '</span>' + b + '</span><span>' + esc(o.status) + '</span></div>' +
+    '<div class="row1"><span>' + (pick ? '<input type="checkbox" class="pick" data-pick="' + esc(o.no) + '" aria-label="고르기">' : '') + '<span class="no">' + esc(o.no) + '</span>' + b + '</span><span>' + esc(o.status) + '</span></div>' +
+    (o.ship && o.ship.addr && ['입금', '작업', '발송'].indexOf(o.status) >= 0 ? '<div class="facts"><span>받는 분 ' + esc(o.ship.name) + ' · ' + esc(o.ship.addr) + '</span></div>' : '') +
     '<div class="who">' + esc(o.name) + ' <a href="tel:' + esc(o.tel) + '">' + esc(telf(o.tel)) + '</a></div>' +
     '<div class="what">' + esc(o.grain) + ' · ' + won(o.amount) + '</div>' +
     '<div class="facts">' + facts.map(function (f) { return '<span>' + esc(f) + '</span>'; }).join('') + '</div>' +

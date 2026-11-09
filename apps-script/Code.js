@@ -1432,6 +1432,14 @@ function adminPage_() {
 }
 function md2_(v) { var x = v ? toDate_(v) : null; return x ? (x.getMonth() + 1) + "/" + x.getDate() : ""; }   // 스크립트 시간대 Asia/Seoul
 function mdhm_(v) { var x = v ? toDate_(v) : null; return x ? md2_(x) + " " + ("0" + x.getHours()).slice(-2) + ":" + ("0" + x.getMinutes()).slice(-2) : ""; }
+// 배송지(받는 분) — 선물이면 받는 분, 아니면 주문할 때 적은 주소(접수 원문), 없으면 고객 주소. 배송 개요·택배 파일용(대표 화면만).
+function shipTo_(o, c, r) {
+  var to = null; try { to = o['받는 분'] ? JSON.parse(o['받는 분']) : null; } catch (e) {}
+  var raw = {}; try { raw = r ? JSON.parse(r['원문']) : {}; } catch (e) {}
+  var addr = (to && to['주소']) || raw['주소'] || [c['주소'], c['상세 주소']].filter(String).join(' ');
+  return { name: (to && to['이름']) || c['이름'] || '', tel: phone_((to && to['연락처']) || c['연락처']), addr: String(addr || ''),
+           note: String(raw['요청사항'] || '') };
+}
 // 화면에 보일 것: 취소 안 된 주문 전부 + 최근 14일 안에 끝난(취소·도착) 주문
 function adminLoad() {
   ownerOnly_();
@@ -1441,11 +1449,14 @@ function adminLoad() {
     var k = String(m['주문'] || ''); if (!k) return;
     (msgs[k] = msgs[k] || []).push({ at: mdhm_(m['시각']), code: m['문자틀'], result: String(m['결과'] || '') });
   });
+  var rec = {}; rows_('접수').forEach(function (r) { rec[r['접수번호']] = r; });
   var orders = rows_('주문').filter(function (o) {
     return ['취소', '도착'].indexOf(o['상태']) < 0 || (o['상태 바뀐 시각'] && toDate_(o['상태 바뀐 시각']) > since);
   }).map(function (o) {
     var c = cs[o['고객']] || {};
     return { no: String(o['주문번호']), status: o['상태'], name: c['이름'] || '', tel: String(c['연락처'] || ''), grain: o['곡식'], kg: o['양(kg)'],
+             items: items_(o).map(function (it) { return { grain: it.grain, gl: it.grain === 'rice' ? Number(it.glutinous || 0) : null, size: Number(it.size), sub: !!it.subpack, qty: qty_(it) }; }),
+             ship: shipTo_(o, c, rec[o['접수번호']]),
              amount: o['청구액'] === '' ? '' : Number(o['청구액']), route: o['경로'] || '', pay: o['결제수단'] || '', work: md2_(o['작업일']),
              arrive: md2_(o['받을 날']), due: mdhm_(o['입금 기한']), invoice: String(o['송장'] || ''), memo: String(o['메모'] || ''),
              changed: mdhm_(o['상태 바뀐 시각']), test: o['시험'] === 'Y', friend: isFriend_(o), regular: o['정기'] === 'Y',
@@ -1477,6 +1488,20 @@ function adminStock(grain, kg, memo) {
     if (on_('waitlist')) processWaitlist();   // 대기 줄을 켰을 때만
     return { ok: true, msg: '' };
   });
+}
+// 한꺼번에 처리 — 고른 주문마다 adminAct 를 그대로 부른다(같은 규칙·같은 문자). 입금 확인·작업 완료·송장·도착만.
+// list: [{ no, action, data }]  →  { done, failed:[{ no, msg }] }
+function adminBulk(list) {
+  ownerOnly_();
+  var out = { done: 0, failed: [] };
+  (list || []).slice(0, 200).forEach(function (x) {
+    if (['입금', '작업', '송장', '도착'].indexOf(x && x.action) < 0) { out.failed.push({ no: x && x.no, msg: '한꺼번에 못 하는 일' }); return; }
+    var r;
+    try { r = adminAct(String(x.no), x.action, x.data || {}); } catch (e) { r = { ok: false, msg: String(e) }; }
+    if (r && r.ok) out.done++; else out.failed.push({ no: x.no, msg: (r && r.msg) || '처리 안 됨' });
+  });
+  log_('주문 관리', '', '한꺼번에 ' + out.done + '건' + (out.failed.length ? ' · 못 함 ' + out.failed.length : ''));
+  return out;
 }
 // 단추 하나 = 장부에 손으로 넣는 일 하나. 문자는 연락 규칙대로 나간다(수동 상태 바꾸기만 문자 없음).
 function adminAct(no, action, data) {
@@ -1536,7 +1561,9 @@ function adminOrder(f) {
     .map(function (it) { return { grain: it.grain, glutinous: it.grain === 'rice' ? Number(it.glutinous || 0) : undefined, size: Number(it.size), subpack: !!it.subpack, repeat: 'once' }; });
   if (!items.length) return { ok: false, msg: '품목을 넣으세요' };
   if (f.route === '지인' && !(Number(String(f.amount || '').replace(/\D/g, '')) > 0)) return { ok: false, msg: '지인 주문은 금액을 적으세요' };
-  var p = { '경로': f.route, '원문': '주문 관리 입력' + (f.memo ? ' — ' + f.memo : ''), '이름': f.name, '연락처': f.tel, '주소': f.addr || '',
+  // 원문은 홈페이지 주문과 같은 꼴(JSON) — 배송 개요·택배 파일이 주소·요청사항을 같은 자리에서 읽는다
+  var p = { '경로': f.route, '원문': JSON.stringify({ '입력': '주문 관리', '이름': f.name, '연락처': phone_(f.tel), '주소': f.addr || '', '요청사항': f.memo || '' }),
+            '이름': f.name, '연락처': f.tel, '주소': f.addr || '',
             mode: 'order', items: items, '금액': f.amount || '' };
   if (testMode_()) p.test = true;
   var r = intake(p);

@@ -15,6 +15,19 @@
 
 둘 다 장부에 붙인 프로젝트가 아니라 따로 만든 프로젝트다(속성 `BOOK_ID` 가 없으면 코드의 실제 장부 ID). 파일 Code.gs(= Code.js)·SelfTest.gs·Admin.html. 코드를 고치면 **두 프로젝트 모두** 편집기의 파일을 이 저장소 판으로 바꾸고 저장한다(시험판 먼저).
 
+### 배포 주소(2026-11-09)
+| | 주소 끝 `…/exec` 앞 ID | 액세스 |
+|---|---|---|
+| 실제 · 주문 관리 | `AKfycbxmFG65EAdh12HmBCaEvKEpToQZD5gr_v-8BpMRMq3J2JjrFGVwjvIFyiDVBKw45hxv` + `?page=admin` | 나만 |
+| 시험 · 주문 관리 | `AKfycbx_FmqfU-8ecMDePoALYYPQV-OIePgtRAF9tg6akAdhYQQGMLYOshAh3wmMjLd4RXJW` + `?page=admin` | 나만 |
+| 시험 · 홈페이지(시험판) | `AKfycbz5Sm1TehfImaOoUlQ3KWHIRz77kMbYZwN1n8Zsz_eo0W_Tznn5ROqgrm7wJfw72aKc` | 모든 사용자 |
+| 실제 · 홈페이지 | 아직 없음 — 가격·통장 정한 뒤 만들어 `assets/order-config.js` `endpoint` 에 | 모든 사용자 |
+
+주소 앞부분은 `https://script.google.com/macros/s/`. 코드를 고친 뒤에는 「배포 관리 → 연필 → 버전: 새 버전」으로 같은 주소를 새 판으로 올린다(새 배포를 만들면 주소가 바뀐다).
+
+### 홈페이지 시험판
+`moaonfarm.kr/test/` 에서 「시험판 켜기」 → 그 브라우저에서만 `order-config.js` 끝의 시험판 블록이 켜져 시험 일꾼(홈페이지) 주소·흉내 결제창·시험 가격으로 돈다. 손님 화면은 그대로. 다 보면 「시험판 끄기」.
+
 ### 주문 관리 화면(진행표 7단계 — 대표 전용)
 - `Admin.html` + Code.js `adminLoad`·`adminAct`·`adminOrder`. 각 프로젝트에 배포를 하나 더: **웹 앱, 실행 = 나, 액세스 = 나만** → 그 주소 + `?page=admin`. 폰에서 열어 홈 화면에 추가.
 - 장부 쓰기는 규칙 일꾼 하나 — 단추는 장부에 손으로 넣을 때와 같은 함수를 부른다: 입금 확인(확정→입금, 6단계 입금 대조 전까지) · 작업 완료 · 송장 입력(「택배사 송장번호」→ 발송/지인발송) · 도착 · 취소(도정 전이면 토스 결제도 취소) · 확인필요 정리(문자 없이 상태만) · 메모 · 새 주문(전화·문자·카톡·지인).

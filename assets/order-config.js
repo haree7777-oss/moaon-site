@@ -33,3 +33,24 @@ window.DOODOO_CONFIG = {
     photo: ['soy-dish', 'soy-hero']
   }
 };
+
+// ───── 시험판(대표 확인용) ─────
+// moaonfarm.kr/test/ 에서 「시험판 켜기」를 누른 그 브라우저에서만 켜진다. 실제 손님 화면에는 아무 변화가 없다.
+// 시험 일꾼(「두두 고객장부 (시험)」)에만 쓰고, 결제는 흉내 결제창(돈 안 나감), 문자는 장부 「연락」에 문구만 남는다.
+(function (C) {
+  var on = false; try { on = localStorage.getItem('doodoo-test') === 'on'; } catch (e) {}
+  if (!on) return;
+  C.endpoint = 'https://script.google.com/macros/s/AKfycbz5Sm1TehfImaOoUlQ3KWHIRz77kMbYZwN1n8Zsz_eo0W_Tznn5ROqgrm7wJfw72aKc/exec';
+  C.test = true;
+  C.pay.clientKey = ''; C.pay.mock = true;
+  C.shipping = 4000;                                   // 시험 값(시험 장부와 같게)
+  C.rice.price = { 10: 40000, 20: 80000 };
+  C.soy.sizes = [5]; C.soy.price = { 5: 30000 };
+  document.addEventListener('DOMContentLoaded', function () {
+    var b = document.createElement('div');
+    b.setAttribute('role', 'note');
+    b.style.cssText = 'position:sticky;top:0;z-index:999;background:#fff3d6;color:#7a4f00;font-size:13px;font-weight:600;padding:6px 16px;text-align:center';
+    b.innerHTML = '시험판 — 시험 장부에만 기록되고, 결제·문자는 실제로 일어나지 않습니다. <a href="/test/" style="color:inherit">시험판 끄기</a>';
+    document.body.insertBefore(b, document.body.firstChild);
+  });
+})(window.DOODOO_CONFIG);

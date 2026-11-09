@@ -488,5 +488,43 @@ ok('같은 판이면 대표가 고친 문구·켬/끔 그대로', one_('문자�
 rj = one_('연락 규칙', '규칙', '접수'); rj['켬/끔'] = '끔'; save_('연락 규칙', rj);
 window.__scenarios = SC.map(function (s) { return { name: s.name, msgs: sent(s.tel) }; });
 
+// 36. 주문 관리 화면(대표 전용) — 장부에 손으로 넣는 것과 같은 길
+at(2027, 2, 1, 10);
+__user = '';
+ok('공개 배포(로그인 없음)로 열면 화면 대신 막힘', !!doGet({ parameter: { page: 'admin' } }).html);
+var denied = false; try { adminLoad(); } catch (e) { denied = true; }
+ok('로그인 없으면 adminLoad 거부', denied);
+denied = false; try { adminAct('1', '입금'); } catch (e) { denied = true; }
+ok('로그인 없으면 adminAct 거부', denied);
+__user = 'other@test';
+denied = false; try { adminLoad(); } catch (e) { denied = true; }
+ok('다른 계정도 거부', denied);
+__user = 'owner@test';
+ok('대표 계정이면 화면 파일 Admin', doGet({ parameter: { page: 'admin' } }).file === 'Admin');
+var ad = adminOrder({ route: '전화', name: '시험관리', tel: '010-0000-0061', addr: '시험시 61', items: [{ grain: 'rice', glutinous: 20, size: 10 }] });
+var an = ad.res['주문번호'];
+ok('새 주문(전화) → 확정 + 확정 문자', ad.ok && order(an)['상태'] === '확정' && order(an)['경로'] === '전화' && real('01000000061').map(function (s) { return s.code; }).join() === '확정', JSON.stringify(ad));
+var L = adminLoad();
+ok('adminLoad 에 그 주문·재고·시험 표시', L.orders.some(function (o) { return o.no === String(an) && o.status === '확정' && o.name === '시험관리'; }) && L.stock.length > 0 && L.test === true);
+ok('adminLoad 값에 날짜 객체 없음(google.script.run 은 Date 를 못 넘김)', JSON.stringify(L).indexOf('"20') < 0 || L.orders.every(function (o) { return Object.keys(o).every(function (k) { return !(o[k] instanceof Date); }); }));
+ok('확정 아닌데 작업 완료 → 거절', adminAct(an, '작업').ok === false && order(an)['상태'] === '확정');
+ok('입금 확인 → 입금 + 입금확인 문자', adminAct(an, '입금').ok && order(an)['상태'] === '입금' && real('01000000061').map(function (s) { return s.code; }).join() === '확정,입금확인');
+ok('작업 완료 → 작업', adminAct(an, '작업').ok && order(an)['상태'] === '작업');
+ok('송장 형식 틀리면 거절', adminAct(an, '송장', { text: '1234' }).ok === false);
+ok('송장 입력 → 발송 + 발송 문자(택배사·번호 나눠 넣음)', adminAct(an, '송장', { text: 'CJ대한통운 777-7777' }).ok && order(an)['상태'] === '발송' && order(an)['송장'] === 'CJ대한통운 777-7777' && /■ 운송장정보 : CJ대한통운 \/ 777-7777/.test(sent('01000000061').filter(function (s) { return s.code === '발송'; })[0].result), JSON.stringify(sent('01000000061')));
+ok('같은 주문 송장 다시 → 거절(문자 한 번)', adminAct(an, '송장', { text: 'CJ대한통운 777-7778' }).ok === false && sent('01000000061').filter(function (s) { return s.code === '발송'; }).length === 1);
+ok('도착 → 도착', adminAct(an, '도착').ok && order(an)['상태'] === '도착');
+var af = adminOrder({ route: '지인', name: '시험관리지인', tel: '01000000062', addr: '시험시 62', items: [{ grain: 'soy', size: 5 }], amount: '30,000원' });
+ok('지인 주문 금액 없으면 거절', adminOrder({ route: '지인', name: 'x', tel: '01000000063', items: [{ grain: 'soy', size: 5 }] }).ok === false);
+ok('새 주문(지인) → 확정·금액 그대로·문자 없음', af.ok && order(af.res['주문번호'])['청구액'] === 30000 && order(af.res['주문번호'])['경로'] === '지인' && real('01000000062').length === 0, JSON.stringify(af));
+var ac = adminOrder({ route: '문자', name: '시험관리취소', tel: '01000000064', addr: '시험시 64', items: [{ grain: 'rice', glutinous: 0, size: 10 }] });
+var cn = ac.res['주문번호'], heldBefore = stock('rice')['예약된 양(kg)'];
+ok('확정 주문 취소 → 취소 + 재고 풀림', adminAct(cn, '취소', { why: '고객 전화' }).ok && order(cn)['상태'] === '취소' && /대표 취소: 고객 전화/.test(order(cn)['메모']) && Number(stock('rice')['예약된 양(kg)']) === Number(heldBefore) - 10);
+var bad = adminOrder({ route: '지인', name: '시험관리부족', tel: '01000000065', items: [{ grain: 'soy', size: 999 }], amount: 1 });
+var bn = bad.res['주문번호'];
+ok('확인필요 주문 → 상태 바꾸기(문자 없음)', order(bn)['상태'] === '확인필요' && adminAct(bn, '상태', { to: '취소', memo: '대표 정리' }).ok && order(bn)['상태'] === '취소' && order(bn)['메모'] === '대표 정리' && sent('01000000065').length === 0);
+ok('메모 저장', adminAct(af.res['주문번호'], '메모', { memo: '문 앞에' }).ok && order(af.res['주문번호'])['메모'] === '문 앞에');
+ok('새 주문 경로 틀리면 거절', adminOrder({ route: '홈페이지', name: 'x', tel: '01000000066', items: [{ grain: 'soy', size: 5 }] }).ok === false);
+
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost'; }).length === 0,
    JSON.stringify(rows_('처리 기록').filter(function (x) { return x['결과'] === '실패'; })));

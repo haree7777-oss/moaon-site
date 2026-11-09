@@ -43,6 +43,7 @@ FakeBook.prototype.getSheets = function () { return this.sheets.slice(); };
 FakeBook.prototype.deleteSheet = function (s) { this.sheets = this.sheets.filter(function (x) { return x !== s; }); };
 
 var __book = new FakeBook();
+__book.getUrl = function () { return "https://docs.google.com/spreadsheets/d/test"; };
 var SpreadsheetApp = { getActive: function () { return __book; } };
 var __cache = {};
 var CacheService = { getScriptCache: function () { return { get: function (k) { return __cache[k] || null; }, put: function (k, v) { __cache[k] = v; } }; } };
@@ -84,3 +85,10 @@ Utilities.getUuid = function () { return crypto.randomUUID(); };
 var __props = { TEST_MODE: 'on' };
 var PropertiesService = { getScriptProperties: function () { return { getProperty: function (k) { return __props[k] || null; } }; } };
 var UrlFetchApp = { fetch: function () { throw new Error('시험에서는 토스를 부르지 않습니다'); } };
+// 주문 관리 화면(대표 전용) — 로그인한 사람·화면 흉내
+var __user = 'owner@test';
+var Session = { getActiveUser: function () { return { getEmail: function () { return __user; } }; }, getEffectiveUser: function () { return { getEmail: function () { return 'owner@test'; } }; } };
+var HtmlService = {
+  createHtmlOutput: function (h) { return { html: h, setTitle: function () { return this; }, addMetaTag: function () { return this; } }; },
+  createHtmlOutputFromFile: function (f) { return { file: f, setTitle: function (t) { this.title = t; return this; }, addMetaTag: function () { return this; } }; }
+};

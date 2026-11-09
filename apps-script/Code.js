@@ -165,8 +165,14 @@ function hours_(s, a, b) { var m = String(s || '').match(/\d+/g); return m && m.
 
 // ───────── 표 읽고 쓰기 ─────────
 // 장부에 붙인(bound) 프로젝트면 getActive(), 따로 만든 프로젝트면 아래 장부 ID로 연다(ID만으로는 열람 권한이 생기지 않는다).
+// 시험 일꾼(사본)은 스크립트 속성 BOOK_ID 에 「두두 고객장부 (시험)」 ID를 넣어 그 장부만 연다. 실제 일꾼은 속성 없이 아래 ID.
 var BOOK_ID = '1yfEsV8uxlwXRmSt9dTuEMhBDeF09eCtbKlGj3T01xTM';
-function book_() { return SpreadsheetApp.getActive() || SpreadsheetApp.openById(BOOK_ID); }
+var bookId_ = null;
+function book_() {
+  var a = SpreadsheetApp.getActive(); if (a) return a;
+  if (bookId_ === null) bookId_ = PropertiesService.getScriptProperties().getProperty('BOOK_ID') || BOOK_ID;
+  return SpreadsheetApp.openById(bookId_);
+}
 function sheet_(name) {
   var sh = book_().getSheetByName(name);
   if (!sh) throw new Error('시트 없음: ' + name + ' — setup()을 먼저 돌리세요');
@@ -1395,9 +1401,101 @@ function recall(tel) {
            ho: c['두두 호'] || null, seatsLeft: seatsLeft_() };
 }
 
+// ───────── 주문 관리 화면(대표 전용 · 진행표 7단계) ─────────
+// 장부 쓰기는 규칙 일꾼 하나로 — 이 화면의 단추는 장부에 손으로 넣을 때와 같은 함수(setStatus·intake·customerCancel_)를 부른다.
+// 배포를 하나 더 만든다: 웹 앱, 실행 = 나, 액세스 = 나만 → 그 주소 끝에 ?page=admin. 공개 배포(모든 사용자)로 열면 로그인한 대표가 아니어서 막힌다.
+function isOwner_() {
+  try { var a = Session.getActiveUser().getEmail(); return !!a && a === Session.getEffectiveUser().getEmail(); } catch (e) { return false; }
+}
+function ownerOnly_() { if (!isOwner_()) throw new Error('대표 계정으로만 쓸 수 있습니다'); }
+function adminPage_() {
+  if (!isOwner_()) return HtmlService.createHtmlOutput('<p style="font:16px sans-serif;padding:24px">대표 계정으로만 열립니다.</p>');
+  return HtmlService.createHtmlOutputFromFile('Admin').setTitle(testMode_() ? '두두 주문 관리 (시험)' : '두두 주문 관리')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+function md2_(v) { var x = v ? toDate_(v) : null; return x ? (x.getMonth() + 1) + "/" + x.getDate() : ""; }   // 스크립트 시간대 Asia/Seoul
+function mdhm_(v) { var x = v ? toDate_(v) : null; return x ? md2_(x) + " " + ("0" + x.getHours()).slice(-2) + ":" + ("0" + x.getMinutes()).slice(-2) : ""; }
+// 화면에 보일 것: 취소 안 된 주문 전부 + 최근 14일 안에 끝난(취소·도착) 주문
+function adminLoad() {
+  ownerOnly_();
+  var cs = {}; rows_('고객').forEach(function (c) { cs[c['고객번호']] = c; });
+  var since = addDays_(now_(), -14), msgs = {};
+  rows_('연락').forEach(function (m) {   // 주문마다 나간(또는 보류·건너뜀) 문자 — 결과 칸에 문구 전체가 있다
+    var k = String(m['주문'] || ''); if (!k) return;
+    (msgs[k] = msgs[k] || []).push({ at: mdhm_(m['시각']), code: m['문자틀'], result: String(m['결과'] || '') });
+  });
+  var orders = rows_('주문').filter(function (o) {
+    return ['취소', '도착'].indexOf(o['상태']) < 0 || (o['상태 바뀐 시각'] && toDate_(o['상태 바뀐 시각']) > since);
+  }).map(function (o) {
+    var c = cs[o['고객']] || {};
+    return { no: String(o['주문번호']), status: o['상태'], name: c['이름'] || '', tel: String(c['연락처'] || ''), grain: o['곡식'], kg: o['양(kg)'],
+             amount: o['청구액'] === '' ? '' : Number(o['청구액']), route: o['경로'] || '', pay: o['결제수단'] || '', work: md2_(o['작업일']),
+             arrive: md2_(o['받을 날']), due: mdhm_(o['입금 기한']), invoice: String(o['송장'] || ''), memo: String(o['메모'] || ''),
+             changed: mdhm_(o['상태 바뀐 시각']), test: o['시험'] === 'Y', friend: isFriend_(o), regular: o['정기'] === 'Y',
+             overdue: o['상태'] === '확정' && o['입금 기한'] && toDate_(o['입금 기한']) < now_(), msgs: msgs[String(o['주문번호'])] || [] };
+  });
+  var stock = rows_('재고').map(function (s) { return { grain: s['곡식'], left: s['남은 양(kg)'], held: s['예약된 양(kg)'] }; });
+  return { orders: orders, stock: stock, lastRun: mdhm_(val_('last_run', '')), test: testMode_(), book: book_().getUrl(), now: mdhm_(now_()) };
+}
+// 단추 하나 = 장부에 손으로 넣는 일 하나. 문자는 연락 규칙대로 나간다(수동 상태 바꾸기만 문자 없음).
+function adminAct(no, action, data) {
+  ownerOnly_();
+  data = data || {};
+  return withLock_(function () {
+    var o = one_('주문', '주문번호', no);
+    if (!o) return { ok: false, msg: '주문 없음' };
+    var c = one_('고객', '고객번호', o['고객']), st = o['상태'], done;
+    if (action === '입금') { if (st !== '확정') return { ok: false, msg: '확정 주문만 입금 처리' }; done = setStatusIn_(o, c, '입금', {}); }
+    else if (action === '작업') { if (st !== '입금') return { ok: false, msg: '입금된 주문만 작업 완료' }; done = setStatusIn_(o, c, '작업', {}); }
+    else if (action === '송장') {
+      var text = String(data.text || '').trim();
+      if (!/\S+\s+\S+/.test(text)) return { ok: false, msg: '「택배사 송장번호」로 적어 주세요' };
+      if (['발송', '도착', '취소'].indexOf(st) >= 0) return { ok: false, msg: '이미 ' + st };
+      var sp = text.split(/\s+/);
+      done = setStatusIn_(o, c, '발송', { '택배사': sp.slice(0, -1).join(' '), '송장': sp[sp.length - 1] });
+    }
+    else if (action === '도착') { if (st !== '발송') return { ok: false, msg: '발송된 주문만 도착 처리' }; done = setStatusIn_(o, c, '도착', {}); }
+    else if (action === '취소') {
+      var why = '대표 취소' + (data.why ? ': ' + data.why : '');
+      if (CANCELABLE.indexOf(st) >= 0) { var r = customerCancel_(o, c, why); done = r.ok; if (!r.ok) return { ok: false, msg: r.reason === '확인필요' ? '결제 취소를 직접 해야 합니다 — 메모 확인' : r.reason }; }
+      else if (st === '확인필요' || st === '결제대기') { cancel_(o, why); done = true; }
+      else return { ok: false, msg: st + ' 주문은 「상태 바꾸기」로(환불은 직접)' };
+    }
+    else if (action === '상태') {   // 확인필요 정리용 — 문자 없이 상태만
+      var to = String(data.to || '');
+      if (['확정', '입금', '작업', '발송', '도착', '취소'].indexOf(to) < 0) return { ok: false, msg: '상태 이름 확인' };
+      o['상태'] = to; o['상태 바뀐 시각'] = now_();
+      if (data.memo !== undefined) o['메모'] = String(data.memo);
+      save_('주문', o); log_('대표 수동', o['주문번호'], to, '문자 없음'); done = true;
+    }
+    else if (action === '메모') { o['메모'] = String(data.memo || ''); save_('주문', o); done = true; }
+    else return { ok: false, msg: '모르는 일: ' + action };
+    if (done && action !== '상태' && action !== '메모') log_('주문 관리', no, action);
+    return { ok: !!done, msg: done ? '' : '처리 안 됨 — 처리 기록 확인' };
+  });
+}
+// 전화·문자·카톡·지인 주문 입력 — 클로드가 정리해 넣던 것을 대표가 바로(intake 와 같은 길).
+// f: { route, name, tel, addr, items:[{grain:'rice'|'soy', glutinous, size, subpack}], amount(지인), memo }
+function adminOrder(f) {
+  ownerOnly_();
+  f = f || {};
+  if (['전화', '문자', '카톡', '지인'].indexOf(f.route) < 0) return { ok: false, msg: '경로를 고르세요' };
+  if (!f.name || phone_(f.tel).length < 10) return { ok: false, msg: '이름·연락처를 확인하세요' };
+  var items = (f.items || []).filter(function (it) { return it && (it.grain === 'rice' || it.grain === 'soy') && Number(it.size) > 0; })
+    .map(function (it) { return { grain: it.grain, glutinous: it.grain === 'rice' ? Number(it.glutinous || 0) : undefined, size: Number(it.size), subpack: !!it.subpack, repeat: 'once' }; });
+  if (!items.length) return { ok: false, msg: '품목을 넣으세요' };
+  if (f.route === '지인' && !(Number(String(f.amount || '').replace(/\D/g, '')) > 0)) return { ok: false, msg: '지인 주문은 금액을 적으세요' };
+  var p = { '경로': f.route, '원문': '주문 관리 입력' + (f.memo ? ' — ' + f.memo : ''), '이름': f.name, '연락처': f.tel, '주소': f.addr || '',
+            mode: 'order', items: items, '금액': f.amount || '' };
+  if (testMode_()) p.test = true;
+  var r = intake(p);
+  return { ok: !!r && r.ok !== false, msg: r && r['상태'] ? '주문 ' + (r['주문번호'] || '') + ' — ' + r['상태'] : '', res: r };
+}
+
 // ───────── 웹 입구 (배포: 웹 앱, 실행 = 나, 액세스 = 모든 사용자) ─────────
 function doGet(e) {
   var q = (e && e.parameter) || {};
+  if (q.page === 'admin') return adminPage_();
   var body;
   try {
     body = q.action === 'switches' ? exportSwitches() : { ok: false, error: 'unknown action' };   // 번호가 든 요청은 주소에 싣지 않고 POST로만

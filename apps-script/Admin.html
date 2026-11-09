@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --bg:#f6f4ef; --card:#fff; --ink:#22201c; --sub:#6b665d; --line:#e2ddd2; --brand:#3f5f2f; --warn:#b4471f; --test:#8a5a00; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:var(--bg); padding:12px 16px 8px; border-bottom:1px solid var(--line); }
+  h1 { font-size:18px; margin:0; display:flex; gap:8px; align-items:center; }
+  .testbar { background:#fff3d6; color:var(--test); font-size:13px; padding:6px 16px; font-weight:600; }
+  .meta { color:var(--sub); font-size:12px; margin-top:2px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .meta a, .meta button { color:var(--brand); background:none; border:0; padding:0; font:inherit; text-decoration:underline; cursor:pointer; }
+  nav { display:flex; gap:6px; overflow-x:auto; padding:8px 16px; scrollbar-width:none; }
+  nav button { flex:none; border:1px solid var(--line); background:var(--card); border-radius:999px; padding:6px 12px; font:inherit; font-size:14px; color:var(--ink); cursor:pointer; }
+  nav button.on { background:var(--brand); border-color:var(--brand); color:#fff; }
+  nav .n { font-weight:700; margin-left:4px; }
+  nav button.hot:not(.on) { border-color:var(--warn); color:var(--warn); }
+  main { padding:4px 16px 80px; max-width:720px; margin:0 auto; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin:10px 0; }
+  .card.late { border-color:var(--warn); }
+  .row1 { display:flex; justify-content:space-between; gap:8px; align-items:baseline; }
+  .no { font-weight:700; }
+  .who { font-weight:600; }
+  .who a { color:inherit; }
+  .what { margin-top:2px; }
+  .facts { color:var(--sub); font-size:13px; margin-top:4px; display:flex; flex-wrap:wrap; gap:4px 12px; }
+  .memo { margin-top:6px; font-size:13px; background:#faf3e8; border-radius:8px; padding:6px 8px; white-space:pre-wrap; }
+  .badge { font-size:11px; border-radius:6px; padding:1px 6px; margin-left:4px; background:#eef2ea; color:var(--brand); font-weight:600; }
+  .badge.t { background:#fff3d6; color:var(--test); }
+  .badge.w { background:#fbe6de; color:var(--warn); }
+  .acts { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .acts button, .btn { border:1px solid var(--brand); background:var(--brand); color:#fff; border-radius:8px; padding:8px 12px; font:inherit; font-size:14px; cursor:pointer; }
+  .acts button.ghost, .btn.ghost { background:#fff; color:var(--brand); }
+  .acts button.danger { background:#fff; color:var(--warn); border-color:var(--warn); }
+  button:disabled { opacity:.5; }
+  .inline { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  input, select, textarea { font:inherit; font-size:16px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; background:#fff; color:var(--ink); min-width:0; }
+  .inline input { flex:1 1 180px; }
+  .empty { color:var(--sub); text-align:center; padding:32px 0; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); }
+  form.card label { display:block; font-size:13px; color:var(--sub); margin-top:10px; }
+  form.card input, form.card select, form.card textarea { width:100%; }
+  .seg { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .seg label { margin:0; display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; color:var(--ink); font-size:14px; }
+  .item { border:1px dashed var(--line); border-radius:10px; padding:8px 10px; margin-top:8px; }
+  .item .inline select, .item .inline input { flex:1 1 90px; }
+  #toast { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; display:none; max-width:calc(100% - 32px); }
+</style>
+</head>
+<body>
+<div id="testbar" class="testbar" hidden>시험판 — 시험 장부에만 쓰고, 실제 문자는 나가지 않습니다.</div>
+<header>
+  <h1>두두 주문 관리</h1>
+  <div class="meta"><span id="when">불러오는 중…</span><button id="reload" type="button">새로 고침</button><a id="book" href="#" target="_blank" rel="noopener">장부 열기</a></div>
+</header>
+<nav id="tabs"></nav>
+<main id="main"></main>
+<div id="toast"></div>
+<script>
+var TABS = [
+  { key: 'check', name: '확인필요', has: function (o) { return o.status === '확인필요'; }, hot: true },
+  { key: 'pay', name: '입금 대기', has: function (o) { return o.status === '확정' || o.status === '결제대기'; } },
+  { key: 'work', name: '작업할 것', has: function (o) { return o.status === '입금'; } },
+  { key: 'ship', name: '보낼 것', has: function (o) { return o.status === '작업'; } },
+  { key: 'road', name: '배송 중', has: function (o) { return o.status === '발송'; } },
+  { key: 'past', name: '지난 2주', has: function (o) { return o.status === '도착' || o.status === '취소'; } },
+  { key: 'new', name: '+ 새 주문' },
+  { key: 'stock', name: '재고' }
+];
+var D = null, cur = 'check';
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function telf(t) { t = String(t || '').replace(/\D/g, ''); return t.length === 11 ? t.slice(0, 3) + '-' + t.slice(3, 7) + '-' + t.slice(7) : t; }
+function won(n) { return n === '' || n == null ? '' : Number(n).toLocaleString('ko-KR') + '원'; }
+function toast(t) { var el = $('toast'); el.textContent = t; el.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(function () { el.style.display = 'none'; }, 3500); }
+function call(fn, args, ok) {
+  var r = google.script.run.withSuccessHandler(ok).withFailureHandler(function (e) { toast('오류: ' + (e && e.message || e)); busy(false); });
+  r[fn].apply(r, args);
+}
+function busy(on) { Array.prototype.forEach.call(document.querySelectorAll('main button'), function (b) { b.disabled = on; }); }
+function load() {
+  $('when').textContent = '불러오는 중…';
+  call('adminLoad', [], function (d) {
+    D = d;
+    $('testbar').hidden = !d.test;
+    $('when').textContent = '지금 ' + d.now + ' · 자동 처리 ' + (d.lastRun || '아직');
+    $('book').href = d.book;
+    if (cur === 'check' && !count(TABS[0])) cur = firstWith() || 'pay';
+    draw();
+  });
+}
+function count(t) { return t.has ? D.orders.filter(t.has).length : 0; }
+function firstWith() { for (var i = 0; i < 5; i++) if (count(TABS[i])) return TABS[i].key; return null; }
+function draw() {
+  $('tabs').innerHTML = TABS.map(function (t) {
+    var n = count(t);
+    return '<button type="button" data-tab="' + t.key + '" class="' + (t.key === cur ? 'on' : '') + (t.hot && n ? ' hot' : '') + '">' + t.name + (t.has && n ? '<span class="n">' + n + '</span>' : '') + '</button>';
+  }).join('');
+  var t = TABS.filter(function (x) { return x.key === cur; })[0];
+  if (t.key === 'new') return drawNew();
+  if (t.key === 'stock') return drawStock();
+  var list = D.orders.filter(t.has);
+  if (t.key === 'pay') list.sort(function (a, b) { return (b.overdue ? 1 : 0) - (a.overdue ? 1 : 0); });
+  $('main').innerHTML = list.length ? list.map(card).join('') : '<p class="empty">없습니다.</p>';
+}
+function card(o) {
+  var b = (o.test ? '<span class="badge t">시험</span>' : '') + (o.friend ? '<span class="badge">지인</span>' : '') + (o.regular ? '<span class="badge">정기</span>' : '') + (o.overdue ? '<span class="badge w">기한 지남</span>' : '');
+  var facts = [o.route && o.route + (o.pay ? '·' + o.pay : ''), o.due && o.status === '확정' && '입금 기한 ' + o.due, o.work && '작업일 ' + o.work, o.arrive && '받을 날 ' + o.arrive, o.invoice && '송장 ' + o.invoice, o.changed && '바뀜 ' + o.changed].filter(Boolean);
+  var a = [];
+  if (o.status === '확정') a.push(btn('입금', '입금 확인'));
+  if (o.status === '입금') a.push(btn('작업', '작업 완료'));
+  if (['확정', '입금', '작업'].indexOf(o.status) >= 0) a.push(btn('송장열기', '송장 입력', 'ghost'));
+  if (o.status === '발송') a.push(btn('도착', '도착'));
+  if (['확정', '입금', '결제대기', '확인필요'].indexOf(o.status) >= 0) a.push(btn('취소', '취소', 'danger'));
+  if (o.status === '확인필요') a.push(btn('상태열기', '상태 바꾸기', 'ghost'));
+  a.push(btn('메모열기', '메모', 'ghost'));
+  if (o.msgs && o.msgs.length) a.push(btn('문자열기', '문자 ' + o.msgs.length, 'ghost'));
+  return '<div class="card' + (o.overdue ? ' late' : '') + '" data-no="' + esc(o.no) + '">' +
+    '<div class="row1"><span><span class="no">' + esc(o.no) + '</span>' + b + '</span><span>' + esc(o.status) + '</span></div>' +
+    '<div class="who">' + esc(o.name) + ' <a href="tel:' + esc(o.tel) + '">' + esc(telf(o.tel)) + '</a></div>' +
+    '<div class="what">' + esc(o.grain) + ' · ' + won(o.amount) + '</div>' +
+    '<div class="facts">' + facts.map(function (f) { return '<span>' + esc(f) + '</span>'; }).join('') + '</div>' +
+    (o.memo ? '<div class="memo">' + esc(o.memo) + '</div>' : '') +
+    '<div class="acts">' + a.join('') + '</div><div class="slot"></div></div>';
+}
+function btn(act, label, cls) { return '<button type="button" data-act="' + act + '" class="' + (cls || '') + '">' + label + '</button>'; }
+var ASK = { '입금': '입금 확인 문자가 나갑니다.', '작업': '작업 완료로 옮깁니다.', '도착': '도착으로 옮깁니다. 도착 다음 날 안내·밥맛 문자가 예약됩니다.' };
+function act(no, action, data, sure) {
+  if (sure && !confirm(sure + '\n\n주문 ' + no + ' — 처리할까요?')) return;
+  busy(true);
+  call('adminAct', [no, action, data || {}], function (r) { busy(false); toast(r.ok ? '처리했습니다.' : (r.msg || '처리 안 됨')); load(); });
+}
+function lastCourier() { try { return localStorage.getItem('courier') || ''; } catch (e) { return ''; } }
+function keepCourier(t) { try { localStorage.setItem('courier', t.split(/\s+/).slice(0, -1).join(' ')); } catch (e) {} }
+$('main').addEventListener('click', function (ev) {
+  var b = ev.target.closest('button[data-act]'); if (!b) return;
+  var cardEl = b.closest('.card'), no = cardEl.getAttribute('data-no'), slot = cardEl.querySelector('.slot');
+  var o = D.orders.filter(function (x) { return x.no === no; })[0], k = b.getAttribute('data-act');
+  if (ASK[k]) return act(no, k, {}, ASK[k]);
+  if (k === '취소') { var why = prompt('취소 이유(고객에게 나가지 않음)', ''); if (why === null) return; return act(no, '취소', { why: why }, '주문을 취소합니다. 결제한 주문이면 결제도 취소되고 취소 문자가 나갑니다.'); }
+  if (k === '송장열기') {
+    var c = lastCourier();
+    slot.innerHTML = '<div class="inline"><input data-f="inv" placeholder="택배사 송장번호 (예: CJ대한통운 1234567890)" value="' + esc(c ? c + ' ' : '') + '"><button type="button" class="btn" data-act="송장">보내기</button></div>';
+    var inp = slot.querySelector('input'); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); return;
+  }
+  if (k === '송장') { var t = slot.querySelector('[data-f=inv]').value.trim(); keepCourier(t); return act(no, '송장', { text: t }, (o.friend ? '지인발송' : '발송') + ' 문자가 나갑니다.'); }
+  if (k === '문자열기') {   // 고객에게 나간 문자(시험판·발송 연결 전에는 「보류」로 문구만 남음)
+    slot.innerHTML = o.msgs.map(function (m) { return '<div class="memo"><b>' + esc(m.code) + '</b> · ' + esc(m.at) + '\n' + esc(m.result) + '</div>'; }).join(''); return;
+  }
+  if (k === '메모열기') { slot.innerHTML = '<div class="inline"><input data-f="memo" value="' + esc(o.memo) + '"><button type="button" class="btn" data-act="메모">저장</button></div>'; return; }
+  if (k === '메모') return act(no, '메모', { memo: slot.querySelector('[data-f=memo]').value });
+  if (k === '상태열기') {
+    slot.innerHTML = '<div class="inline"><select data-f="to">' + ['확정', '입금', '작업', '발송', '도착', '취소'].map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</select><input data-f="memo2" placeholder="메모(비우면 지움)"><button type="button" class="btn" data-act="상태">바꾸기</button></div>'; return;
+  }
+  if (k === '상태') return act(no, '상태', { to: slot.querySelector('[data-f=to]').value, memo: slot.querySelector('[data-f=memo2]').value }, '문자 없이 상태만 바꿉니다(재고·작업 달력도 그대로).');
+});
+$('tabs').addEventListener('click', function (ev) { var b = ev.target.closest('button[data-tab]'); if (!b) return; cur = b.getAttribute('data-tab'); draw(); window.scrollTo(0, 0); });
+$('reload').addEventListener('click', load);
+
+function drawStock() {
+  $('main').innerHTML = '<div class="card"><table><tr><th>곡식</th><th>남은 양</th><th>예약된 양</th><th>팔 수 있는 양</th></tr>' +
+    D.stock.map(function (s) { var free = Number(s.left || 0) - Number(s.held || 0); return '<tr><td>' + esc(s.grain) + '</td><td>' + esc(s.left) + 'kg</td><td>' + esc(s.held || 0) + 'kg</td><td>' + free + 'kg</td></tr>'; }).join('') +
+    '</table><p class="facts">남은 양은 입고 때만 더하고(재배 창 「두두쌀 입고해줘」), 발송 때 저절로 깎입니다.</p></div>';
+}
+function itemHtml() {
+  return '<div class="item"><div class="inline"><select data-f="grain"><option value="rice">두두쌀</option><option value="soy">두두콩</option></select>' +
+    '<select data-f="gl"><option value="0">찹쌀 0%</option><option value="10" selected>찹쌀 10%</option><option value="20">찹쌀 20%</option><option value="30">찹쌀 30%</option></select>' +
+    '<input data-f="size" type="number" inputmode="decimal" min="1" placeholder="양(kg)" value="10"></div></div>';
+}
+function drawNew() {
+  $('main').innerHTML = '<form class="card" id="nf" autocomplete="off">' +
+    '<label>경로</label><div class="seg">' + ['전화', '문자', '카톡', '지인'].map(function (r, i) { return '<label><input type="radio" name="route" value="' + r + '"' + (i ? '' : ' checked') + '>' + r + '</label>'; }).join('') + '</div>' +
+    '<label>이름</label><input name="name" required>' +
+    '<label>연락처</label><input name="tel" inputmode="tel" required placeholder="010-">' +
+    '<label>주소</label><input name="addr">' +
+    '<label>품목</label><div id="items">' + itemHtml() + '</div><button type="button" class="btn ghost" id="addItem" style="margin-top:8px">품목 더하기</button>' +
+    '<div id="amt" hidden><label>금액(지인 주문 — 적은 그대로 받음)</label><input name="amount" inputmode="numeric" placeholder="70000"></div>' +
+    '<label>메모(장부 원문 칸에 남음)</label><input name="memo">' +
+    '<p class="facts" id="nfhelp">전화·문자·카톡: 남은 양이 있으면 바로 확정 문자(계좌 안내), 없으면 품절 문자. 지인: 문자 없이 확정, 송장 넣을 때 「지인발송」 한 통.</p>' +
+    '<div class="acts"><button class="btn" type="submit">주문 넣기</button></div></form>';
+  var f = $('nf');
+  f.addEventListener('change', function (ev) {
+    $('amt').hidden = f.elements.namedItem('route').value !== '지인';
+    if (ev.target.getAttribute('data-f') === 'grain') { var gl = ev.target.parentNode.querySelector('[data-f=gl]'); gl.hidden = ev.target.value !== 'rice'; }
+  });
+  $('addItem').addEventListener('click', function () { $('items').insertAdjacentHTML('beforeend', itemHtml()); });
+  f.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var items = Array.prototype.map.call(f.querySelectorAll('.item'), function (it) {
+      var g = it.querySelector('[data-f=grain]').value;
+      return { grain: g, glutinous: g === 'rice' ? Number(it.querySelector('[data-f=gl]').value) : undefined, size: Number(it.querySelector('[data-f=size]').value) };
+    });
+    function v(n) { return f.elements.namedItem(n).value; }
+    var data = { route: v('route'), name: v('name').trim(), tel: v('tel'), addr: v('addr').trim(), items: items, amount: v('amount'), memo: v('memo').trim() };
+    var say = data.route === '지인' ? '지인 주문을 넣습니다(문자 없음).' : '주문을 넣습니다. 확정 또는 품절 문자가 나갑니다.';
+    if (!confirm(say)) return;
+    f.querySelector('button[type=submit]').disabled = true;
+    call('adminOrder', [data], function (r) {
+      toast(r.ok ? '넣었습니다. ' + (r.msg || '') : (r.msg || '넣지 못했습니다'));
+      if (r.ok) { cur = 'check'; load(); } else f.querySelector('button[type=submit]').disabled = false;
+    });
+  });
+}
+load();
+</script>
+</body>
+</html>

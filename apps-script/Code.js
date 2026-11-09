@@ -994,10 +994,17 @@ function cancelMine(tel, no) {
     return customerCancel_(m.o, m.c, '고객 취소(내 주문)');
   });
 }
-// 고객이 도정 전에 취소 — PG 결제면 결제도 취소. 휴대폰 결제 달 넘김·입금 끝난 가상계좌(환불 계좌 필요)는 대표 확인(확인필요).
+// 고객이 도정 전에 취소 — PG 결제면 결제도 취소. 휴대폰 결제 달 넘김·입금 끝난 가상계좌(환불 계좌 필요)·
+// 판매 통장으로 입금한 주문(전화·문자·카톡·지인)은 대표가 직접 돌려줘야 하므로 확인필요 → 대표가 이체한 뒤 「환불 끝」(adminAct)에서 취소·취소확인.
+function cancelAsk_(o, c, manual) {
+  o['상태'] = '확인필요'; o['메모'] = '취소 요청: ' + manual; o['상태 바뀐 시각'] = now_(); save_('주문', o);
+  log_('취소 요청', o['주문번호'], '확인필요', manual);
+  return { ok: false, reason: '확인필요', view: mineView_(o, c) };
+}
 function customerCancel_(o, c, why) {
   if (CANCELABLE.indexOf(o['상태']) < 0) return { ok: false, reason: o['상태'] === '취소' ? '이미 취소' : '도정 뒤', view: mineView_(o, c) };
   var paid = o['상태'] === '입금', pgRefund = false;
+  if (paid && !o['결제 키']) return cancelAsk_(o, c, '통장 입금 ' + Number(o['청구액'] || 0).toLocaleString('ko-KR') + '원 — 고객에게 이체한 뒤 「환불 끝」');
   if (o['결제 키'] && ['완료', '입금 대기'].indexOf(o['결제 상태']) >= 0) {
     var manual = '';
     if (o['결제수단'] === '휴대폰' && Utilities.formatDate(toDate_(o['결제 시각']), 'Asia/Seoul', 'yyMM') !== Utilities.formatDate(now_(), 'Asia/Seoul', 'yyMM')) manual = '휴대폰 결제 달 넘김 — 대표 직접 환불';
@@ -1006,11 +1013,7 @@ function customerCancel_(o, c, why) {
       var r = tossCancel_(o, why);
       if (!r.ok) manual = 'PG 취소 실패 ' + (r.code || '') + ' — 대표 확인';
     }
-    if (manual) {
-      o['상태'] = '확인필요'; o['메모'] = '취소 요청: ' + manual; o['상태 바뀐 시각'] = now_(); save_('주문', o);
-      log_('취소 요청', o['주문번호'], '확인필요', manual);
-      return { ok: false, reason: '확인필요', view: mineView_(o, c) };
-    }
+    if (manual) return cancelAsk_(o, c, manual + ' — 돌려준 뒤 「환불 끝」');
     pgRefund = o['결제 상태'] === '완료';   // 가상계좌 입금 전 취소는 돌려줄 돈이 없다
     o['결제 상태'] = '취소'; o['취소 금액'] = o['청구액'];
   }
@@ -1495,7 +1498,8 @@ function adminAct(no, action, data) {
     else if (action === '도착') { if (st !== '발송') return { ok: false, msg: '발송된 주문만 도착 처리' }; done = setStatusIn_(o, c, '도착', {}); }
     else if (action === '취소') {
       var why = '대표 취소' + (data.why ? ': ' + data.why : '');
-      if (CANCELABLE.indexOf(st) >= 0) { var r = customerCancel_(o, c, why); done = r.ok; if (!r.ok) return { ok: false, msg: r.reason === '확인필요' ? '결제 취소를 직접 해야 합니다 — 메모 확인' : r.reason }; }
+      if (CANCELABLE.indexOf(st) >= 0) { var r = customerCancel_(o, c, why); done = r.ok; if (!r.ok) return { ok: r.reason === '확인필요', msg: r.reason === '확인필요' ? '돌려줄 돈이 있어 「확인필요」로 옮겼습니다 — 고객에게 돌려준 뒤 「환불 끝」' : r.reason }; }
+      else if (st === '확인필요' && /^취소 요청/.test(String(o['메모']))) return { ok: false, msg: '고객에게 돌려준 뒤 「환불 끝」을 누르세요' };
       else if (st === '확인필요' || st === '결제대기') { cancel_(o, why); done = true; }
       else return { ok: false, msg: st + ' 주문은 「상태 바꾸기」로(환불은 직접)' };
     }
@@ -1507,6 +1511,15 @@ function adminAct(no, action, data) {
       save_('주문', o); log_('대표 수동', o['주문번호'], to, '문자 없음'); done = true;
     }
     else if (action === '메모') { o['메모'] = String(data.memo || ''); save_('주문', o); done = true; }
+    else if (action === '환불끝') {   // 취소 요청(대표가 직접 돌려줘야 하는 것) — 돌려준 뒤: 취소·재고/작업 달력 되돌림·취소확인(환불일 = 오늘)
+      if (st !== '확인필요' || !/^취소 요청/.test(String(o['메모']))) return { ok: false, msg: '취소 요청 주문만' };
+      o['상태'] = '입금';   // 잡아 둔 재고·작업 달력을 cancel_ 이 되돌리도록
+      if (o['결제 키']) { o['결제 상태'] = '취소'; o['취소 금액'] = o['청구액']; }
+      cancel_(o, '취소 — 대표 환불 끝');
+      if (o['정기'] === 'Y') { o['정기'] = '멈춤'; save_('주문', o); }
+      send_('취소확인', c, o, { '환불일': md_(now_()) + ' 환불 완료' });
+      processWaitlist(); done = true;
+    }
     else return { ok: false, msg: '모르는 일: ' + action };
     if (done && action !== '상태' && action !== '메모') log_('주문 관리', no, action);
     return { ok: !!done, msg: done ? '' : '처리 안 됨 — 처리 기록 확인' };

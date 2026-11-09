@@ -267,7 +267,7 @@ var cm = msgs(cust(T)['고객번호'], '취소확인').pop()['결과'];
 ok('입금 전 취소확인 — 환불 줄 뺌', /요청하신 주문이 취소되었습니다\.\n\n■ 주문번호 : \d+\n\n두두농장/.test(cm) && cm.indexOf('환불') < 0, cm);
 setStatus(mo['주문번호'], '입금');
 var cx2 = cancelMine(T, mo['주문번호']);
-ok('입금 뒤 취소확인 — 환불금액·환불예정일', cx2.ok && /■ 환불금액 : [\d,]+원\n■ 환불예정일 : \d+월 \d+일/.test(msgs(cust(T)['고객번호'], '취소확인').pop()['결과']));
+ok('입금 뒤(통장) 취소 → 확인필요, 환불 끝 뒤 취소확인 — 환불금액·환불예정일', cx2.reason === '확인필요' && adminAct(mo['주문번호'], '환불끝').ok && /■ 환불금액 : [\d,]+원\n■ 환불예정일 : \d+월 \d+일 환불 완료/.test(msgs(cust(T)['고객번호'], '취소확인').pop()['결과']));
 var mo3 = web('시험이십', T, [rice(0, 10)], []); setStatus(mo3['주문번호'], '작업');
 var cx3 = cancelMine(T, mo3['주문번호']);
 ok('도정 뒤엔 취소 안 됨', cx3.ok === false && order(mo3['주문번호'])['상태'] === '작업' && cx3.view.canCancel === false);
@@ -555,6 +555,29 @@ var keepN = rows_('연락').filter(function (r) { return !/^건너뜀/.test(Stri
 setup();
 ok('setup 이 찧은날 문자틀·작업 완료 규칙을 지움', !one_('문자틀', '코드', '찧은날') && !one_('연락 규칙', '규칙', '작업 완료'));
 ok('보내지 않은 기록(규칙 끔·지인 거름) 지우고 보낸 기록은 그대로', rows_('연락').filter(function (r) { return r['고객'] === 'C9999'; }).length === 0 && rows_('연락').filter(function (r) { return !/^건너뜀/.test(String(r['결과'])); }).length === keepN);
+
+// 38. 통장으로 입금한 주문(전화·문자·카톡) 취소 — 대표가 직접 돌려줘야 하므로 확인필요 → 「환불 끝」에서 취소·취소확인
+at(2027, 2, 3, 10);
+var bk = adminOrder({ route: '문자', name: '시험통장취소', tel: '01000000081', addr: '시험시 81', items: [{ grain: 'rice', glutinous: 10, size: 10 }] }).res['주문번호'];
+adminAct(bk, '입금');
+var heldB = Number(stock('rice')['예약된 양(kg)']);
+var cr = cancelMine('01000000081', bk);
+ok('통장 입금 주문을 고객이 취소 → 확인필요(통장 환불 필요), 재고는 아직 잡힘, 취소 문자 아직 없음',
+   cr.ok === false && cr.reason === '확인필요' && order(bk)['상태'] === '확인필요' && /^취소 요청: 통장 입금 40,000원/.test(order(bk)['메모']) &&
+   Number(stock('rice')['예약된 양(kg)']) === heldB && sent('01000000081').filter(function (s) { return s.code === '취소확인'; }).length === 0, JSON.stringify([cr.reason, order(bk)['메모']]));
+ok('주문 관리 「취소」는 막고 「환불 끝」으로 안내', adminAct(bk, '취소').ok === false && order(bk)['상태'] === '확인필요');
+ok('환불 끝 → 취소 + 재고 풀림', adminAct(bk, '환불끝').ok && order(bk)['상태'] === '취소' && Number(stock('rice')['예약된 양(kg)']) === heldB - 10);
+var cm = sent('01000000081').filter(function (s) { return s.code === '취소확인'; })[0];
+ok('취소확인 문자에 환불금액·환불 완료 날짜(빈 칸 없음)', cm && /^보류/.test(cm.result) && /■ 환불금액 : 40,000원/.test(cm.result) && /■ 환불예정일 : 2월 3일 환불 완료/.test(cm.result), cm && cm.result);
+ok('환불 끝은 취소 요청 주문만', adminAct(bk, '환불끝').ok === false);
+var un = adminOrder({ route: '전화', name: '시험입금전취소', tel: '01000000082', addr: '시험시 82', items: [{ grain: 'rice', glutinous: 0, size: 10 }] }).res['주문번호'];
+var cu = cancelMine('01000000082', un);
+var cmu = sent('01000000082').filter(function (s) { return s.code === '취소확인'; })[0];
+ok('입금 전이면 바로 취소 + 환불 줄 없는 취소확인', cu.ok && order(un)['상태'] === '취소' && cmu && cmu.result.indexOf('환불') < 0, cmu && cmu.result);
+var ap = adminOrder({ route: '카톡', name: '시험대표취소', tel: '01000000083', addr: '시험시 83', items: [{ grain: 'soy', size: 5 }] }).res['주문번호'];
+adminAct(ap, '입금');
+var ar = adminAct(ap, '취소', { why: '고객 전화' });
+ok('대표가 입금된 통장 주문을 취소 → 확인필요로 옮기고 환불 끝 안내', ar.ok && /환불 끝/.test(ar.msg) && order(ap)['상태'] === '확인필요');
 
 
 ok('처리 기록에 실패 없음(일부러 낸 것 말고)', rows_('처리 기록').filter(function (x) { return x['결과'] === '실패' && x['무엇'] !== 'doPost' && x['무엇'] !== '시험 실패'; }).length === 0,
